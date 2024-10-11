@@ -7,6 +7,24 @@
 # 🔍 참조사이트 : https://store.steampowered.com/?l=koreana
 # ✏️ 프로젝트 상세설명 
 
+# 작업순서
+
+1. `Eclipse` 신규 브랜치 생성 (create branch)
+2. `Eclipse` 브랜치를 클라우드에 (push branch)
+3. `Eclipse` 브랜치에 필요한 작업들을 수행 후 (commit & push)
+4. `Eclipse` 내 브랜치의 모든 내용을 (commit)
+5. `Eclipse` 최신화(pull)
+6. `Eclipse` origin/main의 내용을 내 브랜치로 merge
+7. `Eclipse` 충돌(conflict)이 발생한 파일을 가서 구분선을 찾아 코드를 정리
+8. `Eclipse` 정리된 결과를 commit & push
+9. `Github` 홈페이지에서 PR(Pull Request) 생성
+10. `Github` 누군가의 승인리뷰를 기다림
+11. `Github` main에 브랜치 병합 (merge branch)
+12. `Github` 작업 브랜치 삭제 (delete branch)
+13. `Eclipse` pull (에러가 발생해도 무방)
+14. `Eclipse` origin/main의 최신상태 여부를 확인 (network)
+15. `Eclipse` origin/main을 local로 복사
+
 
 # 공지사항
 1. 기본적으로 스팀의 형식을 유지하되 추가는 본인 자유 (자유 아님)
