@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="paymentDetail">
+
+    <!-- Insert PaymentDetail -->
+    <insert id="insertPaymentDetail" parameterType="PaymentDetailDto">
+        INSERT INTO payment_detail (
+            payment_detail_no, payment_detail_name, payment_detail_price, payment_detail_qty, 
+            payment_detail_item, payment_detail_origin, payment_detail_status
+        ) VALUES (
+            #{paymentDetailNo}, #{paymentDetailName}, #{paymentDetailPrice}, #{paymentDetailQty}, 
+            #{paymentDetailItem}, #{paymentDetailOrigin}, #{paymentDetailStatus}
+        )
+    </insert>
+
+    <!-- Select PaymentDetail by PaymentDetailNo -->
+    <select id="selectPaymentDetailByNo" parameterType="int" resultType="PaymentDetailDto">
+        SELECT * FROM payment_detail
+        WHERE payment_detail_no = #{paymentDetailNo}
+    </select>
+
+    <!-- Update PaymentDetail -->
+    <update id="updatePaymentDetail" parameterType="PaymentDetailDto">
+        UPDATE payment_detail
+        SET 
+            payment_detail_name = #{paymentDetailName},
+            payment_detail_price = #{paymentDetailPrice},
+            payment_detail_qty = #{paymentDetailQty},
+            payment_detail_item = #{paymentDetailItem},
+            payment_detail_origin = #{paymentDetailOrigin},
+            payment_detail_status = #{paymentDetailStatus}
+        WHERE payment_detail_no = #{paymentDetailNo}
+    </update>
+
+    <!-- Delete PaymentDetail -->
+    <delete id="deletePaymentDetail" parameterType="int">
+        DELETE FROM payment_detail
+        WHERE payment_detail_no = #{paymentDetailNo}
+    </delete>
+
+    <!-- Select PaymentDetails by PaymentNo -->
+    <select id="selectPaymentDetailsByPaymentNo" parameterType="int" resultType="PaymentDetailDto">
+        SELECT * FROM payment_detail
+        WHERE payment_detail_origin = #{paymentNo}
+    </select>
+
+</mapper>

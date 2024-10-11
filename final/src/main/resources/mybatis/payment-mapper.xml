@@ -1,0 +1,42 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="payment">
+
+    <!-- Payment 테이블의 다음 시퀀스 값을 가져옵니다. -->
+    <select id="getNextPaymentSeq" resultType="int">
+        SELECT payment_seq.NEXTVAL FROM DUAL
+    </select>
+
+    <!-- Payment 테이블에 결제 정보를 삽입합니다. -->
+    <insert id="insertPayment" parameterType="PaymentDto">
+        INSERT INTO payment (
+            payment_no, payment_tid, payment_name, payment_total,
+            payment_remain, payment_member_id, payment_time
+        ) VALUES (
+            #{paymentNo}, #{paymentTid}, #{paymentName}, #{paymentTotal},
+            #{paymentRemain}, #{memberId}, SYSDATE
+        )
+    </insert>
+
+    <!-- Payment 테이블에서 특정 회원의 결제 리스트를 가져옵니다. -->
+    <select id="selectPaymentsByMemberId" parameterType="string" resultType="PaymentDto">
+        SELECT *
+        FROM payment
+        WHERE payment_member_id = #{memberId}
+    </select>
+
+    <!-- Payment 테이블에서 특정 결제 번호의 정보를 가져옵니다. -->
+    <select id="selectPaymentByNo" parameterType="int" resultType="PaymentDto">
+        SELECT *
+        FROM payment
+        WHERE payment_no = #{paymentNo}
+    </select>
+
+    <!-- 결제 취소 시, Payment 테이블에서 잔여 금액을 0으로 설정합니다. -->
+    <update id="cancelPayment" parameterType="int">
+        UPDATE payment
+        SET payment_remain = 0
+        WHERE payment_no = #{paymentNo}
+    </update>
+</mapper>
