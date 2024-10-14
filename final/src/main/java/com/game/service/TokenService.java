@@ -71,6 +71,7 @@ public class TokenService {
 		}
 		
 		public MemberClaimVO check(String token) {
+//			System.out.println("token="+token);
 			SecretKey key = Keys.hmacShaKeyFor(
 					tokenProperties.getSecret().getBytes(StandardCharsets.UTF_8));
 			Claims claims = (Claims) Jwts.parser()
