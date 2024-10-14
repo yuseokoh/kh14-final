@@ -24,7 +24,7 @@ public class SpringdocConfiguration {
 //		builder 패턴을 사용한 객체 생성
 		Info info = new Info()
 				.version("v0.0.1")
-				.title("내가만든 REST API")
+				.title("3조 파이널 REST API")
 				.description("React에서 이용하기 위해 만든 백엔드 문서입니다");
 		
 //		OpenAPI api = new OpenAPI();

@@ -11,6 +11,7 @@ public class MemberDto {
 	private String memberId;//아이디
 	private String memberPw;//비밀번호
 	private String memberEmail;//이메일
+//	private String memberBirth;  //생일 추가해야함 (다른 패키지에도)
 	private String memberLevel;//등급
 	private int memberPoint;//보유포인트
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")

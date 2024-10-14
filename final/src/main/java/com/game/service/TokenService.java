@@ -8,6 +8,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import com.game.configuration.TokenProperties;
 import com.game.dao.MemberTokenDao;
@@ -17,7 +18,7 @@ import com.game.vo.MemberClaimVO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-
+@Service
 public class TokenService {
 	
 		public static final String BEARER_PREFIX = "bearer ";
