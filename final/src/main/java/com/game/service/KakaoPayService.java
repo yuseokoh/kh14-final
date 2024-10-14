@@ -32,27 +32,26 @@ public class KakaoPayService {
     
     // 결제 준비 (ready)
     public KakaoPayReadyResponseVO ready(KakaoPayReadyRequestVO request) throws URISyntaxException {
-        URI uri = new URI("https://kapi.kakao.com/v1/payment/ready");
-        
+        URI uri = new URI("https://open-api.kakaopay.com/online/v1/payment/ready");
         Map<String, String> body = new HashMap<>();
         body.put("cid", kakaoPayProperties.getCid());
         body.put("partner_order_id", request.getPartnerOrderId());
         body.put("partner_user_id", request.getPartnerUserId());
-        body.put("item_name", request.getItemName());
+        body.put("item_name", "leauge of legends");
         body.put("quantity", "1");
-        body.put("total_amount", String.valueOf(request.getTotalAmount()));
+        body.put("total_amount", "100");
         body.put("tax_free_amount", "0");
-        body.put("approval_url", request.getApprovalUrl() + "/" + request.getPartnerOrderId());
-        body.put("cancel_url", request.getCancelUrl());
-        body.put("fail_url", request.getFailUrl());
-        
+        body.put("approval_url", "http://localhost:/approve");
+        body.put("cancel_url", "http://localhost:8080/cancel");
+        body.put("fail_url", "http://localhost:8080/fail");
+      //카카오페이 결제 준비 요청 데이터
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
         
         return template.postForObject(uri, entity, KakaoPayReadyResponseVO.class);
     }
 // 결제 승인 (approve)
     public KakaoPayApproveResponseVO approve(KakaoPayApproveRequestVO request) throws URISyntaxException {
-        URI uri = new URI("https://kapi.kakao.com/v1/payment/approve");
+        URI uri = new URI("https://open-api.kakaopay.com/online/v1/payment/approve");
         
         Map<String, String> body = new HashMap<>();
         body.put("cid", kakaoPayProperties.getCid());
@@ -68,7 +67,7 @@ public class KakaoPayService {
     
     // 결제 조회 (order)
     public KakaoPayOrderResponseVO order(KakaoPayOrderRequestVO request) throws URISyntaxException {
-        URI uri = new URI("https://kapi.kakao.com/v1/payment/order");
+        URI uri = new URI("https://open-api.kakaopay.com/online/v1/payment/order");
         
         Map<String, String> body = new HashMap<>();
         body.put("cid", kakaoPayProperties.getCid());
@@ -81,7 +80,7 @@ public class KakaoPayService {
     
     // 결제 취소 (cancel)
     public KakaoPayCancelResponseVO cancel(KakaoPayCancelRequestVO request) throws URISyntaxException {
-        URI uri = new URI("https://kapi.kakao.com/v1/payment/cancel");
+        URI uri = new URI("https://open-api.kakaopay.com/online/v1/payment/cancel");
         
         Map<String, String> body = new HashMap<>();
         body.put("cid", kakaoPayProperties.getCid());

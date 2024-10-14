@@ -50,6 +50,10 @@ public class PaymentRestController {
         request.setPartnerOrderId(UUID.randomUUID().toString());
         MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
         request.setPartnerUserId(claimVO.getMemberId());
+        
+        request.setApprovalUrl("http://localhost:8080/approve");
+        request.setCancelUrl("http://localhost:8080/cancel");
+        request.setFailUrl("http://localhost:8080/fail");
         KakaoPayReadyResponseVO response = kakaoPayService.ready(request);
         return response;
     }

@@ -16,10 +16,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoPayReadyResponseVO {
 	private String tid;
-//	private String nextRedirectAppUrl;
-//	private String nextRedirectMobileUrl;
+	//private String nextRedirectAppUrl;
+	//private String nextRedirectMobileUrl;
 	private String nextRedirectPcUrl;
-//	private String androidAppScheme;
-//	private String iosAppScheme;
+	//private String androidAppScheme;
+	//private String iosAppScheme;
 	private LocalDateTime createdAt;
 }
