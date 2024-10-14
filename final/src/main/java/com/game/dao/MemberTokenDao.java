@@ -14,7 +14,7 @@ public class MemberTokenDao {
 	public void insert(MemberTokenDto memberTokenDto) {
 		sqlSession.insert("memberToken.insert", memberTokenDto);
 	}
-	public MemberTokenDto selectone(MemberTokenDto memberTokenDto) {
+	public MemberTokenDto selectOne(MemberTokenDto memberTokenDto) {
 		return sqlSession.selectOne("memberToken.check", memberTokenDto);
 	}
 	public boolean delete(MemberTokenDto memberTokenDto) {
