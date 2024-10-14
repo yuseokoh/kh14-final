@@ -72,37 +72,39 @@ public class MemberRestController {
 	}
 
 	@PostMapping("/refresh")
-	public MemberLoginResponseVO refresh(@RequestHeader("Authorization") String refreshToken) {
-		// [1] refreshToken이 없거나 Bearer로 시작하지 않으면 안됨
-		if (refreshToken == null)
+	public MemberLoginResponseVO refresh(
+			@RequestHeader("Authorization") String refreshToken) {
+		//[1] refreshToken이 없거나 Bearer로 시작하지 않으면 안됨
+		if(refreshToken == null) 
 			throw new TargetNotFoundException("토큰 없음");
-		if (tokenService.isBearerToken(refreshToken) == false)
+		if(tokenService.isBearerToken(refreshToken) == false)
 			throw new TargetNotFoundException("Bearer 토큰 아님");
-
-		// [2] 토큰에서 정보를 추출
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(refreshToken));
-		if (claimVO.getMemberId() == null)
+		
+		//[2] 토큰에서 정보를 추출
+		MemberClaimVO claimVO = 
+				tokenService.check(tokenService.removeBearer(refreshToken));
+		if(claimVO.getMemberId() == null)
 			throw new TargetNotFoundException("아이디 없음");
-		if (claimVO.getMemberLevel() == null)
+		if(claimVO.getMemberLevel() == null)
 			throw new TargetNotFoundException("등급 없음");
-
-		// [3] 토큰 발급 내역을 조회
+		
+		//[3] 토큰 발급 내역을 조회
 		MemberTokenDto memberTokenDto = new MemberTokenDto();
 		memberTokenDto.setTokenTarget(claimVO.getMemberId());
 		memberTokenDto.setTokenValue(tokenService.removeBearer(refreshToken));
 		MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
-		if (resultDto == null)// 발급내역이 없음
+		if(resultDto == null)//발급내역이 없음 
 			throw new TargetNotFoundException("발급 내역이 없음");
-
-		// [4] 기존의 리프시 토큰 삭제
+		
+		//[4] 기존의 리프시 토큰 삭제
 		memberTokenDao.delete(memberTokenDto);
-
-		// [5] 로그인 정보 재발급
+		
+		//[5] 로그인 정보 재발급
 		MemberLoginResponseVO response = new MemberLoginResponseVO();
 		response.setMemberId(claimVO.getMemberId());
 		response.setMemberLevel(claimVO.getMemberLevel());
-		response.setAccessToken(tokenService.createAccessToken(claimVO));// 재발급
-		response.setRefreshToken(tokenService.createRefreshToken(claimVO));// 재발급
+		response.setAccessToken(tokenService.createAccessToken(claimVO));//재발급
+		response.setRefreshToken(tokenService.createRefreshToken(claimVO));//재발급
 		return response;
 	}
 
