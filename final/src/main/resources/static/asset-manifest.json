@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "./static/css/main.fe52357a.css",
+    "main.js": "./static/js/main.417aa464.js",
+    "static/js/453.56fc727d.chunk.js": "./static/js/453.56fc727d.chunk.js",
+    "static/media/login.png": "./static/media/login.620de4501ceecd0288c7.png",
+    "static/media/steamlogo.svg": "./static/media/steamlogo.844c39a4abb853c85a7c65cfde4aa1d2.svg",
+    "index.html": "./index.html",
+    "main.fe52357a.css.map": "./static/css/main.fe52357a.css.map",
+    "main.417aa464.js.map": "./static/js/main.417aa464.js.map",
+    "453.56fc727d.chunk.js.map": "./static/js/453.56fc727d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fe52357a.css",
+    "static/js/main.417aa464.js"
+  ]
+}
