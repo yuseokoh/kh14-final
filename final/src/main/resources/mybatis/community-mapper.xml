@@ -8,7 +8,18 @@
 
 	<!-- 커뮤니티 게시글 목록 -->
 	<select id="list" resultType="CommunityDto">
-
+		select
+			community_no, <!-- 글 번호 -->
+			community_category, <!-- 카테고리(공략,정보,질문 -->
+			community_title, <!-- 글 제목 -->
+			community_content, <!-- 글 내용 -->
+			community_write, <!-- 글 작성시간 -->
+			community_state, <!-- 글 공개,비공개 -->
+			community_views, <!-- 글 조회수 -->
+			community_likes, <!-- 글 좋아요수 -->
+			community_replies <!-- 글 댓글수 -->
+		from community
+		order by community_no DESC <!-- 내림차순 정렬코드 -->
 	</select>
 
 	<!-- 커뮤니티 게시글 등록 -->
@@ -44,13 +55,26 @@
 		community_title = #{communityTitle}, <!-- 글 제목 -->
 		community_content = #{communityContent}, <!-- 글 내용 -->
 		community_state = #{communityState}, <!-- 공개, 비공개 변경 -->
-		community_modify = #{communityModify} <!-- 수정시간 -->
 		where community_no = #{communityNo} <!-- 글 번호 -->
 	</update>
 
 	<!-- 커뮤니티 게시글 검색 -->
 	<select id="search" resultType="CommunityDto">
-
+		select
+		community_no,
+		community_category,
+		community_title,
+		community_content,
+		community_write,
+		community_modify,
+		community_views,
+		community_likes,
+		community_state,
+		community_replies
+		from community
+		where ${column} like CONCAT ('%', #{keyword}, '%')
+		order by 
+		community_no DESC
 	</select>
 
 	<!-- 커뮤니티 게시글 조회수 증가 -->
