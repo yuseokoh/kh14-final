@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="friend">
+<!-- 시퀀스 -->
+	<select id="friendSequence" resultType="int">
+		select friend_seq.nextval from dual
+	</select>
+	
+<!-- 친구 요청 -->
+	<insert id="request">
+		insert into friend(friend_fk, friend_from, friend_to, friend_send_time, friend_accept) 
+		values(#{friendFk}, #{friendFrom}, #{friendTo}, systimestamp, 'N')
+	</insert>
+	
+<!-- 요청 목록 -->
+	<select id="requestList" resultType="FriendDto">
+		select * from friend 
+		where friend_to = #{memberId} and friend_accept = 'N'
+	</select>
+	
+</mapper>
