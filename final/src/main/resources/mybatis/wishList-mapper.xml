@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.game.dao.WishListDao">
+    <select id="sequence">
+        select wishlist_seq.NEXTVAL FROM DUAL
+    </select>
+
+    <insert id="insert">
+        insert into wishList(
+            wishlist_id, member_id, game_id, added_date
+        )
+        values(#{wishlistId}, #{memberId}, #{gameId}, SYSDATE)
+    </insert>
+
+    <delete id="delete">
+        delete from wishList where wishlist_id = #{wishlistId}
+    </delete>
+
+    <select id="list" resultType="wishListDto">
+        select * from wishList where added_date = #{addedDate} order by added_date asc
+    </select>
+</mapper>
