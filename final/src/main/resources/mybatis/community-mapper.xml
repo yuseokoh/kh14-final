@@ -78,7 +78,17 @@
 	</select>
 
 	<!-- 커뮤니티 게시글 조회수 증가 -->
-
-	<!-- -->
+	<update id="views">
+		update community
+		set community_views = community_views + 1 <!-- 조회수 증가 -->
+		where community_no  = #{communityNo}
+	</update>
+		
+	<!-- 커뮤니티 글 좋아요수 증가 -->
+	<update id="likes">
+		update community
+		set community_likes = community_likes + 1 <!-- 좋아요수 증가 -->
+		where community_no = #{communityNo}
+	</update>
 
 </mapper>
