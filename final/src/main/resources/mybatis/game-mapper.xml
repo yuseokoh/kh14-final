@@ -39,22 +39,22 @@
 	<!-- 수정 -->
 	<update id="fix">
 	  set
-		game_no number = #{gameNumber}
-		game_title = #{gameTitle} 
-		game_price = #{gamePrice}
-		game_developer = #{gameDeveloper} 
-	    game_publication_date = #{gamePublicationDate}  
-	    game_discount = #{gameDiscount}
-	    game_category = #{gameCategory}
-	    game_grade = #{gameGrade}
-	    game_theme = #{gameTheme}
-	    game_description = #{gameDescription} 
-	    game_short_description = #{gameShortDescription}
-	    game_user_score = #{gameScore}
-	    game_review_count = #{gameReviewCount}
-	    game_platforms = #{gamePlatforms}
-	    game_system_requirement = #{gameSystemRequirement} 
-	</update>
+		game_no number = #{gameNumber},
+		game_title = #{gameTitle},
+		game_price = #{gamePrice},
+		game_developer = #{gameDeveloper},
+	    game_publication_date = #{gamePublicationDate},
+	    game_discount = #{gameDiscount},
+	    game_category = #{gameCategory},
+	    game_grade = #{gameGrade},
+	    game_theme = #{gameTheme},
+	    game_description = #{gameDescription},
+	    game_short_description = #{gameShortDescription},
+	    game_user_score = #{gameScore},
+	    game_review_count = #{gameReviewCount},
+	    game_platforms = #{gamePlatforms},
+	    game_system_requirement = #{gameSystemRequirement}	
+	    </update>
 	
 	<!-- 삭제 -->
 	<delete id="del">
