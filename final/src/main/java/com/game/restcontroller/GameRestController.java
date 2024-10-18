@@ -138,7 +138,7 @@ public class GameRestController {
 	            tokenService.check(tokenService.removeBearer(token));
 	    
 	    //상품명, 금액을 계산
-	    StringBuffer buffer = new StringBuffer();
+	    StringBuffer buffer = new StringBuffer(); 
 	    int total = 0;
 	    for(GameQtyVO vo : request.getGameList()) {
 	        GameDto gameDto = gameDao.selectOne(vo.getGameNo());//게임정보 조회
