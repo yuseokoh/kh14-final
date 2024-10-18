@@ -63,7 +63,7 @@ public class CommunityRestController {
         return "CommunityViews";
     }
 
-    // 게시글 좋아요수 증가
+    // 게시글 좋아요수 증가 
     @PutMapping("/likes")
     public String CommunityLikes(@PathVariable int communityNo) {
         communityService.CommunityLikes(communityNo);
