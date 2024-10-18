@@ -60,11 +60,6 @@
 	<delete id="del">
 	  delete from game where game_no = #{gameNo}
 	</delete>
-	
-	<!-- 수정 -->
-    <select id="detail" resultType="GameDto">
-    select * from game where game_no = #{gameNo}
-    </select>
 
 
 </mapper>
