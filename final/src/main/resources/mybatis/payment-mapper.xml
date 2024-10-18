@@ -15,7 +15,7 @@
             payment_remain, payment_member_id, payment_time
         ) VALUES (
             #{paymentNo}, #{paymentTid}, #{paymentName}, #{paymentTotal},
-            #{paymentRemain}, #{memberId}, SYSDATE
+            #{paymentRemain}, #{paymentMemberId}, SYSDATE
         )
     </insert>
 

@@ -20,19 +20,19 @@ public class PaymentDao {
 
     // Payment 관련 메소드
     public int paymentSequence() {
-        return sqlSession.selectOne("payment.paymentSequence");
+        return sqlSession.selectOne("payment.getNextPaymentSeq");
     }
     
 public void paymentInsert(PaymentDto paymentDto) {
-        sqlSession.insert("payment.paymentInsert", paymentDto);
+        sqlSession.insert("payment.insertPayment", paymentDto);
     }
 
     public PaymentDto selectPayment(int paymentNo) {
-        return sqlSession.selectOne("payment.selectPayment", paymentNo);
+        return sqlSession.selectOne("payment.selectPaymentByNo", paymentNo);
     }
 
     public List<PaymentDto> selectPaymentList(String memberId) {
-        return sqlSession.selectList("payment.selectPaymentList", memberId);
+        return sqlSession.selectList("payment.selectPaymentsByMemberId", memberId);
     }
 
     public boolean cancelPayment(int paymentNo) {
@@ -40,20 +40,21 @@ public void paymentInsert(PaymentDto paymentDto) {
     }
 
     // PaymentDetail 관련 메소드
+    
     public int paymentDetailSequence() {
         return sqlSession.selectOne("paymentDetail.paymentDetailSequence");
     }
 
     public void paymentDetailInsert(PaymentDetailDto paymentDetailDto) {
-        sqlSession.insert("paymentDetail.paymentDetailInsert", paymentDetailDto);
+        sqlSession.insert("paymentDetail.insertPaymentDetail", paymentDetailDto);
     }
 
     public List<PaymentDetailDto> selectPaymentDetailList(int paymentNo) {
-        return sqlSession.selectList("paymentDetail.selectPaymentDetailList", paymentNo);
+        return sqlSession.selectList("paymentDetail.selectPaymentDetailsByPaymentNo", paymentNo);
     }
 
     public PaymentDetailDto selectPaymentDetail(int paymentDetailNo) {
-        return sqlSession.selectOne("paymentDetail.selectPaymentDetail", paymentDetailNo);
+        return sqlSession.selectOne("paymentDetail.selectPaymentDetailByNo", paymentDetailNo);
     }
 
     public boolean cancelPaymentDetail(int paymentDetailNo) {
