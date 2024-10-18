@@ -9,7 +9,7 @@
 	<!-- 등록 -->
 	<insert id="add">
 	  insert into game(
-	    game_no number, game_title, game_price, game_developer,
+	    game_no, game_title, game_price, game_developer,
 	    game_publication_date, game_discount, game_category ,
 	    game_grade, game_theme, game_description,
 	    game_short_description, game_user_score,
