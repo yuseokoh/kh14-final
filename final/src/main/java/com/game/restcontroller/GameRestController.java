@@ -45,7 +45,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/")
+@RequestMapping("/game")
 public class GameRestController {
 
 	@Autowired 
