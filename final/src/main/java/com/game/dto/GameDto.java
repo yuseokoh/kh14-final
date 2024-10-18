@@ -22,7 +22,7 @@ public class GameDto {
 	private String gameShortDescription;
 	private int gameUserScore;
 	private int gameReviewCount;
-	private String gamePlatForms;
+	private String gamePlatforms;
 	private String gameSystemRequirement;
 	
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.game.dto.PaymentDetailDto;
 import com.game.dto.PaymentDto;
+import com.game.vo.PaymentTotalVO;
 
 @Repository
 public class PaymentDao {
@@ -65,4 +66,20 @@ public void paymentInsert(PaymentDto paymentDto) {
         params.put("money", money);
         return sqlSession.update("payment.decreaseItemRemain", params) > 0;
     }
+    
+    public List<PaymentTotalVO> selectTotalList(String memberId) {
+		return sqlSession.selectList("payment.findTotal", memberId);
+	}
+    
+    public List<PaymentDetailDto> selectDetailList(int paymentNo) {
+		return sqlSession.selectList("payment.findDetail", paymentNo);
+	}
+    
+    public List<PaymentDto> selectList(String memberId) {
+		return sqlSession.selectList("payment.list", memberId);
+	}
+    
+    public PaymentDto selectOne(int paymentNo) {
+		return sqlSession.selectOne("payment.find", paymentNo);
+	}
 }
