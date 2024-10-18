@@ -9,17 +9,49 @@
 	<select id="friendSequence" resultType="int">
 		select friend_seq.nextval from dual
 	</select>
+<!-- 회원 목록 -->
+	<select id="memberList" resultType="MemberDto">
+		select * from member order by member_id asc
+	</select>
+<!-- 회원 검색 -->
+	<select id="memberSearch" resultType="MemberDto">
+		select * from member where instr(member_id, #{keyword}) > 0
+	</select>
 	
+<!-- 친구 목록 -->
+	<select id="friendList" resultType="FriendDto">
+		select * from friend where (friend_from = #{memberId} or friend_to = #{memberId}) and friend_accept = 'Y'
+	</select>
+
 <!-- 친구 요청 -->
 	<insert id="request">
 		insert into friend(friend_fk, friend_from, friend_to, friend_send_time, friend_accept) 
 		values(#{friendFk}, #{friendFrom}, #{friendTo}, systimestamp, 'N')
 	</insert>
 	
-<!-- 요청 목록 -->
-	<select id="requestList" resultType="FriendDto">
+<!-- 상세 -->
+	<select id="find" resultType="FriendDto">
+		select * from friend where friend_fk = #{friendFk}
+	</select>
+	
+<!-- 보낸 요청 목록 -->
+	<select id="requestToOther" resultType="FriendDto">
+		select * from friend where friend_from = #{memberId} and friend_accept = 'N'
+	</select>
+	
+<!-- 받은 요청 목록 -->
+	<select id="requestFromOther" resultType="FriendDto">
 		select * from friend 
 		where friend_to = #{memberId} and friend_accept = 'N'
 	</select>
 	
+<!-- 요청 삭제 -->
+	<delete id="requestDelete">
+		delete friend where friend_fk = #{friendFk}
+	</delete>
+	
+<!-- 요청 수락 -->
+	<update id="getRequest">
+		update friend set friend_accept = 'Y' where friend_fk = #{friendFk}
+	</update>
 </mapper>
