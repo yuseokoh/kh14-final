@@ -49,4 +49,8 @@ public class GameDao {
         return sqlSession.selectOne("game.detail", gameNo);
     }
 
+    public Integer findGameNoByMemberId(String memberId) {
+        return sqlSession.selectOne("cart.findGameNoByTitle", memberId);
+    }
+
 }

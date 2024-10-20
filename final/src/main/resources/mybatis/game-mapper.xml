@@ -61,5 +61,7 @@
 	  delete from game where game_no = #{gameNo}
 	</delete>
 
-
+	<select id="findGameNo" resultType="gameDto">
+    	select game_no from game where member_id = #{memberId}
+	</select>
 </mapper>
