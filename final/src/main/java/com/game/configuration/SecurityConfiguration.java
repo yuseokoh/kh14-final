@@ -19,6 +19,7 @@ public class SecurityConfiguration {
         http.cors().and().csrf().disable()  // CORS 허용 및 CSRF 비활성화
             .authorizeRequests()
             .requestMatchers("/rest/cert/**", "/member/**").permitAll()  // /rest/cert 경로에 대해 모든 요청 허용
+            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()  // Swagger 경로 허용
             .anyRequest().authenticated();
         return http.build();
     }
