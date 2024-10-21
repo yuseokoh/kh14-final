@@ -6,4 +6,6 @@ import lombok.Data;
 public class MemberClaimVO {
 	private String memberId;
 	private String memberLevel;
+
 }
+
