@@ -128,7 +128,8 @@ public class MemberRestController {
 
         // 로그인 시간 갱신
         memberDao.updateLastLogin(memberDto.getMemberId());
-
+        // 로그아웃 시간 갱신
+        memberDao.updateLogoutTime(memberDto.getMemberId());
         return response;
     }
 
