@@ -11,31 +11,31 @@ import com.game.dto.CommunityDto;
 @Service
 public class CommunityService {
 
-	@Autowired
-	private CommunityDao communityDao;
-	
-	//게시글 목록
-	public List<CommunityDto> CommunityList() {
+    @Autowired
+    private CommunityDao communityDao;
+
+    // 게시글 목록 조회
+    public List<CommunityDto> getCommunityList() {
         return communityDao.CommunityList();
     }
-	
-	// 게시글 등록
-    public void CommunityInsert(CommunityDto communityDto) {
+
+    // 게시글 등록
+    public void insertCommunity(CommunityDto communityDto) {
         communityDao.CommunityInsert(communityDto);
     }
-    
-    // 게시글 삭제
-    public void CommunityDelete(int communityNo) {
-        communityDao.CommunityDelete(communityNo);
-    }
-    
+
     // 게시글 수정
-    public void CommunityUpdate(CommunityDto communityDto) {
+    public void updateCommunity(CommunityDto communityDto) {
         communityDao.CommunityUpdate(communityDto);
     }
-    
+
+    // 게시글 삭제
+    public void deleteCommunity(int communityNo) {
+        communityDao.CommunityDelete(communityNo);
+    }
+
     // 게시글 검색
-    public List<CommunityDto> CommunitySearch(String column, String keyword) {
+    public List<CommunityDto> searchCommunityList(String column, String keyword) {
         return communityDao.CommunitySearch(column, keyword);
     }
     
