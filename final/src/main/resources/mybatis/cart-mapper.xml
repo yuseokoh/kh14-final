@@ -15,7 +15,25 @@
     <delete id="delete">
         DELETE FROM cart WHERE cart_id = #{cartId}
     </delete>
-     <select id="list" resultType="CartDto">
+     <select id="listbygameTilte" resultType="CartDto">
         SELECT * FROM cart WHERE game_title = #{gameTitle}
     </select>
+    
+    <select id="list" resultType="CartDto">
+    	select * from cart
+    </select>
+    
+    <select id="detailList" resultType="CartDto">
+    SELECT 
+        c.cart_id AS cartId,
+        c.member_id AS memberId,
+        c.game_no AS gameNo,
+        c.added_date AS addedDate,
+        g.game_title AS gameTitle,
+        g.game_price AS gamePrice
+    FROM cart c
+    LEFT OUTER JOIN game g ON c.game_no = g.game_no
+    WHERE c.member_id = #{memberId}
+</select>
+
   </mapper>

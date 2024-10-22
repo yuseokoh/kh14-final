@@ -28,7 +28,12 @@ public class CartDao {
 
     // 특정 회원의 장바구니 조회
     public List<CartDto> listByMemberId(String memberId) {
-        return sqlSession.selectList("cart.list", memberId);
+        return sqlSession.selectList("cart.detailList", memberId);
+    }
+    
+    
+    public List<CartDto> list(){
+    	return sqlSession.selectList("cart.list");
     }
     
     public int findGameNo(String gameTitle) {
