@@ -33,6 +33,9 @@ import com.game.vo.MemberComplexResponseVO;
 import com.game.vo.MemberLoginRequestVO;
 import com.game.vo.MemberLoginResponseVO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @CrossOrigin(origins = {"http://localhost:3000"})
 @RestController
 @RequestMapping("/member")
