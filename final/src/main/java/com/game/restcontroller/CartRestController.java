@@ -8,6 +8,7 @@ import com.game.error.TargetNotFoundException;
 import com.game.service.TokenService;
 import com.game.vo.MemberClaimVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,16 +27,24 @@ public class CartRestController {
     @Autowired
     private TokenService tokenService;
 
-    //장바구니 조회
-    @GetMapping("/{memberId}")
-    public List<CartDto> getCartItems(@PathVariable String memberId, @RequestHeader("Authorization") String token) {
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-        if (!memberId.equals(claimVO.getMemberId())) {
-            throw new TargetNotFoundException();
-        }
+    
+    @GetMapping("/")
+    @Transactional(readOnly = true)
+    public List<CartDto> getCartItems() {
+        // 토큰에서 사용자 정보 추출
+//        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    	String memberId ="testuser123";
+
+        // 해당 사용자의 장바구니 목록 반환
+    	System.out.println("Member ID: " + memberId);
         return cartDao.listByMemberId(memberId);
     }
 
+
+//    @GetMapping("/")
+//    public List<CartDto> list(){
+//    	return cartDao.list();
+//    }
     // 장바구니 추가
     @PostMapping("/")
     public CartDto addCartItem(@RequestBody CartDto cartDto,@RequestParam String gameTitle, @RequestHeader("Authorization") String token) {
