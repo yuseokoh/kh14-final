@@ -54,28 +54,28 @@
 		set
 		community_title = #{communityTitle}, <!-- 글 제목 -->
 		community_content = #{communityContent}, <!-- 글 내용 -->
-		community_state = #{communityState}, <!-- 공개, 비공개 변경 -->
+		community_state = #{communityState,jdbcType=VARCHAR} <!-- 공개, 비공개 변경 null값 할 수 있게-->
 		where community_no = #{communityNo} <!-- 글 번호 -->
 	</update>
 
 	<!-- 커뮤니티 게시글 검색 -->
-	<select id="search" resultType="CommunityDto">
-		select
-		community_no,
-		community_category,
-		community_title,
-		community_content,
-		community_write,
-		community_modify,
-		community_views,
-		community_likes,
-		community_state,
-		community_replies
-		from community
-		where ${column} like CONCAT ('%', #{keyword}, '%')
-		order by 
-		community_no DESC
-	</select>
+	<!-- 커뮤니티 게시글 검색 (INSTR 사용) -->
+<select id="searchByTitle" resultType="CommunityDto">
+    select 
+        community_no, 
+        community_title, 
+        community_content, 
+        community_write, 
+        community_modify, 
+        community_views, 
+        community_likes, 
+        community_state
+    from community
+    where instr(community_title, #{keyword}) > 0
+    order by community_no DESC
+</select>
+
+
 
 	<!-- 커뮤니티 게시글 조회수 증가 -->
 	<update id="views">
@@ -90,5 +90,20 @@
 		set community_likes = community_likes + 1 <!-- 좋아요수 증가 -->
 		where community_no = #{communityNo}
 	</update>
-
+	
+	<!-- 특정 게시글 상세 조회 -->
+    <select id="detail" resultType="CommunityDto">
+        select community_no,
+               community_category,
+               community_title,
+               community_content,
+               community_write,
+               community_modify,
+               community_views,
+               community_likes,
+               community_state,
+               community_replies
+        from community
+        where community_no = #{communityNo}
+    </select>
 </mapper>

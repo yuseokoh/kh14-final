@@ -15,11 +15,45 @@
     <delete id="delete">
         delete from wishList where wishlist_id = #{wishlistId}
     </delete>
+    
     <select id="list" resultType="wishListDto">
-        select * from wishList where added_date = #{addedDate} order by added_date asc
+    	select * from wishList
     </select>
     
-    <select id="listbyId" resultType="wishListDto">
-    	select * from wishList where member_id = #{memberId}
+    <select id="listByMemberId" resultType="wishListDto">
+    	SELECT 
+    w.wishlist_id, 
+    w.member_id, 
+    g.game_no,
+    g.game_title AS gameTitle,
+    TO_CHAR(g.game_publication_date, 'YYYY-MM-DD') AS releaseDate,
+    g.game_price AS gamePrice
+FROM 
+    wishList w
+LEFT OUTER JOIN 
+    game g ON w.game_no = g.game_no
+WHERE 
+    w.member_id = #{memberId}
     </select>
+    
+    <select id="search" resultType="wishListDto">
+    <![CDATA[
+    SELECT 
+        w.wishlist_id, 
+        w.member_id, 
+        g.game_no,
+        g.game_title,
+        TO_CHAR(g.game_publication_date, 'YYYY-MM-DD') AS release_date,
+        g.game_price
+    FROM 
+        wishList w
+    LEFT OUTER JOIN 
+        game g ON w.game_no = g.game_no
+    WHERE 
+        INSTR(LOWER(g.game_title), LOWER(#{keyword})) > 0
+    ORDER BY g.game_title ASC
+    ]]>
+</select>
+    
+    
 </mapper>

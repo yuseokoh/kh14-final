@@ -30,15 +30,13 @@ public class CartRestController {
     
     @GetMapping("/")
     @Transactional(readOnly = true)
-    public List<CartDto> getCartItems() {
-        // 토큰에서 사용자 정보 추출
-//        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-    	String memberId ="testuser123";
 
-        // 해당 사용자의 장바구니 목록 반환
-    	System.out.println("Member ID: " + memberId);
-        return cartDao.listByMemberId(memberId);
-    }
+    public List<CartDto> list(@RequestHeader("Authorization") String token) {
+    	MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    	//String memberId ="testuser123";
+    	System.out.println("memberId="+claimVO.getMemberId());
+        return cartDao.listByMemberId(claimVO.getMemberId());
+
 
 
 //    @GetMapping("/")
@@ -58,8 +56,10 @@ public class CartRestController {
 
     // 장바구니 삭제
     @DeleteMapping("/{cartId}")
-    public void deleteCartItem(@PathVariable int cartId, @RequestHeader("Authorization") String token) {
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    public void delete(@PathVariable int cartId) {
         boolean result = cartDao.delete(cartId);
+        if(result == false) {
+        	throw new TargetNotFoundException("존재하지 않는 게임정보");
+        }
     }
 }
