@@ -48,7 +48,7 @@ public void paymentInsert(PaymentDto paymentDto) {
     }
 
     public void paymentDetailInsert(PaymentDetailDto paymentDetailDto) {
-        sqlSession.insert("paymentDetail.insertPaymentDetail", paymentDetailDto);
+        sqlSession.insert("paymentDetail.paymentDetailInsert", paymentDetailDto);
     }
 
     public List<PaymentDetailDto> selectPaymentDetailList(int paymentNo) {

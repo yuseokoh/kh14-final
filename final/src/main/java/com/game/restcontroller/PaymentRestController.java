@@ -49,7 +49,9 @@ public class PaymentRestController {
     @PostMapping("/ready")
     public KakaoPayReadyResponseVO ready(@RequestBody KakaoPayReadyRequestVO request,
                                          @RequestHeader("Authorization") String token) throws URISyntaxException {
-        request.setPartnerOrderId(UUID.randomUUID().toString());
+    	
+    	 int paymentSeq = paymentDao.paymentSequence();
+    	request.setPartnerOrderId(String.valueOf(paymentSeq));
         MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
         request.setPartnerUserId(claimVO.getMemberId());
 
