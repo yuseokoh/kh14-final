@@ -198,6 +198,8 @@ public class GameRestController {
 	    paymentDto.setPaymentMemberId(claimVO.getMemberId());//구매자ID
 	    paymentDao.paymentInsert(paymentDto);//대표정보 등록
 	    
+	    
+	    
 	    //[2] 상세 정보 등록
 	    for(GameQtyVO qtyVO : request.getGameList()) {
 	        GameDto gameDto = gameDao.selectOne(qtyVO.getGameNo());//게임 조회
@@ -218,35 +220,7 @@ public class GameRestController {
 	}
 	
 	
-	//구매 내역 조회
-	@GetMapping("/paymentlist")
-	public List<PaymentDto> paymentList(@RequestHeader("Authorization") String token) {
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-		List<PaymentDto> list = paymentDao.selectList(claimVO.getMemberId());
-		return list;
-	}
 	
-	@GetMapping("/paymentlist/{paymentNo}")
-	public List<PaymentDetailDto> paymentDetailList(
-	        @RequestHeader("Authorization") String token,
-	        @PathVariable int paymentNo) {
-	    //사용자 정보 추출
-	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-	    
-	    PaymentDto paymentDto = paymentDao.selectOne(paymentNo);
-	    if(paymentDto == null)
-	        throw new TargetNotFoundException("존재하지 않는 결제번호");
-	    if(!paymentDto.getPaymentMemberId().equals(claimVO.getMemberId()))//내 결제정보가 아니라면
-	        throw new TargetNotFoundException("잘못된 대상의 결제번호");
-	    
-	    List<PaymentDetailDto> list = paymentDao.selectDetailList(paymentNo);
-	    return list;
-	}
 	
-	@GetMapping("/paymentTotalList")
-	public List<PaymentTotalVO> paymentTotalList(
-			@RequestHeader("Authorization") String token) {
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-		return paymentDao.selectTotalList(claimVO.getMemberId());
-	}
+	
 }

@@ -35,10 +35,12 @@ public void paymentInsert(PaymentDto paymentDto) {
         return sqlSession.selectList("payment.selectPaymentsByMemberId", memberId);
     }
 
-    public boolean cancelPayment(int paymentNo) {
-        return sqlSession.update("payment.cancelPayment", paymentNo) > 0;
-    }
-
+    public boolean cancelAll(int paymentNo) {
+		return sqlSession.update("payment.cancelAll", paymentNo) > 0;
+	}
+	public boolean cancelAllItem(int paymentNo) {
+		return sqlSession.update("payment.cancelAllItem", paymentNo) > 0;
+	}
     // PaymentDetail 관련 메소드
     
     public int paymentDetailSequence() {
@@ -57,30 +59,16 @@ public void paymentInsert(PaymentDto paymentDto) {
         return sqlSession.selectOne("paymentDetail.selectPaymentDetailByNo", paymentDetailNo);
     }
 
-    public boolean cancelPaymentDetail(int paymentDetailNo) {
-        return sqlSession.update("paymentDetail.cancelPaymentDetail", paymentDetailNo) > 0;
-    }
+    public boolean cancelItem(int paymentDetailNo) {
+		return sqlSession.update("paymentDetail.cancelItem", paymentDetailNo) > 0;
+	}
 
     public boolean decreaseItemRemain(int paymentNo, int money) {
         Map<String, Integer> params = new HashMap<>();
         params.put("paymentNo", paymentNo);
         params.put("money", money);
-        return sqlSession.update("payment.decreaseItemRemain", params) > 0;
+        return sqlSession.update("paymentDetail.decreaseItemRemain", params) > 0;
     }
     
-    public List<PaymentTotalVO> selectTotalList(String memberId) {
-		return sqlSession.selectList("payment.findTotal", memberId);
-	}
-    
-    public List<PaymentDetailDto> selectDetailList(int paymentNo) {
-		return sqlSession.selectList("payment.findDetail", paymentNo);
-	}
-    
-    public List<PaymentDto> selectList(String memberId) {
-		return sqlSession.selectList("payment.list", memberId);
-	}
-    
-    public PaymentDto selectOne(int paymentNo) {
-		return sqlSession.selectOne("payment.find", paymentNo);
-	}
+   
 }

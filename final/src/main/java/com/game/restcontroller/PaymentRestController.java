@@ -110,8 +110,8 @@ public class PaymentRestController {
         request.setCancelAmount(paymentDto.getPaymentRemain());
         KakaoPayCancelResponseVO response = kakaoPayService.cancel(request);
 
-        paymentDao.cancelPayment(paymentNo);
-        paymentDao.cancelPaymentDetail(paymentNo);
+        paymentDao.cancelAll(paymentNo);
+        paymentDao.cancelAllItem(paymentNo);
 
         return response;
     }
@@ -134,7 +134,7 @@ public class PaymentRestController {
         request.setCancelAmount(money);
         KakaoPayCancelResponseVO response = kakaoPayService.cancel(request);
 
-        paymentDao.cancelPaymentDetail(paymentDetailNo);
+        paymentDao.cancelItem(paymentDetailNo);
         paymentDao.decreaseItemRemain(paymentDto.getPaymentNo(), money);
 
         return response;
