@@ -209,7 +209,7 @@ public class GameRestController {
 	        paymentDetailDto.setPaymentDetailName(gameDto.getGameTitle());//상품명(게임명) 설정
 	        paymentDetailDto.setPaymentDetailPrice(gameDto.getGamePrice());//상품판매가(게임가격) 설정
 	        paymentDetailDto.setPaymentDetailItem(gameDto.getGameNo());//상품번호(게임번호) 설정
-	        paymentDetailDto.setPaymentDetailQty(qtyVO.getQty());//구매수량
+	        paymentDetailDto.setPaymentDetailQty(1);
 	        paymentDetailDto.setPaymentDetailOrigin(paymentSeq);//결제대표번호
 	        paymentDao.paymentDetailInsert(paymentDetailDto);
 	    }
