@@ -8,6 +8,7 @@ import com.game.error.TargetNotFoundException;
 import com.game.service.TokenService;
 import com.game.vo.MemberClaimVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,16 +27,21 @@ public class CartRestController {
     @Autowired
     private TokenService tokenService;
 
-    //장바구니 조회
-    @GetMapping("/{memberId}")
-    public List<CartDto> getCartItems(@PathVariable String memberId, @RequestHeader("Authorization") String token) {
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-        if (!memberId.equals(claimVO.getMemberId())) {
-            throw new TargetNotFoundException();
-        }
-        return cartDao.listByMemberId(memberId);
+    
+    @GetMapping("/")
+    @Transactional(readOnly = true)
+    public List<CartDto> list(@RequestHeader("Authorization") String token) {
+    	MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    	//String memberId ="testuser123";
+    	System.out.println("memberId="+claimVO.getMemberId());
+        return cartDao.listByMemberId(claimVO.getMemberId());
     }
 
+
+//    @GetMapping("/")
+//    public List<CartDto> list(){
+//    	return cartDao.list();
+//    }
     // 장바구니 추가
     @PostMapping("/")
     public CartDto addCartItem(@RequestBody CartDto cartDto,@RequestParam String gameTitle, @RequestHeader("Authorization") String token) {
@@ -49,8 +55,10 @@ public class CartRestController {
 
     // 장바구니 삭제
     @DeleteMapping("/{cartId}")
-    public void deleteCartItem(@PathVariable int cartId, @RequestHeader("Authorization") String token) {
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    public void delete(@PathVariable int cartId) {
         boolean result = cartDao.delete(cartId);
+        if(result == false) {
+        	throw new TargetNotFoundException("존재하지 않는 게임정보");
+        }
     }
 }

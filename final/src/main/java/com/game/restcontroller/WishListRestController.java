@@ -38,27 +38,39 @@ public class WishListRestController {
     @Autowired
     private TokenService tokenService;
     
-    @GetMapping("/{memberId}")
-    public List<WishListDto> list(@RequestHeader("Authorization") String token){
-        logger.info("Received token: {}", token);
-        
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-        
-        String memberId = claimVO.getMemberId();
-        logger.info("Member Claim: {}", claimVO);
-        
-        List<WishListDto> wishList = wishListDao.selectListByMemberId(memberId);
-        logger.info("Wish List Size: {}", wishList.size());
-        
-        return wishList;
+    @GetMapping("/column/{column}/keyword/{keyword}")
+    public List<WishListDto> search(
+    						@PathVariable String column,
+    						@PathVariable String keyword
+    													){
+    	List<WishListDto> list= wishListDao.search(column, keyword);
+    	return list;
     }
+    
+    @GetMapping("/")
+    public List<WishListDto> list(@RequestHeader("Authorization") String token){
+    	MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    	//String memberId="testuser123";
+    	System.out.println(claimVO.getMemberId());
+    	return wishListDao.selectListByMemberId(claimVO.getMemberId());
+    	//return wishListDao.selectListByMemberId(memberId);
+    }
+//    @GetMapping("/")
+//    public List<WishListDto>list(){
+//    	return wishListDao.list();
+//    }
+//    @GetMapping("/")
+//    public List<WishListDto> list(@RequestHeader("Authorization") String token){
+//        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+//        return wishListDao.selectListByMemberId(claimVO.getMemberId());
+//    }
     
     @PostMapping("/")
 	public void insert(@RequestBody WishListDto wishListDto) {
     	wishListDao.insert(wishListDto);
     }
     
-    @DeleteMapping("/")
+    @DeleteMapping("/{wishListId}")
     public void delete(@PathVariable int wishListID) {
     	wishListDao.delete(wishListID);
     }
