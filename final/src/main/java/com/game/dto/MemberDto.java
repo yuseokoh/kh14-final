@@ -3,10 +3,13 @@ package com.game.dto;
 import java.sql.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MemberDto {
     private String memberId;          // 아이디
     private String memberPw;          // 비밀번호
@@ -27,4 +30,6 @@ public class MemberDto {
     private String verificationToken; // 이메일 인증 토큰
     private int emailVerified;        // 이메일 인증 여부 (0: 미인증, 1: 인증)
     private int memberPoint;          // 보유 포인트
+    @JsonProperty("id")
+    private String kakaoId;           // 카카오 회원번호
 }

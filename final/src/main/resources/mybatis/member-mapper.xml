@@ -53,7 +53,7 @@
 			<choose>
 				<when test="beginMemberJoin != null and endMemberJoin != null">
 		AND (member_join BETWEEN to_date(#{beginMemberJoin} || ' ' ||
-		'00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+					'00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 					AND to_date(#{endMemberJoin} || ' ' || '23:59:59',
 		'YYYY-MM-DD HH24:MI:SS'))
 				</when>
@@ -139,7 +139,7 @@
 			<choose>
 				<when test="beginMemberJoin != null and endMemberJoin != null">
 		AND (member_join BETWEEN to_date(#{beginMemberJoin} || ' ' ||
-		'00:00:00', 'YYYY-MM-DD HH24:MI:SS')
+					'00:00:00', 'YYYY-MM-DD HH24:MI:SS')
 					AND to_date(#{endMemberJoin} || ' ' || '23:59:59',
 		'YYYY-MM-DD HH24:MI:SS'))
 				</when>
@@ -187,12 +187,13 @@
 		member_id,
 		member_pw,
 		member_email,
-
+		kakao_id,
 		member_level
 		) VALUES (
 		#{memberId},
 		#{memberPw},
 		#{memberEmail},
+		#{kakaoId},
 		#{memberLevel}
 		)
 	</insert>
@@ -238,13 +239,18 @@
 	</update>
 	<!-- 최종 로그아웃 시각 갱신 -->
 	<update id="updateLogoutTime">
-    UPDATE member SET member_logout = sysdate WHERE member_id = #{memberId}
-</update>
+		UPDATE member SET member_logout = sysdate WHERE member_id = #{memberId}
+	</update>
 
 
 	<!-- 이메일로 회원 찾기 -->
 	<select id="findByEmail" parameterType="string" resultType="MemberDto">
 		SELECT * FROM member WHERE member_email = #{memberEmail}
+	</select>
+
+	<select id="selectOneByKakaoId" parameterType="string"
+		resultType="MemberDto">
+		SELECT * FROM member WHERE kakao_id = #{kakaoId}
 	</select>
 
 	<!-- 자주 사용하는 SQL 조각들 (Top N Query) -->
