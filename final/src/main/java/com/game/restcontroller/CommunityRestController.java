@@ -37,8 +37,9 @@ public class CommunityRestController {
 	    }
 
 	    // 게시글 수정 (PUT 요청)
-	    @PutMapping("/")
-	    public String updateCommunity(@RequestBody CommunityDto communityDto) {
+	    @PutMapping("/{communityNo}")
+	    public String updateCommunity(@PathVariable int communityNo, @RequestBody CommunityDto communityDto) {
+	    	communityDto.setCommunityNo(communityNo);
 	        communityDao.CommunityUpdate(communityDto);
 	        return "게시글이 수정되었습니다.";
 	    }
@@ -50,10 +51,23 @@ public class CommunityRestController {
 	        return "게시글이 삭제되었습니다.";
 	    }
 
-	    // 검색 기능 (GET 요청)
-	    @GetMapping("/column/{column}/keyword/{keyword}")
-	    public List<CommunityDto> searchCommunityList(@PathVariable String column, @PathVariable String keyword) {
-	        return communityDao.CommunitySearch(column, keyword);
+//	    // 검색 기능 (GET 요청)
+//	    @GetMapping("/column/{column}/keyword/{keyword}")
+//	    public List<CommunityDto> searchCommunityList(@PathVariable String column, @PathVariable String keyword) {
+//	        return communityDao.CommunitySearch(column, keyword);
+//	    }
+	    
+	    @GetMapping("/search/title/{keyword}")
+	    public List<CommunityDto> searchCommunityByTitle(@PathVariable String keyword) {
+	        return communityDao.SearchByTitle(keyword);
+	    }
+
+	    
+	    
+	 // 게시글 상세 조회 (GET 요청)
+	    @GetMapping("/{communityNo}")
+	    public CommunityDto getCommunityDetail(@PathVariable int communityNo) {
+	        return communityDao.CommunityDetail(communityNo);
 	    }
 
 //    // 게시글 조회수 증가
