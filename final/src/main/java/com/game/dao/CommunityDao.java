@@ -34,10 +34,11 @@ public class CommunityDao {
 		sqlSession.update("community.update", communityDto);
 	}
 	
-	//게시글 검색
-	public List<CommunityDto> CommunitySearch(String column, String keyword){
-		return sqlSession.selectList("community.search", new Object[]{column, keyword});
+	//제목 검색
+	public List<CommunityDto> SearchByTitle(String keyword) {
+	    return sqlSession.selectList("community.searchByTitle", keyword);
 	}
+
 	
 	//게시글 조회수 증가
 	public void CommunityViews(int communityNo) {
@@ -54,4 +55,8 @@ public class CommunityDao {
         return sqlSession.selectOne("community.getPostById", communityNo);
     }
 	
+	// 특정 게시글 상세 조회
+    public CommunityDto CommunityDetail(int communityNo) {
+        return sqlSession.selectOne("community.detail", communityNo);
+    }
 }
