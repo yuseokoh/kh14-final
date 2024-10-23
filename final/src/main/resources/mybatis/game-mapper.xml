@@ -1,67 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "https://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
 
-	
 <mapper namespace="game">
 	<!-- 등록 -->
 	<insert id="add">
-	  insert into game(
-	    game_no, game_title, game_price, game_developer,
-	    game_publication_date, game_discount, game_category ,
-	    game_grade, game_theme, game_description,
-	    game_short_description, game_user_score,
-	    game_review_count, game_platforms,
-	    game_system_requirement
-	  		)
-	  values(
-	  	game_seq.nextval, #{gameNumber}, #{gameTitle}, #{gamePrice},
-	  	 #{gameDeveloper}, #{gamePublicationDate}, #{gameDiscount},
-	  	 #{gameCategory}, #{gameGrade}, #{gameTheme},
-	  	 #{gameDescription}, #{gameShortDescription}, #{gameUserScore},
-	  	 #{gameReviewCount}, #{gamePlatForms}, #{gameSystemRequirement},
-	  )
-	  
+		insert into game(
+		game_no, game_title, game_price, game_developer,
+		game_publication_date, game_discount, game_category ,
+		game_grade, game_theme, game_description,
+		game_short_description, game_user_score,
+		game_review_count, game_platforms,
+		game_system_requirement
+		)
+		values(
+		game_seq.nextval, #{gameNumber}, #{gameTitle}, #{gamePrice},
+		#{gameDeveloper}, #{gamePublicationDate}, #{gameDiscount},
+		#{gameCategory}, #{gameGrade}, #{gameTheme},
+		#{gameDescription}, #{gameShortDescription}, #{gameUserScore},
+		#{gameReviewCount}, #{gamePlatForms}, #{gameSystemRequirement},
+		)
+
 	</insert>
-	
+
 	<!-- 목록 -->
 	<select id="list" resultType="gameDto">
-	  select * from game order by game_no asc
+		select * from game order by game_no asc
 	</select>
-	
+
 	<!-- 조회 -->
 	<select id="detail" resultType="gameDto">
-	  select * from game where game_no = #{gameNo}
+		select * from game where game_no = #{gameNo}
 	</select>
-	
+
 	<!-- 수정 -->
 	<update id="fix">
-	  set
+		set
 		game_no number = #{gameNumber},
 		game_title = #{gameTitle},
 		game_price = #{gamePrice},
 		game_developer = #{gameDeveloper},
-	    game_publication_date = #{gamePublicationDate},
-	    game_discount = #{gameDiscount},
-	    game_category = #{gameCategory},
-	    game_grade = #{gameGrade},
-	    game_theme = #{gameTheme},
-	    game_description = #{gameDescription},
-	    game_short_description = #{gameShortDescription},
-	    game_user_score = #{gameScore},
-	    game_review_count = #{gameReviewCount},
-	    game_platforms = #{gamePlatforms},
-	    game_system_requirement = #{gameSystemRequirement}	
-	    </update>
-	
+		game_publication_date = #{gamePublicationDate},
+		game_discount = #{gameDiscount},
+		game_category = #{gameCategory},
+		game_grade = #{gameGrade},
+		game_theme = #{gameTheme},
+		game_description = #{gameDescription},
+		game_short_description = #{gameShortDescription},
+		game_user_score = #{gameScore},
+		game_review_count = #{gameReviewCount},
+		game_platforms = #{gamePlatforms},
+		game_system_requirement = #{gameSystemRequirement}
+	</update>
+
 	<!-- 삭제 -->
 	<delete id="del">
-	  delete from game where game_no = #{gameNo}
+		delete from game where game_no = #{gameNo}
 	</delete>
 
 	<select id="findGameNo" resultType="gameDto">
-    	select game_no from game where member_id = #{memberId}
+		select game_no from game where member_id = #{memberId}
 	</select>
 </mapper>

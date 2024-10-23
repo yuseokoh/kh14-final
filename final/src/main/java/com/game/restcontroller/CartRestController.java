@@ -30,12 +30,13 @@ public class CartRestController {
     
     @GetMapping("/")
     @Transactional(readOnly = true)
+
     public List<CartDto> list(@RequestHeader("Authorization") String token) {
     	MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
     	//String memberId ="testuser123";
     	System.out.println("memberId="+claimVO.getMemberId());
         return cartDao.listByMemberId(claimVO.getMemberId());
-    }
+
 
 
 //    @GetMapping("/")

@@ -1,5 +1,6 @@
 package com.game.restcontroller;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.game.dao.CertDao;
 import com.game.dao.MemberDao;
 import com.game.dao.MemberTokenDao;
-import com.game.dto.CertDto;
 import com.game.dto.MemberDto;
 import com.game.dto.MemberTokenDto;
 import com.game.error.TargetNotFoundException;
 import com.game.service.EmailService;
+import com.game.service.KakaoLoginService;
 import com.game.service.TokenService;
 import com.game.vo.MemberClaimVO;
 import com.game.vo.MemberComplexRequestVO;
@@ -33,6 +34,9 @@ import com.game.vo.MemberComplexResponseVO;
 import com.game.vo.MemberLoginRequestVO;
 import com.game.vo.MemberLoginResponseVO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @CrossOrigin(origins = {"http://localhost:3000"})
 @RestController
 @RequestMapping("/member")
@@ -50,6 +54,8 @@ public class MemberRestController {
     private EmailService emailService;
     @Autowired
     private CertDao certDao;
+    @Autowired
+    private KakaoLoginService kakaoLoginService;
 
     @PostMapping("/search")
     public MemberComplexResponseVO search(@RequestBody MemberComplexRequestVO vo) {
@@ -133,8 +139,147 @@ public class MemberRestController {
         return response;
     }
 
+//    @PostMapping("/kakaoLogin")
+//    public ResponseEntity<MemberLoginResponseVO> kakaoLogin(@RequestBody Map<String, String> request) {
+//        String code = request.get("code");
+//        System.out.println("받은 인가 코드: " + code);
+//
+//        try {
+//            // 액세스 토큰 발급
+//            String accessToken = kakaoLoginService.getAccessToken(code);
+//            System.out.println("발급된 액세스 토큰: " + accessToken);
+//
+//            // 사용자 정보 요청
+//            MemberDto kakaoUser = kakaoLoginService.getUserInfo(accessToken);
+//            System.out.println("카카오 사용자 정보: " + kakaoUser.toString());
+//
+//            // 기존 회원 여부 확인 및 회원가입 처리
+//            Optional<MemberDto> existingMember = memberDao.selectOneByKakaoId(kakaoUser.getKakaoId());
+//            MemberDto member;
+//            if (existingMember.isPresent()) {
+//                System.out.println("기존 회원 로그인: " + existingMember.get().getMemberId());
+//                member = existingMember.get();
+//            } else {
+//                System.out.println("신규 회원 가입: 카카오 아이디 " + kakaoUser.getKakaoId());
+//                member = new MemberDto();
+//                member.setMemberId("kakao_" + kakaoUser.getKakaoId());
+//
+//                // 이메일이 null인 경우 기본값 설정
+//                if (kakaoUser.getMemberEmail() == null || kakaoUser.getMemberEmail().isEmpty()) {
+//                    member.setMemberEmail("default_email@example.com"); // 기본 이메일 설정
+//                } else {
+//                    member.setMemberEmail(kakaoUser.getMemberEmail());
+//                }
+//
+//                // 닉네임이 null인 경우 기본값 설정
+//                if (kakaoUser.getMemberNickname() == null || kakaoUser.getMemberNickname().isEmpty()) {
+//                    member.setMemberNickname("카카오사용자"); // 기본 닉네임 설정
+//                } else {
+//                    member.setMemberNickname(kakaoUser.getMemberNickname());
+//                }
+//
+//                member.setKakaoId(kakaoUser.getKakaoId());
+//                member.setMemberLevel("BASIC");
+//                member.setMemberPw(encoder.encode("TEMP_PASSWORD")); // 임시 비밀번호 설정
+//
+//                memberDao.insert(member);
+//                System.out.println("신규 회원 등록 완료: " + member.getMemberId());
+//            }
+//
+//            // JWT 토큰 생성
+//            MemberClaimVO claimVO = new MemberClaimVO();
+//            claimVO.setMemberId(member.getMemberId());
+//            claimVO.setMemberLevel(member.getMemberLevel());
+//
+//            MemberLoginResponseVO response = new MemberLoginResponseVO();
+//            response.setMemberId(member.getMemberId());
+//            response.setMemberLevel(member.getMemberLevel());
+//            response.setAccessToken(tokenService.createAccessToken(claimVO));
+//            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+//
+//            System.out.println("JWT 토큰 생성 완료: " + response.getAccessToken());
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            System.out.println("액세스 토큰 요청 중 오류 발생: " + e.getMessage());
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
+//    }
+    
+    @PostMapping("/kakaoLogin")
+    public ResponseEntity<MemberLoginResponseVO> kakaoLogin(@RequestBody Map<String, String> request) {
+        String code = request.get("code");
+        System.out.println("받은 인가 코드: " + code);
+
+        try {
+            // 액세스 토큰 발급
+            String accessToken = kakaoLoginService.getAccessToken(code);
+            System.out.println("발급된 액세스 토큰: " + accessToken);
+
+            // 사용자 정보 요청
+            MemberDto kakaoUser = kakaoLoginService.getUserInfo(accessToken);
+            System.out.println("카카오 사용자 정보: " + kakaoUser.toString());
+
+            // 기존 회원 여부 확인 및 회원가입 처리
+            Optional<MemberDto> existingMember = memberDao.selectOneByKakaoId(kakaoUser.getKakaoId());
+            MemberDto member;
+            if (existingMember.isPresent()) {
+                System.out.println("기존 회원 로그인: " + existingMember.get().getMemberId());
+                member = existingMember.get();
+            } else {
+                System.out.println("신규 회원 가입: 카카오 아이디 " + kakaoUser.getKakaoId());
+                member = new MemberDto();
+                member.setMemberId("kakao_" + kakaoUser.getKakaoId());
+
+                // 이메일이 null인 경우 기본값 설정
+                if (kakaoUser.getMemberEmail() == null || kakaoUser.getMemberEmail().isEmpty()) {
+                    member.setMemberEmail("default_email@example.com"); // 기본 이메일 설정
+                } else {
+                    member.setMemberEmail(kakaoUser.getMemberEmail());
+                }
+
+                // 닉네임이 null인 경우 기본값 설정
+                if (kakaoUser.getMemberNickname() == null || kakaoUser.getMemberNickname().isEmpty()) {
+                    member.setMemberNickname("카카오사용자"); // 기본 닉네임 설정
+                } else {
+                    member.setMemberNickname(kakaoUser.getMemberNickname());
+                }
+
+                member.setKakaoId(kakaoUser.getKakaoId());
+                member.setMemberLevel("BASIC");
+                member.setMemberPw(encoder.encode("TEMP_PASSWORD")); // 임시 비밀번호 설정
+
+                memberDao.insert(member);
+                System.out.println("신규 회원 등록 완료: " + member.getMemberId());
+            }
+
+            // JWT 토큰 생성
+            MemberClaimVO claimVO = new MemberClaimVO();
+            claimVO.setMemberId(member.getMemberId());
+            claimVO.setMemberLevel(member.getMemberLevel());
+
+            MemberLoginResponseVO response = new MemberLoginResponseVO();
+            response.setMemberId(member.getMemberId());
+            response.setMemberLevel(member.getMemberLevel());
+            response.setAccessToken(tokenService.createAccessToken(claimVO));
+            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+
+            System.out.println("JWT 토큰 생성 완료: " + response.getAccessToken());
+            return ResponseEntity.ok(response); // 클라이언트에 로그인 완료 후 JWT 토큰을 반환
+
+        } catch (Exception e) {
+            System.out.println("액세스 토큰 요청 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 
+
+
+
+    
+    
     @PostMapping("/refresh")
     public MemberLoginResponseVO refresh(
             @RequestHeader("Authorization") String refreshToken) {

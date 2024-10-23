@@ -97,6 +97,10 @@ public class MemberDao {
         return sqlSession.update("member.updateLogoutTime", memberId) > 0;
     }
 
+    // 카카오 사용자 확인용 메서드 추가
+    public Optional<MemberDto> selectOneByKakaoId(String kakaoId) {
+        return Optional.ofNullable(sqlSession.selectOne("member.selectOneByKakaoId", kakaoId));
+    }
 
 
 }
