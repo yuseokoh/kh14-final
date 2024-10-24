@@ -125,6 +125,49 @@ public class GameRestController {
         }
     }
     
+    
+    @Operation(
+    		description = "도서 정보 상세 조회"
+    		,responses = {
+    			@ApiResponse(//정상
+    				responseCode = "200"//상태코드
+    				,description = "조회 완료"//설명
+    				,content = @Content(//결과 메세지의 형태와 샘플
+    					mediaType = "application/json"//결과 메세지의 MIME 타입
+    					,schema = @Schema(implementation = GameDto.class)//내용물
+    				)
+    			),
+    			@ApiResponse(//서버 오류
+    				responseCode = "404"//상태코드	
+    				,description = "대상을 찾을 수 없음"//설명
+    				,content = @Content(//결과 메세지의 형태와 샘플
+    					mediaType = "text/plain"//결과 메세지의 MIME 타입
+    					,schema = @Schema(implementation = String.class)//자바의 자료형
+    					,examples = @ExampleObject("target not found")//예시 데이터
+    				)
+    			),
+    			@ApiResponse(//서버 오류
+    				responseCode = "500"//상태코드	
+    				,description = "서버 오류"//설명
+    				,content = @Content(//결과 메세지의 형태와 샘플
+    					mediaType = "text/plain"//결과 메세지의 MIME 타입
+    					,schema = @Schema(implementation = String.class)//자바의 자료형
+    					,examples = @ExampleObject("server error")//예시 데이터
+    				)
+    			)
+    		}
+    	)
+    @GetMapping("/{gameNo}")//상세
+    public GameDto detail(
+    		@Parameter(required = true, description = "도서번호(pk)")
+    		@PathVariable int gameNo) {
+        GameDto gameDto = gameDao.selectOne(gameNo);
+        if (gameDto == null) {
+            throw new TargetNotFoundException("존재하지 않는 게임입니다");
+        }
+        return gameDto;
+    }
+    
     // 구매
     @PostMapping("/purchase")
     public KakaoPayReadyResponseVO purchase(
