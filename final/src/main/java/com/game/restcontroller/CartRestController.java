@@ -4,6 +4,7 @@ import com.game.dao.CartDao;
 import com.game.dao.GameDao;
 import com.game.dto.CartDto;
 import com.game.dto.GameDto;
+import com.game.dto.WishListDto;
 import com.game.error.TargetNotFoundException;
 import com.game.service.TokenService;
 import com.game.vo.MemberClaimVO;
@@ -43,16 +44,28 @@ public class CartRestController {
 //    public List<CartDto> list(){
 //    	return cartDao.list();
 //    }
-    // 장바구니 추가
     @PostMapping("/")
-    public CartDto addCartItem(@RequestBody CartDto cartDto,@RequestParam String gameTitle, @RequestHeader("Authorization") String token) {
+    public CartDto addToCartFromWishlist(
+        @RequestHeader("Authorization") String token,		
+        @RequestBody WishListDto wishListDto) {
+
         MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-        cartDto.setMemberId(claimVO.getMemberId());
+        String memberId = claimVO.getMemberId();
+        int gameNo = wishListDto.getGameNo();
         
-        int gameNo = cartDao.findGameNo(gameTitle);
+        // 로그로 데이터 확인
+        System.out.println("Member ID: " + memberId);
+        System.out.println("Game No: " + gameNo);
+
+        // 장바구니에 추가
+        CartDto cartDto = new CartDto();
+        cartDto.setMemberId(memberId);
         cartDto.setGameNo(gameNo);
+        cartDao.addToCart(memberId, gameNo);
+
         return cartDto;
     }
+
 
     // 장바구니 삭제
     @DeleteMapping("/{cartId}")
