@@ -12,7 +12,7 @@ public class ReplyDto {
 	private String replyWriter;
 	private int replyOrigin; //커뮤니티 게시글
 	private String replyContent;
-	private int replyTarget;
+	private Integer replyTarget;
 	private int replyGroup;
 	private int replyDepth;
 	//프론트엔드로 전송할 때(JSON으로 변환할 때) 시간도 포함되도록 설정
@@ -22,6 +22,15 @@ public class ReplyDto {
 	private Date replyWtime;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 	private Date replyUtime;
+	
+
+	public boolean isNew() {
+		return this.replyTarget == null;
+	}
+
+	public boolean isReply() {
+		return this.replyTarget != null;
+	}
 	
 	
 }

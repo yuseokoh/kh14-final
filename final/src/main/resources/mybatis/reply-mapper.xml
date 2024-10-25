@@ -6,17 +6,17 @@
   
   <mapper namespace="reply">
   <!-- 시퀀스 -->
-  <select id="sequence">
+  <select id="sequence" resultType="int">
   	select reply_seq.nextval from dual
   </select>
   
   <!-- 등록기능 -->
   <insert id="insert">
-  	insert into reply
+  	insert into reply(
   		reply_no, reply_writer, reply_content,
   		reply_origin, reply_target, reply_group,
   		reply_depth
-  	values(
+  	)values(
   		#{replyNo}, #{replyWriter}, #{replyContent},
   		#{replyOrigin}, #{replyTarget}, #{replyGroup},
   		#{replyDepth}
@@ -46,6 +46,10 @@
   <include refid="top-n-footer"></include>
   </select>
   
+  <!-- 상세 -->
+  <select id="detail">
+  		select * from reply where  reply_no = #{replyNo}
+  </select>
   
   <!-- 
 		자주 사용하는(ex : Top N Query) 구문들을 보관해두고 불러서 사용
