@@ -34,11 +34,10 @@ public class CommunityDao {
 		sqlSession.update("community.update", communityDto);
 	}
 	
-	//제목 검색
-	public List<CommunityDto> SearchByTitle(String keyword) {
-	    return sqlSession.selectList("community.searchByTitle", keyword);
+	//게시글 검색
+	public List<CommunityDto> CommunitySearch(String column, String keyword){
+		return sqlSession.selectList("community.search", new Object[]{column, keyword});
 	}
-
 	
 	//게시글 조회수 증가
 	public void CommunityViews(int communityNo) {
@@ -55,30 +54,4 @@ public class CommunityDao {
         return sqlSession.selectOne("community.getPostById", communityNo);
     }
 	
-	// 특정 게시글 상세 조회
-    public CommunityDto CommunityDetail(int communityNo) {
-        return sqlSession.selectOne("community.detail", communityNo);
-    }
-    
-// // 댓글 또는 답글 추가
-//    public void insertComment(CommunityDto commentDto) {
-//        sqlSession.insert("community.insertComment", commentDto);
-//    }
-//
-//    // 댓글 수정
-//    public void updateComment(CommunityDto commentDto) {
-//        sqlSession.update("community.updateComment", commentDto);
-//    }
-//
-//    // 댓글 삭제
-//    public void deleteComment(int communityNo) {
-//        sqlSession.delete("community.deleteComment", communityNo);
-//    }
-//
-//    // 특정 게시글의 댓글 목록 조회
-//    public List<CommunityDto> getCommentsByPostId(int communityNo) {
-//        return sqlSession.selectList("community.getCommentsByPostId", communityNo);
-//    }
 }
-    
-    

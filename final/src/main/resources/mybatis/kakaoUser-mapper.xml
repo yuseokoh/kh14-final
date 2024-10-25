@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kakaoUser">
+
+
+	<insert id="add" parameterType="KakaoUserDto">
+		INSERT INTO kakao_user (kakao_user_id, kakao_id, member_nickname,
+		member_email, member_join)
+		VALUES (kakao_user_seq.NEXTVAL, #{kakaoId}, #{memberNickname},
+		#{memberEmail}, #{memberJoin})
+	</insert>
+
+
+
+	<!--최초 로그인시 null 이므로 member테이블에 이메일저장-->
+<!-- 
+	<update id="updateKakaoUser">
+		UPDATE kakao_user
+		SET member_email = #{memberEmail}
+		WHERE kakao_id = #{kakaoId}
+	</update>
+-->
+
+	<update id="updateKakaoUser" parameterType="KakaoUserDto">
+		UPDATE kakao_user
+		SET member_nickname = #{memberNickname},
+		member_email = #{memberEmail},
+		member_join = #{memberJoin}
+		WHERE kakao_id = #{kakaoId}
+	</update>
+
+
+	<insert id="addKakaoUserBasic" parameterType="MemberDto">
+		INSERT INTO member (kakao_id, member_nickname, member_email,
+		member_join)
+		VALUES (#{kakaoId}, #{memberNickname}, #{memberEmail}, #{memberJoin})
+	</insert>
+
+	<select id="selectOneByKakaoId" parameterType="string"
+		resultType="KakaoUserDto">
+		SELECT * FROM kakao_user WHERE kakao_id = #{kakaoId}
+	</select>
+</mapper>
+

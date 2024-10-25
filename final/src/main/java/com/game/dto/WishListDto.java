@@ -4,10 +4,7 @@ import lombok.Data;
 @Data
 public class WishListDto {
 	private int wishListId;
-	private String memberId;
+	private int memberId;
 	private int gameNo;
 	private Date addedDate;
-	private String gameTitle; // 게임 이름
-    private double gamePrice; // 게임 가격
-    private String  releaseDate;
 }

@@ -29,7 +29,7 @@ public class GameDao {
         Map<String, Object> params = new HashMap<>();
         params.put("column", column);
         params.put("keyword", keyword);
-        return sqlSession.selectList("game.search", params);
+        return sqlSession.selectList("emp.search", params);
     }
 
     public void insert(GameDto gameDto) {
@@ -48,7 +48,7 @@ public class GameDao {
     public GameDto selectOne(int gameNo) {
         return sqlSession.selectOne("game.detail", gameNo);
     }
-    
+
     public Integer findGameNoByMemberId(String memberId) {
         return sqlSession.selectOne("cart.findGameNoByTitle", memberId);
     }

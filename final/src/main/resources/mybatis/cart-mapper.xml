@@ -5,11 +5,12 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="cart">
-    
-    <insert id="addToCart">
-    INSERT INTO cart (cart_id, member_id, game_no, added_date) 
-    VALUES (cart_seq.NEXTVAL, #{memberId}, #{gameNo}, SYSTIMESTAMP)
-	</insert>
+  	<insert id="insert">
+        INSERT INTO cart (cart_id, added_date, member_id, game_no) 
+        VALUES (
+            cart_seq.NEXTVAL, #{addedDate}, 
+            #{memberId},#{gameNo} )
+    </insert>
     
     <delete id="delete">
         DELETE FROM cart WHERE cart_id = #{cartId}

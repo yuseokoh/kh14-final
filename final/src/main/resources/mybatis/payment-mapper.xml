@@ -33,14 +33,10 @@
         WHERE payment_no = #{paymentNo}
     </select>
 
-   <update id="cancelAll">
-		update payment 
-		set payment_remain = 0
-		where payment_no = #{paymentNo}
-	</update>
-	<update id="cancelAllItem">
-		update payment_detail
-		set payment_detail_status = '취소'
-		where payment_detail_origin = #{paymentNo}
-	</update>
+    <!-- 결제 취소 시, Payment 테이블에서 잔여 금액을 0으로 설정합니다. -->
+    <update id="cancelPayment" parameterType="int">
+        UPDATE payment
+        SET payment_remain = 0
+        WHERE payment_no = #{paymentNo}
+    </update>
 </mapper>

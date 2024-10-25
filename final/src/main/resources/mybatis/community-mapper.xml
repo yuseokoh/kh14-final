@@ -21,8 +21,8 @@
         community_category,
         community_title,
         community_content,
-        community_wtime,
-        community_utime,
+        community_write,
+        community_modify,
         community_views,
         community_likes,
         community_state,
@@ -33,7 +33,7 @@
         #{communityTitle},
         #{communityContent},
         SYSDATE,
-        #{communityUtime,jdbcType=TIMESTAMP},
+        #{communityModify,jdbcType=TIMESTAMP},
         #{communityViews},
         #{communityLikes},
         #{communityState},
@@ -45,7 +45,7 @@
 	<!-- 커뮤니티 게시글 삭제 -->
 	<delete id="delete" >
 		delete from community
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter -->}<!-- 글 번호 -->
+		where community_no = #{communityNo} <!-- 글 번호 -->
 	</delete>
 
 	<!-- 커뮤니티 게시글 수정 -->
@@ -54,28 +54,28 @@
 		set
 		community_title = #{communityTitle}, <!-- 글 제목 -->
 		community_content = #{communityContent}, <!-- 글 내용 -->
-		community_state = #{communityState} <!-- 공개, 비공개 변경 null값 할 수 있게-->
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter -->} <!-- 글 번호 -->
+		community_state = #{communityState}, <!-- 공개, 비공개 변경 -->
+		where community_no = #{communityNo} <!-- 글 번호 -->
 	</update>
 
 	<!-- 커뮤니티 게시글 검색 -->
-	<!-- 커뮤니티 게시글 검색 (INSTR 사용) -->
-<select id="searchByTitle" resultType="CommunityDto">
-    select 
-        community_no, 
-        community_title, 
-        community_content, 
-        community_wtime, 
-        community_utime, 
-        community_views, 
-        community_likes, 
-        community_state
-    from community
-    where instr(community_title, #{keyword}) > 0
-    order by community_no DESC
-</select>
-
-
+	<select id="search" resultType="CommunityDto">
+		select
+		community_no,
+		community_category,
+		community_title,
+		community_content,
+		community_write,
+		community_modify,
+		community_views,
+		community_likes,
+		community_state,
+		community_replies
+		from community
+		where ${column} like CONCAT ('%', #{keyword}, '%')
+		order by 
+		community_no DESC
+	</select>
 
 	<!-- 커뮤니티 게시글 조회수 증가 -->
 	<update id="views">
@@ -90,78 +90,5 @@
 		set community_likes = community_likes + 1 <!-- 좋아요수 증가 -->
 		where community_no = #{communityNo}
 	</update>
-	
-	<!-- 특정 게시글 상세 조회 -->
-    <select id="detail" resultType="CommunityDto">
-        select community_no,
-               community_category,
-               community_title,
-               community_content,
-               community_wtime,
-               community_utime,
-               community_views,
-               community_likes,
-               community_state,
-               community_replies
-        from community
-        where community_no = #{communityNo}
-    </select>
-    
-    <!-- 댓글 또는 답글 추가 
-<insert id="insertComment">
-    INSERT INTO community (
-        community_no,
-        community_category,
-        community_title,
-        community_content,
-        community_write,
-        community_modify,
-        community_views,
-        community_likes,
-        community_state,
-        community_replies,
-        community_group,
-        community_target,
-        community_depth
-    ) VALUES (
-        community_seq.NEXTVAL,
-        #{communityCategory},
-        #{communityTitle},
-        #{communityContent},
-        SYSDATE,
-        #{communityModify,jdbcType=TIMESTAMP},
-        #{communityViews},
-        #{communityLikes},
-        #{communityState},
-        #{communityReplies},
-        #{communityGroup},
-        #{communityTarget},
-        #{communityDepth}
-    )
-</insert>
 
-댓글 수정
-<update id="updateComment">
-    UPDATE community
-    SET community_content = #{communityContent},
-        community_modify = SYSDATE
-    WHERE community_no = #{communityNo}
-</update>
-
-댓글 삭제
-<delete id="deleteComment">
-    DELETE FROM community
-    WHERE community_no = #{communityNo}
-</delete>
-
-특정 게시글의 댓글 목록 조회
-<select id="getCommentsByPostId" resultType="CommunityDto">
-    SELECT * FROM community
-    WHERE community_group = #{communityNo}
-    ORDER BY community_no ASC
-</select>
- -->
-    
-    
-    
 </mapper>
