@@ -51,7 +51,7 @@ public class EmailService {
         String certNumber = randomService.generateNumber(6);
         
         // 회원가입 URL에 인증번호 추가
-        String signupUrl = "http://localhost:3000/#/member/SignupForm?certNumber=" + certNumber + "&certEmail=" + email;
+        String signupUrl = "http://localhost:3000/member/SignupForm?certNumber=" + certNumber + "&certEmail=" + email;
         
      // 이메일 본문 HTML 템플릿 작성
         String emailContent = "<div style=\"font-family: Arial, sans-serif; background-color: #1b2838; color: #ffffff; margin: 0; padding: 0;\">" +

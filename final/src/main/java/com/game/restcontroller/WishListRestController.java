@@ -40,15 +40,15 @@ public class WishListRestController {
     
     @GetMapping("/{memberId}")
     public List<WishListDto> list(@RequestHeader("Authorization") String token){
-        logger.info("Received token: {}", token);
+//        logger.info("Received token: {}", token);
         
         MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
         
         String memberId = claimVO.getMemberId();
-        logger.info("Member Claim: {}", claimVO);
+//        logger.info("Member Claim: {}", claimVO);
         
         List<WishListDto> wishList = wishListDao.selectListByMemberId(memberId);
-        logger.info("Wish List Size: {}", wishList.size());
+//        logger.info("Wish List Size: {}", wishList.size());
         
         return wishList;
     }
