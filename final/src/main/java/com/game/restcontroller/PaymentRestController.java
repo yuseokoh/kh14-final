@@ -49,7 +49,9 @@ public class PaymentRestController {
     @PostMapping("/ready")
     public KakaoPayReadyResponseVO ready(@RequestBody KakaoPayReadyRequestVO request,
                                          @RequestHeader("Authorization") String token) throws URISyntaxException {
-        request.setPartnerOrderId(UUID.randomUUID().toString());
+    	
+    	 int paymentSeq = paymentDao.paymentSequence();
+    	request.setPartnerOrderId(String.valueOf(paymentSeq));
         MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
         request.setPartnerUserId(claimVO.getMemberId());
 
@@ -110,8 +112,8 @@ public class PaymentRestController {
         request.setCancelAmount(paymentDto.getPaymentRemain());
         KakaoPayCancelResponseVO response = kakaoPayService.cancel(request);
 
-        paymentDao.cancelPayment(paymentNo);
-        paymentDao.cancelPaymentDetail(paymentNo);
+        paymentDao.cancelAll(paymentNo);
+        paymentDao.cancelAllItem(paymentNo);
 
         return response;
     }
@@ -134,7 +136,7 @@ public class PaymentRestController {
         request.setCancelAmount(money);
         KakaoPayCancelResponseVO response = kakaoPayService.cancel(request);
 
-        paymentDao.cancelPaymentDetail(paymentDetailNo);
+        paymentDao.cancelItem(paymentDetailNo);
         paymentDao.decreaseItemRemain(paymentDto.getPaymentNo(), money);
 
         return response;

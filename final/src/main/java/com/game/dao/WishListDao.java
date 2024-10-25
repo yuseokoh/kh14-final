@@ -1,5 +1,8 @@
 package com.game.dao;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,7 +24,7 @@ public class WishListDao {
 		sqlSession.insert("wishlist.insert",wishListDto);
 	}
 	
-	public List<WishListDto> selectList(){
+	public List<WishListDto> list(){
 		return sqlSession.selectList("wishlist.list");
 	}
 	
@@ -30,6 +33,13 @@ public class WishListDao {
 	}
 	
 	public List<WishListDto> selectListByMemberId(String memberId) {
-		return sqlSession.selectList("wishlist.listbyId",memberId);
+		return sqlSession.selectList("wishlist.listByMemberId",memberId);
+	}
+	
+	public List<WishListDto> search(String column,String keyword){
+		Map<String, Object> params = new HashMap<>();
+		params.put("column", column);
+		params.put("keyword", keyword);
+		return sqlSession.selectList("wishlist.search",params);
 	}
 }

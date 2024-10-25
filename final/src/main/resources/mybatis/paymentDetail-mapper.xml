@@ -6,15 +6,24 @@
 <mapper namespace="paymentDetail">
 
     <!-- Insert PaymentDetail -->
-    <insert id="insertPaymentDetail" parameterType="PaymentDetailDto">
-        INSERT INTO payment_detail (
-            payment_detail_no, payment_detail_name, payment_detail_price, payment_detail_qty, 
-            payment_detail_item, payment_detail_origin, payment_detail_status
-        ) VALUES (
-            #{paymentDetailNo}, #{paymentDetailName}, #{paymentDetailPrice}, #{paymentDetailQty}, 
-            #{paymentDetailItem}, #{paymentDetailOrigin}, #{paymentDetailStatus}
-        )
-    </insert>
+   <insert id="paymentDetailInsert">
+		insert into payment_detail (
+			payment_detail_no, payment_detail_name, payment_detail_price,
+			payment_detail_qty, payment_detail_item, payment_detail_origin,
+			payment_detail_status
+		) 
+		values(
+			#{paymentDetailNo}, #{paymentDetailName}, #{paymentDetailPrice},
+			#{paymentDetailQty}, #{paymentDetailItem}, #{paymentDetailOrigin},
+			'승인'
+		)
+	</insert>
+	
+
+    <!-- Select sequence for PaymentDetail -->
+    <select id="paymentDetailSequence" resultType="int">
+        SELECT payment_detail_seq.NEXTVAL FROM dual
+    </select>
 
     <!-- Select PaymentDetail by PaymentDetailNo -->
     <select id="selectPaymentDetailByNo" parameterType="int" resultType="PaymentDetailDto">

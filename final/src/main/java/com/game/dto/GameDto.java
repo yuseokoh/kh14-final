@@ -12,7 +12,7 @@ public class GameDto {
 	private String gameTitle;
 	private int gamePrice;
 	private String gameDeveloper;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date gamePublicationDate;//가입일
 	private int gameDiscount;
 	private String gameCategory;
@@ -24,5 +24,5 @@ public class GameDto {
 	private int gameReviewCount;
 	private String gamePlatforms;
 	private String gameSystemRequirement;
-	
+		
 }
