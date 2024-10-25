@@ -12,4 +12,5 @@ public class CartDto {
     private int gameNo;
     private String gameTitle; 
     private int gamePrice;
+    private int attachmentNo; // attachmentNo로 이미지 파일 번호를 받음
 }

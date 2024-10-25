@@ -24,15 +24,19 @@
     
     <select id="detailList" resultType="CartDto">
     SELECT 
-        c.cart_id AS cartId,
-        c.member_id AS memberId,
-        c.game_no AS gameNo,
-        c.added_date AS addedDate,
-        g.game_title AS gameTitle,
-        g.game_price AS gamePrice
-    FROM cart c
-    LEFT OUTER JOIN game g ON c.game_no = g.game_no
-    WHERE c.member_id = #{memberId}
+        c.*, 
+        g.game_title AS gameTitle, 
+        g.game_price AS gamePrice, 
+        gI.attachment_no AS attachmentNo
+    FROM 
+        cart c
+    JOIN 
+        game g ON c.game_no = g.game_no  -- gameNo로 연결
+    LEFT JOIN 
+        game_image gI ON g.game_no = gI.game_no  -- gameNo로 연결
+    WHERE 
+        c.member_id = #{memberId}
 </select>
+
 
   </mapper>

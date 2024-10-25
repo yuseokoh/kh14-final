@@ -21,17 +21,17 @@
     </select>
     
     <select id="listByMemberId" resultType="wishListDto">
-    	SELECT 
-    w.wishlist_id, 
-    w.member_id, 
-    g.game_no,
-    g.game_title AS gameTitle,
-    TO_CHAR(g.game_publication_date, 'YYYY-MM-DD') AS releaseDate,
-    g.game_price AS gamePrice
+    SELECT 
+    w.*, 
+    g.game_title AS gameTitle, 
+    g.game_price AS gamePrice, 
+    gI.attachment_no AS attachmentNo
 FROM 
     wishList w
-LEFT OUTER JOIN 
-    game g ON w.game_no = g.game_no
+JOIN 
+    game g ON w.game_no = g.game_no  -- gameNo로 연결
+LEFT JOIN 
+    game_image gI ON g.game_no = gI.game_no  -- gameNo로 연결
 WHERE 
     w.member_id = #{memberId}
     </select>
