@@ -1,10 +1,12 @@
 package com.game.restcontroller;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,14 +17,20 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.GameDao;
+import com.game.dao.GameImageDao;
 import com.game.dao.PaymentDao;
 import com.game.dto.GameDto;
+import com.game.dto.GameImageDto;
 import com.game.dto.PaymentDetailDto;
 import com.game.dto.PaymentDto;
 import com.game.error.TargetNotFoundException;
+import com.game.service.AttachmentService;
 import com.game.service.KakaoPayService;
 import com.game.service.PaymentService;
 import com.game.service.TokenService;
@@ -42,6 +50,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.mail.Multipart;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -62,6 +71,12 @@ public class GameRestController {
     
     @Autowired
     private PaymentService paymentService;  // 공통 서비스 사용
+    
+    @Autowired
+    private GameImageDao gameImageDao;
+    
+    @Autowired
+    private AttachmentService attachmentService;
     
     // 조회매핑 API 문서 설명 추가
     @Operation(
@@ -105,15 +120,51 @@ public class GameRestController {
     }
     
     @PostMapping("/") // 등록
-    public void insert(@RequestBody GameDto gameDto) {
+    public void insert(
+    		@RequestPart("game") GameDto gameDto,
+    		@RequestPart(value = "files", required = false) 
+    		List<MultipartFile> files) 
+    		throws IllegalStateException, IOException{
+    	//1. 게임 정보 등록
         gameDao.insert(gameDto);
+        
+        //2. 이미지가 있다면 자동으로 연결
+        if (files != null && !files.isEmpty()){
+        	for(MultipartFile file : files) {
+        		//첨부파일 저장
+        		int attachmentNo = attachmentService.save(file);
+        		
+        		//게임-이미지 연결정보 저장
+        		GameImageDto gameImageDto = new GameImageDto();
+        		gameImageDto.setAttachmentNo(attachmentNo);
+        		gameImageDto.setGameNo(gameDto.getGameNo());
+        		gameImageDao.insert(gameImageDto);
+        	}
+        }
     }
     
     @PutMapping("/") // 수정
-    public void update(@RequestBody GameDto gameDto) {
+    public void update(
+    		@RequestPart("game") GameDto gameDto,
+    		@RequestPart(value = "files", required = false)
+    		List<MultipartFile> files) 
+    		throws IllegalStateException, IOException{
+    	//1.게임 정보 수정
         boolean result = gameDao.update(gameDto);
         if (!result) {
             throw new TargetNotFoundException("존재하지 않는 게임정보");
+        }
+        
+        //2. 새로운 이미지가 있다면 자동으로 연결
+        if(files != null && !files.isEmpty()) {
+        	for(MultipartFile file : files) {
+        		int attachmentNo = attachmentService.save(file);
+        		
+        		GameImageDto gameImageDto = new GameImageDto();
+        		gameImageDto.setAttachmentNo(attachmentNo);
+        		gameImageDto.setGameNo(gameDto.getGameNo());
+        		gameImageDao.insert(gameImageDto);
+        	}
         }
     }
     
@@ -253,5 +304,54 @@ public class GameRestController {
         }
         
         return responseVO;
+    }
+    
+    //게임의 이미지 목록을 조회하는 엔드포인트
+    @GetMapping("/image/{gameNo}")
+    public List<GameImageDto> getGameImages(@PathVariable int gameNo){
+    	return gameImageDao.selectList(gameNo);
+    }
+    
+    //이미지 다운로드를 처리하는 엔드포인트
+    @GetMapping("/download/{attachmentNo}")
+    public ResponseEntity<ByteArrayResource> downloadImage(
+    		@PathVariable int attachmentNo) throws IOException{
+    	return attachmentService.find(attachmentNo);
+    }
+    
+    //첨부파일을 하나씩 업로드하는 엔드포인트
+    @PostMapping("/upload/{gameNo}")
+    public int uploadGameImage(
+    		@PathVariable int gameNo,
+    		@RequestParam("file") MultipartFile file)
+    		throws IllegalStateException, IOException{
+    	//1. 첨부파일 저장
+    	int attachmentNo = attachmentService.save(file);
+    	
+    	//2. 게임 이미지 정보 저장
+    	GameImageDto gameImageDto = new GameImageDto();
+    	gameImageDto.setAttachmentNo(attachmentNo);
+    	gameImageDto.setGameNo(gameNo);
+    	gameImageDao.insert(gameImageDto);
+    	
+    	return attachmentNo;
+    }
+    
+    //여러 첨부파일을 한번에 업로드하는 엔드포인트
+    @PostMapping("/upload/multiple/{gameNo}")
+    public void uploadGameImages(
+    		@PathVariable int gameNo, 
+    		@RequestParam("files") List<MultipartFile> files)
+    		throws IllegalStateException, IOException{
+	    	//1. 게임 이미지 정보 저장
+	    	for(MultipartFile file : files) {
+	    		int attachmentNo = attachmentService.save(file);
+    		
+    		//2. 게임 이미지 정보 저장
+        	GameImageDto gameImageDto = new GameImageDto();
+        	gameImageDto.setAttachmentNo(attachmentNo);
+        	gameImageDto.setGameNo(gameNo);
+        	gameImageDao.insert(gameImageDto);
+    	}
     }
 }

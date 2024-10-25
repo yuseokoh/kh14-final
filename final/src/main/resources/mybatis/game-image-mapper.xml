@@ -7,19 +7,19 @@
 <mapper namespace="gameImage">
 	<!-- 게임 이미지 등록 -->
 	<insert id="add">
-		insert into game_image(attachment, game)
-		values(#{attachment}, #{game}")
+		insert into game_image(attachment_no, game_no)
+		values(#{attachmentNo}, #{gameNo})
 	</insert>
 
 	<!-- 게임별 이미지 목록 -->
 	<select id="listByGame" resultType="gameImageDto">
-		select * from game_image where game = #{gameNo}
+		select * from game_image where game_no = #{gameNo}
 	</select>
 	
 	<!-- 게임 이미지 삭제 -->
 	<delete id="remove">
 		delete game_image
-		where attachment = #{attachmentNo} and game = #{gameNo}
+		where attachment_no = #{attachmentNo} and game_no = #{gameNo}
 	</delete>
 	
 </mapper>
