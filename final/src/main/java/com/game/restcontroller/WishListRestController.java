@@ -71,7 +71,7 @@ public class WishListRestController {
     }
     
     @DeleteMapping("/{wishListId}")
-    public void delete(@PathVariable int wishListID) {
-    	wishListDao.delete(wishListID);
+    public void delete(@PathVariable int wishListId) {
+    	wishListDao.delete(wishListId);
     }
 }
