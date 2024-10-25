@@ -59,4 +59,26 @@ public class CommunityDao {
     public CommunityDto CommunityDetail(int communityNo) {
         return sqlSession.selectOne("community.detail", communityNo);
     }
+    
+// // 댓글 또는 답글 추가
+//    public void insertComment(CommunityDto commentDto) {
+//        sqlSession.insert("community.insertComment", commentDto);
+//    }
+//
+//    // 댓글 수정
+//    public void updateComment(CommunityDto commentDto) {
+//        sqlSession.update("community.updateComment", commentDto);
+//    }
+//
+//    // 댓글 삭제
+//    public void deleteComment(int communityNo) {
+//        sqlSession.delete("community.deleteComment", communityNo);
+//    }
+//
+//    // 특정 게시글의 댓글 목록 조회
+//    public List<CommunityDto> getCommentsByPostId(int communityNo) {
+//        return sqlSession.selectList("community.getCommentsByPostId", communityNo);
+//    }
 }
+    
+    

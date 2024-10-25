@@ -31,24 +31,21 @@ public class CommunityRestController {
 
 	    // 게시글 등록 (POST 요청)
 	    @PostMapping("/")
-	    public String createCommunity(@RequestBody CommunityDto communityDto) {
+	    public void createCommunity(@RequestBody CommunityDto communityDto) {
 	        communityDao.CommunityInsert(communityDto);
-	        return "게시글이 등록되었습니다.";
 	    }
 
 	    // 게시글 수정 (PUT 요청)
 	    @PutMapping("/{communityNo}")
-	    public String updateCommunity(@PathVariable int communityNo, @RequestBody CommunityDto communityDto) {
+	    public void updateCommunity(@PathVariable int communityNo, @RequestBody CommunityDto communityDto) {
 	    	communityDto.setCommunityNo(communityNo);
 	        communityDao.CommunityUpdate(communityDto);
-	        return "게시글이 수정되었습니다.";
 	    }
 
 	    // 게시글 삭제 (DELETE 요청)
 	    @DeleteMapping("/{communityNo}")
-	    public String deleteCommunity(@PathVariable int communityNo) {
+	    public void deleteCommunity(@PathVariable int communityNo) {
 	        communityDao.CommunityDelete(communityNo);
-	        return "게시글이 삭제되었습니다.";
 	    }
 
 //	    // 검색 기능 (GET 요청)
@@ -83,4 +80,35 @@ public class CommunityRestController {
 //        communityService.CommunityLikes(communityNo);
 //        return "CommunityLikes";
 //    }
+//	 // 댓글 작성
+//	    @PostMapping("/{communityNo}/comments")
+//	    public String createComment(@PathVariable int communityNo, @RequestBody CommunityDto commentDto) {
+//	        commentDto.setCommunityGroup(communityNo);  // 댓글 그룹 설정 (해당 게시글 번호로)
+//	        communityDao.insertComment(commentDto);
+//	        return "댓글이 등록되었습니다.";
+//	    }
+//
+//	    // 댓글 수정
+//	    @PutMapping("/comments/{communityNo}")
+//	    public String updateComment(@PathVariable int communityNo, @RequestBody CommunityDto commentDto) {
+//	        commentDto.setCommunityNo(communityNo);
+//	        communityDao.updateComment(commentDto);
+//	        return "댓글이 수정되었습니다.";
+//	    }
+//
+//	    // 댓글 삭제
+//	    @DeleteMapping("/comments/{communityNo}")
+//	    public String deleteComment(@PathVariable int communityNo) {
+//	        communityDao.deleteComment(communityNo);
+//	        return "댓글이 삭제되었습니다.";
+//	    }
+//
+//	    // 특정 게시글의 댓글 목록 조회
+//	    @GetMapping("/{communityNo}/comments")
+//	    public List<CommunityDto> getComments(@PathVariable int communityNo) {
+//	        return communityDao.getCommentsByPostId(communityNo);
+//	    }
+
+	    
+	    
 }
