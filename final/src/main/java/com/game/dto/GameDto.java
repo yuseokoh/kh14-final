@@ -25,4 +25,5 @@ public class GameDto {
 	private String gamePlatforms;
 	private String gameSystemRequirement;
 		
+	
 }

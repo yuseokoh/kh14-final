@@ -45,7 +45,7 @@
 	<!-- 커뮤니티 게시글 삭제 -->
 	<delete id="delete" >
 		delete from community
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter -->}<!-- 글 번호 -->
+		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter }--><!-- 글 번호 -->
 	</delete>
 
 	<!-- 커뮤니티 게시글 수정 -->
@@ -53,9 +53,9 @@
 		update community
 		set
 		community_title = #{communityTitle}, <!-- 글 제목 -->
-		community_content = #{communityContent}, <!-- 글 내용 -->
-		community_state = #{communityState} <!-- 공개, 비공개 변경 null값 할 수 있게-->
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter -->} <!-- 글 번호 -->
+		community_content = #{communityContent, jdbcType=VARCHAR}, <!-- 글 내용 -->
+		community_state = #{communityState, jdbcType=VARCHAR} <!-- 공개, 비공개 변경 null값 할 수 있게-->
+		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter }--> <!-- 글 번호 -->
 	</update>
 
 	<!-- 커뮤니티 게시글 검색 -->

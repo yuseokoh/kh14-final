@@ -39,6 +39,11 @@ public class ReplyDao {
 		return sqlSession.selectList("reply.list");
 	}
 	
+	// 상세
+	public ReplyDto selectOne(int replyNo) {
+		return sqlSession.selectOne("reply.detail");
+	}
+	
 	
 	
 	
