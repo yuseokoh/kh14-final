@@ -10,7 +10,7 @@
         insert into wishList(
             wishlist_id, member_id, game_no, added_date
         )
-        values(#{wishlistId}, #{memberId}, #{gameNo}, SYSDATE)
+        values(wishlist_seq.nextval, #{memberId}, #{gameNo}, SYSTIMESTAMP)
     </insert>
     <delete id="delete">
         delete from wishList where wishlist_id = #{wishlistId}

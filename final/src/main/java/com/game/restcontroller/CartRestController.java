@@ -41,13 +41,15 @@ public class CartRestController {
     }
 
     @PostMapping("/add")
-    public CartDto addToCartFromWishlist(@RequestBody WishListDto wishListDto) {
-        String memberId = wishListDto.getMemberId();
-        int gameNo = wishListDto.getGameNo();
+    public CartDto addToCartFromWishlist(@RequestHeader("Authorization") String token,
+    															@RequestBody CartDto cartDto) {
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+        String memberId = claimVO.getMemberId();
+        int gameNo = cartDto.getGameNo();
         
-
+        System.out.println("memberId="+memberId);
+        System.out.println("gameNo="+gameNo);
         // 장바구니에 추가
-        CartDto cartDto = new CartDto();
         cartDto.setMemberId(memberId);
         cartDto.setGameNo(gameNo);
         cartDao.addToCart(memberId, gameNo);

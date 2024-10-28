@@ -20,8 +20,12 @@ public class WishListDao {
 		return sqlSession.selectOne("wishlist.sequence");
 	}
 	
-	public void insert(WishListDto wishListDto) {
-		sqlSession.insert("wishlist.insert",wishListDto);
+	public void insert(String memberId, int gameNo) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("memberId", memberId);
+        params.put("gameNo", gameNo);
+        
+		sqlSession.insert("wishlist.insert",params);
 	}
 	
 	public List<WishListDto> list(){

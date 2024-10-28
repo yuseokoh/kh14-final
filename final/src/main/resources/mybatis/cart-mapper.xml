@@ -14,6 +14,7 @@
     <delete id="delete">
         DELETE FROM cart WHERE cart_id = #{cartId}
     </delete>
+    
      <select id="listbygameTilte" resultType="CartDto">
         SELECT * FROM cart WHERE game_title = #{gameTitle}
     </select>
