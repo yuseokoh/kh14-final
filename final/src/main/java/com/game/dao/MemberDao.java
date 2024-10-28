@@ -1,5 +1,6 @@
 package com.game.dao;
 
+
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,8 @@ import com.game.dto.KakaoUserDto;
 import com.game.dto.MemberDto;
 import com.game.vo.MemberComplexRequestVO;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Repository
 public class MemberDao {
 
@@ -109,23 +112,53 @@ public class MemberDao {
 
 	// 카카오 회원 가입 처리 메서드
 	public void insertWithKakao(KakaoUserDto kakaoUser) {
-	    // KakaoUserDto에서 kakaoUserId 값을 수동으로 생성하거나 받아옴
-	    Integer kakaoUserId = getKakaoUserIdFromKakaoId(kakaoUser.getKakaoId()); // 예시 로직
-	    kakaoUser.setKakaoUserId(kakaoUserId);
+	    Integer kakaoUserId = kakaoUser.getKakaoUserId(); // KakaoUserDto에서 kakao_user_id 가져오기
 
-	    // kakao_user 테이블에 저장
-	    kakaoUserDao.insert(kakaoUser);
+	    if (kakaoUserId == null) {
+	        throw new RuntimeException("Kakao User ID가 없습니다.");
+	    }
 
-	    // member 테이블에 외래키 연동
+	    // member 테이블에 kakao_user_id를 포함한 데이터를 삽입
 	    MemberDto memberDto = new MemberDto();
-	    memberDto.setKakaoUserId(kakaoUserId);
-	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId());
+	    memberDto.setKakaoUserId(kakaoUserId);  // 외래키로 연동된 kakao_user_id 설정
+	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId()); // 멤버 ID는 kakao_카카오ID 형식
 	    memberDto.setMemberEmail(kakaoUser.getMemberEmail());
 	    memberDto.setMemberNickname(kakaoUser.getMemberNickname());
 	    memberDto.setMemberLevel("BASIC");
-	    
-	    sqlSession.insert("member.addWithKakao", memberDto);
+
+	    try {
+	        sqlSession.insert("member.addWithKakao", memberDto);
+	        log.info("member 테이블에 데이터 삽입 성공");
+	    } catch (Exception e) {
+	        log.error("member 테이블에 데이터 삽입 실패", e);
+	    }
 	}
+	
+	
+//	public void insertWithKakao(KakaoUserDto kakaoUser) {
+//	    // KakaoUserDto에서 kakaoUserId 값을 수동으로 생성하거나 받아옴
+//	    Integer kakaoUserId = getKakaoUserIdFromKakaoId(kakaoUser.getKakaoId()); // 예시 로직
+//	    kakaoUser.setKakaoUserId(kakaoUserId);
+//
+//	    // kakao_user 테이블에 저장
+//	    kakaoUserDao.insert(kakaoUser);
+//
+//	    // member 테이블에 외래키 연동
+//	    MemberDto memberDto = new MemberDto();
+//	    memberDto.setKakaoUserId(kakaoUserId);
+//	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId());
+//	    memberDto.setMemberEmail(kakaoUser.getMemberEmail());
+//	    memberDto.setMemberNickname(kakaoUser.getMemberNickname());
+//	    memberDto.setMemberLevel("BASIC");
+//	    
+//	    try {
+//	        sqlSession.insert("member.addWithKakao", memberDto);
+//	        log.info("member 테이블에 데이터 삽입 성공");
+//	    } catch (Exception e) {
+//	        log.error("member 테이블에 데이터 삽입 실패", e);
+//	    }
+//
+//	}
 
 
 
@@ -159,5 +192,45 @@ public class MemberDao {
 		params.put("kakaoUserId", kakaoUserId);
 		return sqlSession.update("member.updateKakaoUserId", params) > 0;
 	}
+
+	public void updateMemberEmail(String kakaoId, String email) {
+	    // kakaoId로 member를 조회하여 이메일 업데이트
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("kakaoId", kakaoId);
+	    params.put("email", email);
+	    
+	    try {
+	        int updatedRows = sqlSession.update("member.updateMemberEmailByKakaoId", params);
+	        if (updatedRows > 0) {
+	            log.info("Member email updated successfully for kakaoId: {}", kakaoId);
+	        } else {
+	            log.warn("No member found with kakaoId: {}", kakaoId);
+	        }
+	    } catch (Exception e) {
+	        log.error("Error updating member email for kakaoId: {}", kakaoId, e);
+	    }
+	}
+
+
+	public void updateWithKakao(KakaoUserDto kakaoUser) {
+	    // kakaoUser에서 필요한 정보를 추출해 member 정보를 업데이트
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("kakaoUserId", kakaoUser.getKakaoUserId());
+	    params.put("memberNickname", kakaoUser.getMemberNickname());
+	    params.put("memberEmail", kakaoUser.getMemberEmail());
+	    
+	    try {
+	        // MyBatis 쿼리를 통해 member 정보를 업데이트
+	        int updatedRows = sqlSession.update("member.updateWithKakao", params);
+	        if (updatedRows > 0) {
+	            log.info("Member updated successfully for kakaoUserId: {}", kakaoUser.getKakaoUserId());
+	        } else {
+	            log.warn("No member found with kakaoUserId: {}", kakaoUser.getKakaoUserId());
+	        }
+	    } catch (Exception e) {
+	        log.error("Error updating member with kakaoUserId: {}", kakaoUser.getKakaoUserId(), e);
+	    }
+	}
+
 
 }

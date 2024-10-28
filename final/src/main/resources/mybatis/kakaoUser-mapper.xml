@@ -12,9 +12,8 @@
 	</insert>
 
 
-
 	<!--최초 로그인시 null 이므로 member테이블에 이메일저장-->
-<!-- 
+	<!-- 
 	<update id="updateKakaoUser">
 		UPDATE kakao_user
 		SET member_email = #{memberEmail}
@@ -41,5 +40,20 @@
 		resultType="KakaoUserDto">
 		SELECT * FROM kakao_user WHERE kakao_id = #{kakaoId}
 	</select>
+
+	<select id="selectKakaoUserIdByKakaoId" parameterType="string"
+		resultType="int">
+		SELECT kakao_user_id
+		FROM kakao_user
+		WHERE kakao_id = #{kakaoId}
+	</select>
+
+	<update id="updateKakaoUserEmail" parameterType="map">
+		UPDATE kakao_user
+		SET member_email = #{memberEmail}
+		WHERE kakao_id = #{kakaoId}
+	</update>
+
+
 </mapper>
 
