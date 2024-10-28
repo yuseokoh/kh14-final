@@ -194,22 +194,23 @@ public class MemberDao {
 	}
 
 	public void updateMemberEmail(String kakaoId, String email) {
-	    // kakaoId로 member를 조회하여 이메일 업데이트
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("kakaoId", kakaoId);
 	    params.put("email", email);
-	    
+
 	    try {
 	        int updatedRows = sqlSession.update("member.updateMemberEmailByKakaoId", params);
 	        if (updatedRows > 0) {
-	            log.info("Member email updated successfully for kakaoId: {}", kakaoId);
+	            System.out.println("Member 테이블에서 이메일 업데이트 성공: kakaoId = " + kakaoId);
 	        } else {
-	            log.warn("No member found with kakaoId: {}", kakaoId);
+	            System.out.println("Member 테이블에서 이메일 업데이트 실패: kakaoId = " + kakaoId);
 	        }
 	    } catch (Exception e) {
-	        log.error("Error updating member email for kakaoId: {}", kakaoId, e);
+	        System.out.println("Member 테이블에서 이메일 업데이트 중 오류 발생: kakaoId = " + kakaoId);
+	        e.printStackTrace();
 	    }
 	}
+
 
 
 	public void updateWithKakao(KakaoUserDto kakaoUser) {

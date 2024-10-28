@@ -70,29 +70,36 @@ public class KakaoUserService {
     }
 
 	
-	@Transactional
-	public KakaoUserDto saveOrUpdateKakaoUser(KakaoUserDto kakaoUser) {
-	    Optional<KakaoUserDto> existingUser = kakaoUserDao.selectOneByKakaoId(kakaoUser.getKakaoId());
+    @Transactional
+    public KakaoUserDto saveOrUpdateKakaoUser(KakaoUserDto kakaoUser) {
+        Optional<KakaoUserDto> existingUser = kakaoUserDao.selectOneByKakaoId(kakaoUser.getKakaoId());
 
-	    if (!existingUser.isPresent()) {
-	        // 유저가 존재하지 않으면 새로운 유저로 저장
-	        kakaoUserDao.insert(kakaoUser);
-	        
-	        // 저장된 kakao_user_id를 가져와서 KakaoUserDto에 설정
-	        Integer kakaoUserId = kakaoUserDao.getKakaoUserIdByKakaoId(kakaoUser.getKakaoId());
-	        kakaoUser.setKakaoUserId(kakaoUserId); // kakao_user_id 설정
-	    } else {
-	        // 유저가 이미 존재하면 업데이트
-	        KakaoUserDto existing = existingUser.get();
-	        existing.setMemberNickname(kakaoUser.getMemberNickname());
-	        existing.setMemberEmail(kakaoUser.getMemberEmail());
-	        existing.setMemberJoin(kakaoUser.getMemberJoin());
-	        kakaoUserDao.updateKakaoUser(existing);
-	        return existing;
-	    }
+        if (!existingUser.isPresent()) {
+            // 유저가 존재하지 않으면 새로운 유저로 저장
+            kakaoUserDao.insert(kakaoUser);
 
-	    return kakaoUser;
-	}
+            // 저장된 kakao_user_id를 가져와서 KakaoUserDto에 설정
+            Integer kakaoUserId = kakaoUserDao.getKakaoUserIdByKakaoId(kakaoUser.getKakaoId());
+            kakaoUser.setKakaoUserId(kakaoUserId); // kakao_user_id 설정
+        } else {
+            // 유저가 이미 존재하면 업데이트
+            KakaoUserDto existing = existingUser.get();
+
+            // 이미 이메일이 등록된 경우, 임시 이메일로 덮어쓰지 않음
+            if (existing.getMemberEmail() != null && !existing.getMemberEmail().equals("no-email@example.com")) {
+                kakaoUser.setMemberEmail(existing.getMemberEmail());
+            }
+
+            // 닉네임과 가입 날짜 업데이트
+            existing.setMemberNickname(kakaoUser.getMemberNickname());
+            existing.setMemberJoin(kakaoUser.getMemberJoin());
+            kakaoUserDao.updateKakaoUser(existing);
+            return existing;
+        }
+
+        return kakaoUser;
+    }
+
 
 
 	// 카카오 유저 이메일 업데이트 로직
@@ -126,10 +133,13 @@ public class KakaoUserService {
 	    Integer kakaoUserId = savedKakaoUser.getKakaoUserId();
 	    if (kakaoUserId != null) {
 	        memberDao.insertWithKakao(savedKakaoUser);  // 멤버 추가
+	        System.out.println("Member inserted with Kakao ID: " + kakaoUserId);
 	    } else {
 	        throw new RuntimeException("Kakao User ID 생성 실패");
 	    }
 	}
+
+
 
 
 //	@Transactional
@@ -165,16 +175,22 @@ public class KakaoUserService {
 	    params.put("memberEmail", memberEmail);
 
 	    try {
-	        // MyBatis 매퍼를 호출하여 이메일 업데이트
+	        // MyBatis 매퍼를 호출하여 kakao_user 테이블의 이메일 업데이트
 	        int updatedRows = sqlSession.update("kakaoUser.updateKakaoUserEmail", params);
 	        if (updatedRows > 0) {
-	            log.info("KakaoUser 이메일 업데이트 성공: kakaoId = {}, memberEmail = {}", kakaoId, memberEmail);
+	            System.out.println("KakaoUser 이메일 업데이트 성공: kakaoId = " + kakaoId + ", memberEmail = " + memberEmail);
+
+	            // member 테이블에서도 이메일 업데이트
+	            memberDao.updateMemberEmail(kakaoId, memberEmail);
 	        } else {
-	            log.warn("KakaoUser 이메일 업데이트 실패: 해당 kakaoId를 찾을 수 없음 = {}", kakaoId);
+	            System.out.println("KakaoUser 이메일 업데이트 실패: 해당 kakaoId를 찾을 수 없음 = " + kakaoId);
 	        }
 	    } catch (Exception e) {
-	        log.error("KakaoUser 이메일 업데이트 중 오류 발생: kakaoId = {}", kakaoId, e);
+	        System.out.println("KakaoUser 이메일 업데이트 중 오류 발생: kakaoId = " + kakaoId);
+	        e.printStackTrace();
 	    }
 	}
+
+
 
 }
