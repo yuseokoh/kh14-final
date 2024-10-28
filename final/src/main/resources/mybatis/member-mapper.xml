@@ -257,6 +257,21 @@
 		#{memberLevel}, #{memberPw})
 	</insert>
 
+	<insert id="addWithKakao" parameterType="MemberDto">
+		INSERT INTO member (member_id, kakao_user_id, member_email,
+		member_nickname, member_level)
+		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
+		#{memberLevel})
+	</insert>
+
+
+	<insert id="insertWithKakao" parameterType="KakaoUserDto">
+		INSERT INTO member (member_id, kakao_user_id, member_email,
+		member_nickname, member_level)
+		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
+		'BASIC')
+	</insert>
+
 
 	<select id="selectOneByKakaoId" parameterType="string"
 		resultType="MemberDto">
@@ -268,6 +283,20 @@
 		SET kakao_user_id = #{kakaoUserId}
 		WHERE member_id = #{memberId}
 	</update>
+
+	<update id="updateMemberEmailByKakaoId">
+		UPDATE member
+		SET member_email = #{email}
+		WHERE kakao_user_id = (SELECT kakao_user_id FROM kakao_user WHERE
+		kakao_id = #{kakaoId})
+	</update>
+
+	<update id="updateWithKakao">
+		UPDATE member
+		SET member_nickname = #{memberNickname}, member_email = #{memberEmail}
+		WHERE kakao_user_id = #{kakaoUserId}
+	</update>
+
 
 	<!-- 자주 사용하는 SQL 조각들 (Top N Query) -->
 	<sql id="top-n-header">

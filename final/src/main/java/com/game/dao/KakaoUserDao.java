@@ -25,6 +25,11 @@ public class KakaoUserDao {
         sqlSession.update("kakaoUser.updateKakaoUser", kakaoUserDto);
     }
 
+    public Integer getKakaoUserIdByKakaoId(String kakaoId) {
+        return sqlSession.selectOne("kakaoUser.selectKakaoUserIdByKakaoId", kakaoId);
+    }
+
+
 	
 	
 	
