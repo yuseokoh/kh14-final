@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="play">
+
+	<select id="playSequence" resultType="int">
+		select play_seq.nextval from dual 
+	</select>
+	<insert id="insert">
+		insert into play(
+			play_no, game_no, member_id, play_score, play_level, play_playtime, play_lastplayed
+		)
+		values(play_seq.nextval, #{gameNo}, #{memberId}, #{playScore}, #{playLevel}, #{playTime}, #{playLastplayed})
+	</insert>
+</mapper>
