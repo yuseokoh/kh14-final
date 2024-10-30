@@ -25,14 +25,14 @@ public class ReplyRestController {
 	private ReplyDao replyDao;
 	
 	//댓글 목록
-	@GetMapping("/")
-	public List<ReplyDto>list(){
-		return replyDao.list();
+	@GetMapping("/{replyOrigin}")
+	public List<ReplyDto> list(@PathVariable int replyOrigin){
+		return replyDao.list(replyOrigin);
 	}
 	
 	//댓글 등록
-	@PostMapping("/")
-	public void add(@RequestBody ReplyDto replyDto) {
+	@PostMapping("/{communityNo}")
+	public void add(@PathVariable int communityNo, @RequestBody ReplyDto replyDto) {
 		//step 1 : 시퀀스 번호를 생성한다
 		int seq = replyDao.sequence();
 		
@@ -41,6 +41,7 @@ public class ReplyRestController {
 		
 		//step 3 : 정보를 설정한다
 		replyDto.setReplyNo(seq);
+		replyDto.setReplyOrigin(communityNo);
 		replyDto.setReplyWriter(memberId);
 		//(+추가) 새글, 답글 여부에 따라 그룹, 상위글, 차수를 설정해야한다
 		if(replyDto.isNew()) {

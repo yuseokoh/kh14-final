@@ -22,6 +22,9 @@ public class CommunityDto {
 	private String communityState; //커뮤니티 상태 (공개,비공개)
 	private int communityReplies; //커뮤니티 댓글수
 	
+//	 private int beginRow; //페이징
+//	 private int endRow; //페이징
+//	
 //	//댓글 관련 
 //	private int communityGroup;
 //	private Integer communityTarget;
