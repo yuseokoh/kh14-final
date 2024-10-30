@@ -24,7 +24,7 @@ import com.game.vo.MemberClaimVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/friend")
 public class FriendRestController {
@@ -86,6 +86,7 @@ public class FriendRestController {
 		return friendDao.friendList(memberId);
 	}
 	
+	//수락
 	@PutMapping("/{friendFk}")
 	public void getRequest(@PathVariable int friendFk) {
 		boolean result = friendDao.getRequest(friendFk);
