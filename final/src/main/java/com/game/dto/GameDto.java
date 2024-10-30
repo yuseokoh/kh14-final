@@ -20,10 +20,9 @@ public class GameDto {
 	private String gameTheme;
 	private String gameDescription;
 	private String gameShortDescription;
-	private int gameUserScore;
+	private double gameUserScore;
 	private int gameReviewCount;
 	private String gamePlatforms;
 	private String gameSystemRequirement;
 		
-	
 }

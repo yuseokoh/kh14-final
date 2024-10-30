@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="score">
+    <!-- 통계 데이터 조회 -->
+    <select id="getGameStats" resultType="GameScoreStatsDto">
+        select * from game_score_stats
+        where game_no = #{gameNo}
+    </select>
+
+    <!-- 통계 데이터 새로고침 -->
+    <update id="refreshGameStats" parameterType="int">
+        merge into game_score_stats s
+        using (
+            select
+                game_no,
+                count(*) as review_count,
+                sum(review_score) as total_score
+            from member_review
+            where game_no = #{gameNo}
+            and review_status = 'active'
+            group by game_no
+        ) r
+        on (s.game_no = r.game_no)
+        when matched then
+            update set
+                s.total_score = r.total_score,
+                s.review_count = r.review_count
+        when not matched then
+            insert (game_no, total_score, review_count)
+            values (r.game_no, r.total_score, r.review_count)
+    </update>
+
+    <!-- 평점 통계 삭제 -->
+    <delete id="deleteGameStats" parameterType="int">
+        delete from game_score_stats
+        where game_no = #{gameNo}
+    </delete>
+
+    <!-- 평점 범위로 게임 검색 -->
+    <select id="findGamesByScoreRange" resultType="int">
+        select game_no 
+        from game_score_stats
+        where average_score between #{minScore} and #{maxScore}
+        and review_count >= #{minReviews}
+    </select>
+
+    <!-- 평점 높은 순으로 게임 조회 -->
+    <select id="listTopRatedGames" resultType="GameScoreStatsDto">
+        select * from game_score_stats
+        where review_count >= #{minReviews}
+        order by average_score desc, review_count desc
+        fetch first #{limit} rows only
+    </select>
+</mapper>

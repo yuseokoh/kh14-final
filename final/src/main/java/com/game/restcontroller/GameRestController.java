@@ -2,7 +2,9 @@ package com.game.restcontroller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,9 +26,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.GameDao;
 import com.game.dao.GameImageDao;
+import com.game.dao.GameScoreStatsDao;
+import com.game.dao.MemberReviewDao;
 import com.game.dao.PaymentDao;
 import com.game.dto.GameDto;
 import com.game.dto.GameImageDto;
+import com.game.dto.GameScoreStatsDto;
+import com.game.dto.MemberReviewDto;
 import com.game.dto.PaymentDetailDto;
 import com.game.dto.PaymentDto;
 import com.game.error.TargetNotFoundException;
@@ -50,7 +56,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.mail.Multipart;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -77,6 +82,12 @@ public class GameRestController {
     
     @Autowired
     private AttachmentService attachmentService;
+    
+    @Autowired
+    private MemberReviewDao memberReviewDao;
+    
+    @Autowired
+    private GameScoreStatsDao gameScoreStatsDao;
     
     // 조회매핑 API 문서 설명 추가
     @Operation(
@@ -354,4 +365,194 @@ public class GameRestController {
         	gameImageDao.insert(gameImageDto);
     	}
     }
+    
+    /**
+     * 게임별 리뷰 목록 조회
+     * @param gameNo 게임 번호
+     * @param page 페이지 번호 (기본값 1)
+     * @param size 페이지당 항목 수 (기본값 10)
+     * @return 리뷰 목록
+     */
+    @GetMapping("/{gameNo}/reviews")
+    public Map<String, Object> getReviews(
+        @PathVariable int gameNo,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        int start = (page - 1) * size;
+        
+        List<MemberReviewDto> reviews = memberReviewDao.listByGame(gameNo, start, size);
+        int totalCount = memberReviewDao.countByGame(gameNo);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("reviews", reviews);
+        response.put("totalCount", totalCount);
+        response.put("totalPages", (totalCount + size - 1) / size);
+        response.put("currentPage", page);
+        
+        return response;
+    }
+
+    /**
+     * 리뷰 작성
+     * @param gameNo 게임 번호
+     * @param Authorization 인증 토큰
+     * @param reviewDto 리뷰 정보
+     */
+    @PostMapping("/{gameNo}/review")
+    public void createReview(
+        @PathVariable int gameNo,
+        @RequestHeader(required = true) String Authorization,
+        @RequestBody MemberReviewDto reviewDto
+    ) {
+        // 토큰 검증
+        if(!tokenService.isBearerToken(Authorization)) {
+            throw new TargetNotFoundException("로그인이 필요합니다.");
+        }
+        
+        // 토큰에서 회원 정보 추출
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(Authorization));
+        String memberId = claimVO.getMemberId();
+        
+        // 이미 리뷰를 작성했는지 확인
+        if(memberReviewDao.existsByMemberAndGame(memberId, gameNo)) {
+            throw new IllegalStateException("이미 리뷰를 작성했습니다.");
+        }
+        
+        // 리뷰 저장
+        reviewDto.setMemberId(memberId);
+        reviewDto.setGameNo(gameNo);
+        memberReviewDao.insert(reviewDto);
+
+     // 게임 평점 통계 갱신
+     try {
+         gameScoreStatsDao.refreshGameStats(gameNo);  // updateStats -> refreshGameStats
+     } catch(Exception e) {
+         // 먼저 통계 테이블에 해당 게임 데이터가 있는지 확인
+         GameScoreStatsDto stats = gameScoreStatsDao.getGameStats(gameNo);
+         if(stats == null) {
+             // 새로운 게임 통계 데이터 자동 생성 (merge 구문으로 처리됨)
+             gameScoreStatsDao.refreshGameStats(gameNo);
+         }
+     }
 }
+    /**
+     * 리뷰 수정
+     * @param gameNo 게임 번호
+     * @param reviewNo 리뷰 번호
+     * @param Authorization 인증 토큰
+     * @param reviewDto 수정할 리뷰 정보
+     */
+    @PutMapping("/{gameNo}/review/{reviewNo}")
+    public void updateReview(
+        @PathVariable int gameNo,
+        @PathVariable int reviewNo,
+        @RequestHeader(required = true) String Authorization,
+        @RequestBody MemberReviewDto reviewDto
+    ) {
+        // 토큰 검증
+        if(!tokenService.isBearerToken(Authorization)) {
+            throw new TargetNotFoundException("로그인이 필요합니다.");
+        }
+        
+        // 토큰에서 회원 정보 추출
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(Authorization));
+        String memberId = claimVO.getMemberId();
+        
+        // 리뷰 작성자 확인
+        MemberReviewDto existingReview = memberReviewDao.detail(reviewNo);
+        if (!existingReview.getMemberId().equals(memberId)) {
+            throw new TargetNotFoundException("본인의 리뷰만 수정할 수 있습니다.");
+        }
+        
+        // 리뷰 수정
+        reviewDto.setReviewNo(reviewNo);
+        reviewDto.setMemberId(memberId);
+        memberReviewDao.update(reviewDto);
+        
+        // 게임 평점 통계 갱신
+        gameScoreStatsDao.refreshGameStats(gameNo);
+    }
+
+    /**
+     * 리뷰 삭제 (상태 변경)
+     * @param gameNo 게임 번호
+     * @param reviewNo 리뷰 번호
+     * @param Authorization 인증 토큰
+     */
+    @DeleteMapping("/{gameNo}/review/{reviewNo}")
+    public void deleteReview(
+        @PathVariable int gameNo,
+        @PathVariable int reviewNo,
+        @RequestHeader(required = true) String Authorization
+    ) {
+        // 토큰 검증
+        if(!tokenService.isBearerToken(Authorization)) {
+            throw new TargetNotFoundException("로그인이 필요합니다.");
+        }
+        
+        // 토큰에서 회원 정보 추출
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(Authorization));
+        String memberId = claimVO.getMemberId();
+        
+        // 리뷰 작성자 확인
+        MemberReviewDto existingReview = memberReviewDao.detail(reviewNo);
+        if (!existingReview.getMemberId().equals(memberId)) {
+            throw new TargetNotFoundException("본인의 리뷰만 삭제할 수 있습니다.");
+        }
+        
+        // 리뷰 상태를 'deleted'로 변경
+        memberReviewDao.updateStatus(reviewNo, "deleted");
+        
+        // 게임 평점 통계 갱신
+        gameScoreStatsDao.refreshGameStats(gameNo);
+    }
+
+    /**
+     * 리뷰 좋아요
+     * @param gameNo 게임 번호
+     * @param reviewNo 리뷰 번호
+     * @param Authorization 인증 토큰
+     */
+    @PostMapping("/{gameNo}/review/{reviewNo}/like")
+    public void likeReview(
+        @PathVariable int gameNo,
+        @PathVariable int reviewNo,
+        @RequestHeader(required = true) String Authorization
+    ) {
+        // 토큰 검증
+        if(!tokenService.isBearerToken(Authorization)) {
+            throw new TargetNotFoundException("로그인이 필요합니다.");
+        }
+        
+        memberReviewDao.increaseLikes(reviewNo);
+    }
+
+    /**
+     * 인기 리뷰 목록 조회
+     * @param gameNo 게임 번호
+     * @param days 최근 일수 (기본값 30일)
+     * @return 인기 리뷰 목록
+     */
+    @GetMapping("/{gameNo}/reviews/popular")
+    public List<MemberReviewDto> getPopularReviews(
+        @PathVariable int gameNo,
+        @RequestParam(defaultValue = "30") int days
+    ) {
+        return memberReviewDao.listPopularReviews(gameNo, days);
+    }
+
+    /**
+     * 평점 높은 게임 목록 조회
+     * @param minReviews 최소 리뷰 수 (기본값 5)
+     * @param limit 조회할 게임 수 (기본값 10)
+     * @return 평점 높은 게임 목록
+     */
+    @GetMapping("/top-rated")
+    public List<GameScoreStatsDto> getTopRatedGames(
+        @RequestParam(defaultValue = "5") int minReviews,
+        @RequestParam(defaultValue = "10") int limit
+    ) {
+        return gameScoreStatsDao.listTopRatedGames(minReviews, limit);
+    }
+ }

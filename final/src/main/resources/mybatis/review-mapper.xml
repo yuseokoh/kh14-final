@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="review">
+   <!-- 리뷰 등록 -->
+   <!-- 새로운 리뷰를 등록하고 리뷰번호는 시퀀스에서 자동 생성 -->
+   <insert id="insert" parameterType="MemberReviewDto">
+       <selectKey keyProperty="reviewNo" resultType="int" order="BEFORE">
+           select member_review_seq.nextval from dual
+       </selectKey>
+       insert into member_review(
+           review_no, member_id, game_no, review_content,
+           review_score, review_date, review_likes, review_status
+       )
+       values(
+           #{reviewNo}, #{memberId}, #{gameNo}, #{reviewContent},
+           #{reviewScore}, sysdate, 0, 'active'
+       )
+   </insert>
+
+   <!-- 리뷰 수정 -->
+   <!-- 리뷰 내용과 평점을 수정하고 수정일자 갱신 -->
+   <update id="update" parameterType="MemberReviewDto">
+       update member_review
+       set review_content = #{reviewContent},
+           review_score = #{reviewScore},
+           review_date = sysdate
+       where review_no = #{reviewNo}
+       and member_id = #{memberId}
+   </update>
+
+   <!-- 리뷰 상태 변경 -->
+   <!-- 리뷰의 상태를 변경 (active/deleted/reported) -->
+   <update id="updateStatus">
+       update member_review
+       set review_status = #{reviewStatus}
+       where review_no = #{reviewNo}
+   </update>
+
+   <!-- 리뷰 좋아요 증가 -->
+   <update id="increaseLikes">
+       update member_review
+       set review_likes = review_likes + 1
+       where review_no = #{reviewNo}
+   </update>
+
+   <!-- 단일 리뷰 조회 -->
+   <!-- 리뷰 번호로 상세 정보 조회 -->
+   <select id="detail" resultType="MemberReviewDto">
+       select r.*, m.member_nickname
+       from member_review r
+       join member m on r.member_id = m.member_id
+       where r.review_no = #{reviewNo}
+   </select>
+
+ <!-- 게임별 리뷰 목록 조회 (페이징) -->
+<select id="listByGame" resultType="MemberReviewDto">
+    SELECT r.*, m.member_nickname
+    FROM member_review r
+    JOIN member m ON r.member_id = m.member_id
+    WHERE r.game_no = #{gameNo}
+    AND r.review_status = 'active'
+    ORDER BY r.review_date DESC
+    OFFSET #{start} ROWS 
+    FETCH NEXT #{size} ROWS ONLY
+</select>
+
+   <!-- 회원별 리뷰 목록 조회 -->
+   <select id="listByMember" resultType="MemberReviewDto">
+       select r.*, m.member_nickname
+       from member_review r
+       join member m on r.member_id = m.member_id
+       where r.member_id = #{memberId}
+       and r.review_status = 'active'
+       order by r.review_date desc
+   </select>
+
+   <!-- 게임별 리뷰 수 조회 -->
+   <select id="countByGame" resultType="int">
+       select count(*)
+       from member_review
+       where game_no = #{gameNo}
+       and review_status = 'active'
+   </select>
+
+   <!-- 회원의 게임 리뷰 존재 여부 확인 -->
+   <select id="existsByMemberAndGame" resultType="int">
+       select count(*)
+       from member_review
+       where member_id = #{memberId}
+       and game_no = #{gameNo}
+       and review_status = 'active'
+   </select>
+   
+   
+
+   <!-- 인기 리뷰 목록 조회 -->
+   <select id="listPopularReviews" resultType="MemberReviewDto">
+       select r.*, m.member_nickname
+       from member_review r
+       join member m on r.member_id = m.member_id
+       where r.game_no = #{gameNo}
+       and r.review_status = 'active'
+       and r.review_date >= sysdate - #{days}
+       order by r.review_likes desc, r.review_date desc
+       fetch first 10 rows only
+   </select>
+</mapper>
