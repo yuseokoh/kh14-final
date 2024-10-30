@@ -38,7 +38,7 @@
   
   <!-- 목록기능 -->
   <select id="list" resultType="ReplyDto">
-  <include refid="top-n-header"></include>
+  <include refid="top-n-header"></include> 
   	select * from reply
   	where reply_origin = #{replyOrigin}
   	order by

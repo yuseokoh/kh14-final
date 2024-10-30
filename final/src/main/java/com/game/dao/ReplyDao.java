@@ -1,6 +1,8 @@
 package com.game.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +37,12 @@ public class ReplyDao {
 	}
 	
 	//댓글 목록
-	public List<ReplyDto> list(){
-		return sqlSession.selectList("reply.list");
+	public List<ReplyDto> list(int replyOrigin){
+		Map<String, Object> params = new HashMap<>();
+		params.put("replyOrigin", replyOrigin);
+		params.put("beginRow", null);
+		params.put("endRow", null);
+		return sqlSession.selectList("reply.list", params);
 	}
 	
 	// 상세
