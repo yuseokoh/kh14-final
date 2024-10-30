@@ -33,7 +33,7 @@ public class GameDao {
     }
 
     public void insert(GameDto gameDto) {
-        sqlSession.insert("game.add", gameDto);
+        sqlSession.insert("game.insert", gameDto);
     }
 
     public boolean update(GameDto gameDto) {
