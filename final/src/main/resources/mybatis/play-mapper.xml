@@ -13,4 +13,18 @@
 		)
 		values(play_seq.nextval, #{gameNo}, #{memberId}, #{playScore}, #{playLevel}, #{playTime}, #{playLastplayed})
 	</insert>
+	
+	<!-- 점수 랭킹 -->
+	<select id="scoreRanking" resultType="PlayDto">
+		select * from play order by play_score desc
+	</select>
+	<!-- 레벨 랭킹 -->
+	<select id="levelRanking" resultType="PlayDto">
+		select * from play order by play_level desc
+	</select>
+	<!-- 아이디 검색 -->
+	<select id="idSearch" resultType="PlayDto">
+		select * from play where instr(member_id, #{keyword}) > 0
+	</select>
+	
 </mapper>
