@@ -1,6 +1,7 @@
 package com.game.service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -124,9 +125,11 @@ public class TokenService {
 //        }
 //    }
 
-    // 일정 시간마다 만료된 토큰 제거
+ // 매일 자정마다 만료된 토큰 제거
     @Scheduled(cron = "0 0 0 * * *")
     public void clearToken() {
-        memberTokenDao.clear();
+        System.out.println("clearToken 메서드 실행됨: " + LocalDateTime.now());
+        int deletedCount = memberTokenDao.clear();
+        System.out.println("삭제된 토큰 개수: " + deletedCount);
     }
 }
