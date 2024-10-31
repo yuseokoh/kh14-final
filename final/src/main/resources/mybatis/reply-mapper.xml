@@ -46,6 +46,13 @@
   <include refid="top-n-footer"></include>
   </select>
   
+  <select id="count" resultType="int">
+	  	select count(*) from reply
+	  	where reply_origin = #{replyOrigin}
+	  	order by
+	  	reply_no desc
+  </select>
+  
   <!-- 상세 -->
   <select id="detail">
   		select * from reply where  reply_no = #{replyNo}

@@ -9,12 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.game.dto.ReplyDto;
+import com.game.vo.ReplyComplexRequestVO;
 
 @Repository
 public class ReplyDao {
 	
 	@Autowired
 	private SqlSession sqlSession;
+	
+//	//복합 목록 메소드
+//		public List<ReplyDto> complexList(ReplyComplexRequestVO vo){
+//			return sqlSession.selectList("reply.replyList", vo);
+//		}
+//		
+//		//복합 목록 카운트 메소드
+//		public int complexListCount(ReplyComplexRequestVO vo) {
+//			return sqlSession.selectOne("reply.replyListCount", vo);
+//		}
+	
 	
 	//시퀀스
 	public int sequence() {
@@ -37,18 +49,23 @@ public class ReplyDao {
 	}
 	
 	//댓글 목록
-	public List<ReplyDto> list(int replyOrigin){
-		Map<String, Object> params = new HashMap<>();
-		params.put("replyOrigin", replyOrigin);
-		params.put("beginRow", null);
-		params.put("endRow", null);
-		return sqlSession.selectList("reply.list", params);
+	public List<ReplyDto> list(ReplyComplexRequestVO vo){
+//		Map<String, Object> params = new HashMap<>();
+//		params.put("replyOrigin", replyOrigin);
+//		params.put("beginRow", null);
+//		params.put("endRow", null);
+		return sqlSession.selectList("reply.list", vo);
 	}
 	
 	// 상세
 	public ReplyDto selectOne(int replyNo) {
 		return sqlSession.selectOne("reply.detail");
 	}
+	
+	//카운트를 위한 Dao
+	public int count(ReplyComplexRequestVO vo) {
+        return sqlSession.selectOne("reply.count", vo);
+    }
 	
 	
 	

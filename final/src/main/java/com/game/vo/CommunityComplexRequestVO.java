@@ -21,7 +21,7 @@ public class CommunityComplexRequestVO {
 	private int communityLikes; //커뮤니티 글 좋아요수
 	private String communityState; //커뮤니티 상태 (공개,비공개)
 	private int communityReplies; //커뮤니티 댓글수
-//	private Integer beginRow, endRow;
+	private Integer beginRow, endRow;
 	
 	
 	
