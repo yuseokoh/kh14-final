@@ -1,5 +1,6 @@
 package com.game.dao;
 
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class ReplyDao {
 	
 	//댓글 수정
 	public void update(ReplyDto replyDto) {
+		replyDto.setReplyUtime(new Date(System.currentTimeMillis())); // 현재 시간으로 업데이트
 		sqlSession.update("reply.update", replyDto);
 	}
 	
@@ -66,6 +68,12 @@ public class ReplyDao {
 	public int count(ReplyComplexRequestVO vo) {
         return sqlSession.selectOne("reply.count", vo);
     }
+
+	
+	//댓글수나오게 하는거 
+	public int getCommunityNoByReplyNo(int replyNo) {
+		return sqlSession.selectOne("reply.getCommunityNoByReplyNo", replyNo);
+	}
 	
 	
 	

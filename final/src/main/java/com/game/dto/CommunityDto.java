@@ -13,7 +13,7 @@ public class CommunityDto {
 	private String communityCategory; //카테고리(예: 정보, 자유, 공략, 질문...)
 	private String communityTitle; //커뮤니티 제목
 	private int communityNo; //커뮤니티 글 번호
-	private String communityWriter;//작성자 =memberId pri
+	private String communityWriter;//작성자 =memberId id pri
 	private String communityContent; //커뮤니티 내용
 	private Date communityWtime; //커뮤니티 글 작성일
 	private Date communityUtime; //커뮤니티 글 수정일

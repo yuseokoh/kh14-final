@@ -54,6 +54,7 @@
 	<!-- 커뮤니티 게시글 등록 -->
 	<insert id="insert" >
     INSERT INTO community (
+    	
         community_no,
         community_category,
         community_title,
@@ -120,7 +121,12 @@
 		select * from community
     </select> -->
     
-    
+    <!-- 댓글수 나오는거 -->
+    <update id="updateReplyCount">
+    UPDATE community
+    SET community_replies = (SELECT COUNT(*) FROM reply WHERE reply_origin = #{communityNo})
+    WHERE community_no = #{communityNo}
+</update>
     
     
     

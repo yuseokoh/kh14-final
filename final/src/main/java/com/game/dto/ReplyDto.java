@@ -10,7 +10,7 @@ import lombok.Data;
 public class ReplyDto {
 	private int replyNo;
 	private String replyWriter;
-	private int replyOrigin; //커뮤니티 게시글 
+	private int replyOrigin; //커뮤니티 게시글
 	private String replyContent;
 	private Integer replyTarget;
 	private int replyGroup;

@@ -3,7 +3,6 @@ package com.game.restcontroller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.game.dao.ReplyDao;
 import com.game.dto.ReplyDto;
+import com.game.error.TargetNotFoundException;
+import com.game.service.TokenService;
+import com.game.vo.MemberClaimVO;
 import com.game.vo.ReplyComplexRequestVO;
 import com.game.vo.ReplyComplexResponseVO;
 
@@ -23,6 +25,9 @@ public class ReplyRestController {
 
 	@Autowired
 	private ReplyDao replyDao;
+	
+	@Autowired
+	private TokenService tokenService;
 	
 	
 	//댓글 목록 무한스크롤
@@ -55,9 +60,16 @@ public class ReplyRestController {
 		//step 1 : 시퀀스 번호를 생성한다
 		int seq = replyDao.sequence();
 		
-		//step 2 : 작성자 정보를 불러온다
-		String memberId = "testuser123";
-		
+		//step 2 : 작성자 정보를 불러온다 //clamVo에 있는 코드보고
+		String memberId = "testuser123"; //바꾸는 작업할 때 빼야한다
+//		 if(!tokenService.isBearerToken(Authorization)) {
+//	            throw new TargetNotFoundException("로그인이 필요합니다.");
+//	        }
+//	        
+//	        // 토큰에서 회원 정보 추출
+//	        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(Authorization));
+//	        String memberId = claimVO.getMemberId();
+//		
 		//step 3 : 정보를 설정한다
 		replyDto.setReplyNo(seq);
 		replyDto.setReplyOrigin(communityNo);
