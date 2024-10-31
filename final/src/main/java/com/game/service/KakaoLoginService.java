@@ -59,25 +59,23 @@ public class KakaoLoginService {
 
     public String createJwtToken(KakaoUserDto savedUser) {
         // 토큰 만료 시간 설정 (예: 1시간)
-        long expirationTime = 1000 * 60 * 60;  // 1시간
-        Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
+//        long expirationTime = 1000 * 60 * 60;  // 1시간
+//        Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
-        // 사용자 정보 클레임에 포함
+    	 // 비밀키를 사용해 서명할 때, 클레임에 사용자 정보 포함
         Map<String, Object> claims = new HashMap<>();
         claims.put("kakaoId", savedUser.getKakaoId());
         claims.put("email", savedUser.getMemberEmail());
         claims.put("nickname", savedUser.getMemberNickname());
 
         // JWT 토큰 생성
-     // JWT 토큰 생성
         String token = Jwts.builder()
             .setClaims(claims)
-            .setSubject(savedUser.getKakaoId())  // 사용자 ID (sub 클레임)
-            .setIssuedAt(new Date())             // 토큰 발급 시간
-            .setExpiration(expirationDate)       // 토큰 만료 시간
-            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))  // 서명 알고리즘과 키 설정
+            .setSubject(savedUser.getKakaoId()) // 사용자 ID 설정
+            .setIssuedAt(new Date()) // 토큰 발급 시간
+            .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 만료 시간 (1시간)
+            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256) // 서명 알고리즘
             .compact();
-
 
         return token;
     }

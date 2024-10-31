@@ -93,12 +93,15 @@ public class KakaoUserService {
             // 닉네임과 가입 날짜 업데이트
             existing.setMemberNickname(kakaoUser.getMemberNickname());
             existing.setMemberJoin(kakaoUser.getMemberJoin());
+
+            // 기존 사용자의 정보를 업데이트
             kakaoUserDao.updateKakaoUser(existing);
-            return existing;
+            return existing;  // 업데이트된 기존 사용자 반환
         }
 
-        return kakaoUser;
+        return kakaoUser;  // 새로운 사용자 정보 반환
     }
+
 
 
 
@@ -113,10 +116,10 @@ public class KakaoUserService {
 	    // member 테이블에 kakao_user_id를 포함한 데이터를 삽입
 	    MemberDto memberDto = new MemberDto();
 	    memberDto.setKakaoUserId(kakaoUserId);  // 외래키로 연동된 kakao_user_id 설정
-	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId()); // 멤버 ID는 kakao_카카오ID 형식
+	    memberDto.setMemberId( kakaoUser.getKakaoId()); 
 	    memberDto.setMemberEmail(kakaoUser.getMemberEmail());
 	    memberDto.setMemberNickname(kakaoUser.getMemberNickname()); // 이미 설정된 닉네임 사용
-	    memberDto.setMemberLevel("BASIC");
+	    memberDto.setMemberLevel("카카오 회원");
 
 	    try {
 	        sqlSession.insert("member.addWithKakao", memberDto);
