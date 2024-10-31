@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.game.dao.CommunityDao;
+import com.game.dao.MemberDao;
 import com.game.dto.CommunityDto;
+import com.game.service.TokenService;
+import com.game.vo.CommunityComplexRequestVO;
+import com.game.vo.CommunityComplexResponseVO;
 @CrossOrigin(origins = "http://localhost:3000") 
 @RestController
 @RequestMapping("/community")
@@ -22,6 +26,36 @@ public class CommunityRestController {
 
 	@Autowired
 	private CommunityDao communityDao;
+	@Autowired
+	private TokenService tokenService;
+	
+	
+	
+	//검색 무한스크롤
+	@PostMapping("/search")
+	public CommunityComplexResponseVO search(
+			@RequestBody CommunityComplexRequestVO vo){
+		
+		int count = communityDao.complexSearchCount(vo);
+		//마지막 == 페이징 안쓰는 경우 
+		boolean last = vo.getEndRow() == null || count <= vo.getEndRow();
+		
+		CommunityComplexResponseVO response = new CommunityComplexResponseVO();
+		response.setCommunityList(communityDao.complexSearch(vo));
+		response.setCount(count);
+		response.setLast(last);
+		return response;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	// 게시글 목록 조회
 	 @GetMapping("/")
@@ -47,13 +81,8 @@ public class CommunityRestController {
 	    public void deleteCommunity(@PathVariable int communityNo) {
 	        communityDao.CommunityDelete(communityNo);
 	    }
-
-//	    // 검색 기능 (GET 요청)
-//	    @GetMapping("/column/{column}/keyword/{keyword}")
-//	    public List<CommunityDto> searchCommunityList(@PathVariable String column, @PathVariable String keyword) {
-//	        return communityDao.CommunitySearch(column, keyword);
-//	    }
 	    
+	    //검색기능
 	    @GetMapping("/search/title/{keyword}")
 	    public List<CommunityDto> searchCommunityByTitle(@PathVariable String keyword) {
 	        return communityDao.SearchByTitle(keyword);
@@ -66,48 +95,21 @@ public class CommunityRestController {
 	    public CommunityDto getCommunityDetail(@PathVariable int communityNo) {
 	        return communityDao.CommunityDetail(communityNo);
 	    }
-
-//    // 게시글 조회수 증가
-//    @PutMapping("/{communityNo}")
-//    public String CommunityViews(@PathVariable int communityNo) {
-//        communityService.CommunityViews(communityNo);
-//        return "CommunityViews";
-//    }
-//
-//    // 게시글 좋아요수 증가 
-//    @PutMapping("/{communityNo}")
-//    public String CommunityLikes(@PathVariable int communityNo) {
-//        communityService.CommunityLikes(communityNo);
-//        return "CommunityLikes";
-//    }
-//	 // 댓글 작성
-//	    @PostMapping("/{communityNo}/comments")
-//	    public String createComment(@PathVariable int communityNo, @RequestBody CommunityDto commentDto) {
-//	        commentDto.setCommunityGroup(communityNo);  // 댓글 그룹 설정 (해당 게시글 번호로)
-//	        communityDao.insertComment(commentDto);
-//	        return "댓글이 등록되었습니다.";
-//	    }
-//
-//	    // 댓글 수정
-//	    @PutMapping("/comments/{communityNo}")
-//	    public String updateComment(@PathVariable int communityNo, @RequestBody CommunityDto commentDto) {
-//	        commentDto.setCommunityNo(communityNo);
-//	        communityDao.updateComment(commentDto);
-//	        return "댓글이 수정되었습니다.";
-//	    }
-//
-//	    // 댓글 삭제
-//	    @DeleteMapping("/comments/{communityNo}")
-//	    public String deleteComment(@PathVariable int communityNo) {
-//	        communityDao.deleteComment(communityNo);
-//	        return "댓글이 삭제되었습니다.";
-//	    }
-//
-//	    // 특정 게시글의 댓글 목록 조회
-//	    @GetMapping("/{communityNo}/comments")
-//	    public List<CommunityDto> getComments(@PathVariable int communityNo) {
-//	        return communityDao.getCommentsByPostId(communityNo);
-//	    }
+	    
+	    
+	    //명호형이만든거
+//	    @PostMapping("/list") // 회원가입과 구분하기 위해 주소 규칙을 깬다
+//		public CommunityComplexResponseVO search(@RequestBody CommunityComplexRequestVO vo){
+//			
+//			int count = communityDao.countWithPaging(vo);
+//			boolean last = vo.getEndRow() == null || count <= vo.getEndRow();
+//			CommunityComplexResponseVO response = new CommunityComplexResponseVO();
+//			response.setCommunityList(communityDao.selectListByPaging(vo));
+//			response.setCount(count);
+//			response.setLast(last);
+//			return response;
+//		}
+	    
 
 	    
 	    

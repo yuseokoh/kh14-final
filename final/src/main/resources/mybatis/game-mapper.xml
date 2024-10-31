@@ -3,7 +3,10 @@
 
 <mapper namespace="game">
     <!-- 등록 -->
-    <insert id="add">
+    <insert id="insert" parameterType="GameDto">
+	    <selectKey keyProperty="gameNo" resultType="int" order="BEFORE">
+	        select game_seq.nextval from dual
+	    </selectKey>
         insert into game(
             game_no,
             game_title,
@@ -22,7 +25,7 @@
             game_system_requirement
         )
         values(
-            game_seq.nextval,
+        	#{gameNo},
             #{gameTitle},
             #{gamePrice},
             #{gameDeveloper},
@@ -35,7 +38,7 @@
             #{gameShortDescription},
             #{gameUserScore},
             #{gameReviewCount},
-            #{gamePlatforms},
+            #{gamePlatforms, jdbcType=VARCHAR},
             #{gameSystemRequirement}
         )
     </insert>
@@ -87,4 +90,27 @@
     <select id="findGameNo" resultType="gameDto">
         select game_no from game where member_id = #{memberId}
     </select>
+    
+    <!-- 게임 평점(score) 업데이트 -->
+    <update id="updateScore">
+    	update game
+    	set game_user_score = (
+    		select avg(score)
+    		from member_score
+    		where game_no = #{gameNo}	
+    	)
+    	where game_no = #{gameNo}
+    </update>
+    
+    <!-- 게임 리뷰카운트 업데이트 -->
+    <update id="updateReviewCount">
+    	update game
+    	set game_review_count = (
+    		select count(*)
+    		from member_review
+    		where game_no = #{gameNo}
+    		and review_status = 'active'
+    	)
+    	where game_no = #{gameNo}
+    </update>
 </mapper>

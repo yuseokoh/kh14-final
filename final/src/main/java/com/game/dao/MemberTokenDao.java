@@ -11,9 +11,13 @@ public class MemberTokenDao {
 	
 	@Autowired
 	private SqlSession sqlSession;
+	
 	public void insert(MemberTokenDto memberTokenDto) {
-		sqlSession.insert("memberToken.insert", memberTokenDto);
+	    memberTokenDto.setTokenTarget(memberTokenDto.getTokenTarget());
+	    System.out.println("Inserting into member_token: " + memberTokenDto);
+	    sqlSession.insert("memberToken.insert", memberTokenDto);
 	}
+
 	public MemberTokenDto selectOne(MemberTokenDto memberTokenDto) {
 		return sqlSession.selectOne("memberToken.check", memberTokenDto);
 	}
@@ -23,6 +27,12 @@ public class MemberTokenDao {
 	public int clear() {
 		return sqlSession.delete("memberToken.clear");
 	}
+
+	public void deleteByTokenValue(String strippedToken) {
+	    sqlSession.delete("memberToken.deleteByTokenValue", strippedToken);
+	    System.out.println("Deleted token: " + strippedToken);
+	}
+
 	
 	
 	

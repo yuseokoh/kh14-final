@@ -38,12 +38,19 @@
   
   <!-- 목록기능 -->
   <select id="list" resultType="ReplyDto">
-  <include refid="top-n-header"></include>
+  <include refid="top-n-header"></include> 
   	select * from reply
   	where reply_origin = #{replyOrigin}
   	order by
   	reply_no desc
   <include refid="top-n-footer"></include>
+  </select>
+  
+  <select id="count" resultType="int">
+	  	select count(*) from reply
+	  	where reply_origin = #{replyOrigin}
+	  	order by
+	  	reply_no desc
   </select>
   
   <!-- 상세 -->

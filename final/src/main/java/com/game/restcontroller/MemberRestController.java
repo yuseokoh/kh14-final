@@ -1,15 +1,19 @@
 package com.game.restcontroller;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,14 +21,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.CertDao;
 import com.game.dao.MemberDao;
 import com.game.dao.MemberTokenDao;
+import com.game.dao.MemberImageDao;
+import com.game.dto.GameImageDto;
 import com.game.dto.MemberDto;
 import com.game.dto.MemberTokenDto;
+import com.game.dto.MemberImageDto;
 import com.game.error.TargetNotFoundException;
+import com.game.service.AttachmentService;
 import com.game.service.EmailService;
 import com.game.service.KakaoLoginService;
 import com.game.service.TokenService;
@@ -56,7 +66,10 @@ public class MemberRestController {
     private CertDao certDao;
     @Autowired
     private KakaoLoginService kakaoLoginService;
-
+    @Autowired
+    private MemberImageDao memberImageDao;
+    @Autowired
+    private AttachmentService attachmentService;
     @PostMapping("/search")
     public MemberComplexResponseVO search(@RequestBody MemberComplexRequestVO vo) {
         int count = memberDao.complexSearchCount(vo);
@@ -246,17 +259,11 @@ public class MemberRestController {
         return response;
     }
 
-    @GetMapping("/find")
-    public MemberDto find(@RequestHeader("Authorization") String accessToken) {
-        if (tokenService.isBearerToken(accessToken) == false)
-            throw new TargetNotFoundException("유효하지 않은 토큰");
-        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
+    //상세조회
+    @GetMapping("/{memberId}")
+    public MemberDto find(@PathVariable String memberId) {
+        MemberDto memberDto = memberDao.selectOne(memberId);
 
-        MemberDto memberDto = memberDao.selectOne(claimVO.getMemberId());
-        if (memberDto == null)
-            throw new TargetNotFoundException("존재하지 않는 회원");
-
-        memberDto.setMemberPw(null);
         return memberDto;
     }
 
@@ -304,17 +311,73 @@ public class MemberRestController {
     }
 
     // 회원 정보 수정
+//    @PutMapping("/edit")
+//    public boolean edit(@RequestBody MemberDto memberDto) {
+//        return memberDao.updateMemberInfo(memberDto);
+//    }
+    
     @PutMapping("/edit")
-    public boolean edit(@RequestBody MemberDto memberDto) {
+    public boolean edit(
+            @RequestPart("member") MemberDto memberDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IllegalStateException, IOException {
+        // memberDto와 files를 사용하여 처리 로직 구현
+        // 파일 처리를 추가로 구현할 수 있습니다.
+        boolean result = memberDao.updateMemberInfo(memberDto);
+        if(!result) {
+        	throw new TargetNotFoundException("존재하지 않는 회원정보");
+        }
+        
+        // 예시: 파일 업로드가 필요한 경우
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                // 파일 저장 로직 구현
+                int attachmentNo = attachmentService.save(file);
+                
+                MemberImageDto memberImageDto = new MemberImageDto();
+                memberImageDto.setAttachment(attachmentNo);
+                memberImageDto.setMemberId(memberDto.getMemberId());
+                memberImageDao.insert(memberImageDto);
+            }
+        }
+        
         return memberDao.updateMemberInfo(memberDto);
     }
 
+    
     // 회원 정보 삭제
     @DeleteMapping("/delete/{memberId}")
     public boolean delete(@PathVariable String memberId) {
         return memberDao.deleteMember(memberId);
     }
 
+    //회원 이미지 조회
+    @GetMapping("/image/{memberId}")
+    	public MemberImageDto getMemberImages(@PathVariable String memberId){
+    		return memberImageDao.selectone(memberId);
+    	}
+    //이미지 다운로드를 처리
+    @GetMapping("/download/{attachment}")
+    public ResponseEntity<ByteArrayResource> downloadImage(
+    		@PathVariable int attachment) throws IOException{
+    	return attachmentService.find(attachment);
+    }
+  //첨부파일을 하나씩 업로드하는 엔드포인트
+    @PostMapping("/upload/{memberId}")
+    public int uploadGameImage(
+    		@PathVariable String memberId,
+    		@RequestParam("file") MultipartFile file)
+    		throws IllegalStateException, IOException{
+    	//1. 첨부파일 저장
+    	int attachment = attachmentService.save(file);
+    	
+    	//2. 게임 이미지 정보 저장
+    	MemberImageDto memberImageDto = new MemberImageDto();
+    	memberImageDto.setAttachment(attachment);
+    	memberImageDto.setMemberId(memberId);
+    	memberImageDao.insert(memberImageDto);
+    	
+    	return attachment;
+    }
     
 
 }
