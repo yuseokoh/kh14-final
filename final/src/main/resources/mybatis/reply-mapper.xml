@@ -32,7 +32,7 @@
   <!-- 수정기능 -->
   <update id="update">
   	update reply
-  	set reply_content = #{replyContent},
+  	set reply_content = #{replyContent}, reply_utime = sysdate <!-- 수정 시간 업데이트 -->
   		 where reply_no = #{replyNo} <!-- and reply_writer = #{replyWriter }-->
   </update>
   
@@ -77,4 +77,14 @@
 		where rn between #{beginRow} and #{endRow}
 		</if>
 	</sql>
+	
+	
+	
+	<!-- 댓글수나오게하는거 -->
+	
+	<select id="getCommunityNoByReplyNo" resultType="int">
+    SELECT reply_origin 
+    FROM reply
+    WHERE reply_no = #{replyNo}
+</select>
   </mapper>
