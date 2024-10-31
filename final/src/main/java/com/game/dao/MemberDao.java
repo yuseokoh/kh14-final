@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import com.game.dto.KakaoUserDto;
 import com.game.dto.MemberDto;
+import com.game.dto.MemberTokenDto;
 import com.game.vo.MemberComplexRequestVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,9 @@ public class MemberDao {
 	
 	@Autowired
 	private KakaoUserDao kakaoUserDao;
+	
+	@Autowired
+	private MemberTokenDao memberTokenDao;
 
 	public List<MemberDto> complexSearch(MemberComplexRequestVO vo) {
 		return sqlSession.selectList("member.complexSearch", vo);
@@ -111,28 +115,36 @@ public class MemberDao {
 	}
 
 	// 카카오 회원 가입 처리 메서드
-	public void insertWithKakao(KakaoUserDto kakaoUser) {
-	    Integer kakaoUserId = kakaoUser.getKakaoUserId(); // KakaoUserDto에서 kakao_user_id 가져오기
+	 public void insertWithKakao(KakaoUserDto kakaoUser) {
+	        Integer kakaoUserId = kakaoUser.getKakaoUserId();
 
-	    if (kakaoUserId == null) {
-	        throw new RuntimeException("Kakao User ID가 없습니다.");
+	        if (kakaoUserId == null) {
+	            throw new RuntimeException("Kakao User ID가 없습니다.");
+	        }
+
+	        // member_id가 이미 존재하는지 확인
+	        MemberDto existingMember = selectByMemberId("kakao_" + kakaoUser.getKakaoId());
+	        if (existingMember != null) {
+	            log.info("중복된 member_id가 존재합니다: " + existingMember.getMemberId());
+	            // 중복된 member_id가 있을 경우 로그인 처리 진행 (삽입 없이)
+	            return;
+	        }
+
+	        // 중복되지 않으면 member 테이블에 삽입
+	        MemberDto memberDto = new MemberDto();
+	        memberDto.setKakaoUserId(kakaoUserId);
+	        memberDto.setMemberId(kakaoUser.getKakaoId());
+	        memberDto.setMemberEmail(kakaoUser.getMemberEmail());
+	        memberDto.setMemberNickname(kakaoUser.getMemberNickname());
+	        memberDto.setMemberLevel("카카오 회원");
+
+	        try {
+	            sqlSession.insert("member.addWithKakao", memberDto);
+	            log.info("member 테이블에 데이터 삽입 성공");
+	        } catch (Exception e) {
+	            log.error("member 테이블에 데이터 삽입 실패", e);
+	        }
 	    }
-
-	    // member 테이블에 kakao_user_id를 포함한 데이터를 삽입
-	    MemberDto memberDto = new MemberDto();
-	    memberDto.setKakaoUserId(kakaoUserId);  // 외래키로 연동된 kakao_user_id 설정
-	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId()); // 멤버 ID는 kakao_카카오ID 형식
-	    memberDto.setMemberEmail(kakaoUser.getMemberEmail());
-	    memberDto.setMemberNickname(kakaoUser.getMemberNickname());
-	    memberDto.setMemberLevel("BASIC");
-
-	    try {
-	        sqlSession.insert("member.addWithKakao", memberDto);
-	        log.info("member 테이블에 데이터 삽입 성공");
-	    } catch (Exception e) {
-	        log.error("member 테이블에 데이터 삽입 실패", e);
-	    }
-	}
 	
 	
 //	public void insertWithKakao(KakaoUserDto kakaoUser) {
@@ -231,6 +243,20 @@ public class MemberDao {
 	    } catch (Exception e) {
 	        log.error("Error updating member with kakaoUserId: {}", kakaoUser.getKakaoUserId(), e);
 	    }
+	}
+
+	// DAO 클래스에 해당 메서드를 구현
+	public MemberDto selectByMemberId(String memberId) {
+	    return sqlSession.selectOne("member.selectByMemberId", memberId);
+	}
+
+	public MemberDto findById(String memberId) {
+	    return selectByMemberId(memberId);  // memberId로 멤버를 조회하여 반환
+	}
+
+	
+	public void saveToken(MemberTokenDto tokenDto) {
+	    memberTokenDao.insert(tokenDto); // MemberTokenDao의 insert 메서드 사용하여 토큰 저장
 	}
 
 
