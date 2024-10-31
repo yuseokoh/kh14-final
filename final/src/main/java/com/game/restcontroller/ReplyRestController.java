@@ -1,7 +1,5 @@
 package com.game.restcontroller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.game.dao.ReplyDao;
 import com.game.dto.ReplyDto;
+import com.game.vo.ReplyComplexRequestVO;
+import com.game.vo.ReplyComplexResponseVO;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -24,14 +24,33 @@ public class ReplyRestController {
 	@Autowired
 	private ReplyDao replyDao;
 	
-	//댓글 목록
-	@GetMapping("/{replyOrigin}")
-	public List<ReplyDto> list(@PathVariable int replyOrigin){
-		return replyDao.list(replyOrigin);
-	}
+	
+	//댓글 목록 무한스크롤
+		@PostMapping("/list")
+		public ReplyComplexResponseVO list(
+				@RequestBody ReplyComplexRequestVO vo){
+			int count = replyDao.count(vo);
+			//마지막 == 페이징 안쓰는 경우 
+			boolean last = vo.getEndRow() == null || count <= vo.getEndRow();
+			
+			ReplyComplexResponseVO response = new ReplyComplexResponseVO();
+			response.setReplyList(replyDao.list(vo));
+			response.setCount(count);
+			response.setLast(last);
+			return response;
+		}
+	
+	
+	
+	
+//	//댓글 목록
+//	@GetMapping("/{replyOrigin}")
+//	public List<ReplyDto> list(@PathVariable int replyOrigin){
+//		return replyDao.list(replyOrigin);
+//	}
 	
 	//댓글 등록
-	@PostMapping("/{communityNo}")
+	@PostMapping("/insert/{communityNo}")
 	public void add(@PathVariable int communityNo, @RequestBody ReplyDto replyDto) {
 		//step 1 : 시퀀스 번호를 생성한다
 		int seq = replyDao.sequence();

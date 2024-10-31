@@ -28,27 +28,25 @@ public class CommunityRestController {
 	private CommunityDao communityDao;
 	@Autowired
 	private TokenService tokenService;
-	@Autowired
-	private MemberDao memberDao;
 	
 	
 	
-//	//검색 무한스크롤
-//	@PostMapping("/search")
-//	public CommunityComplexResponseVO search(
-//			@RequestBody CommunityComplexRequestVO vo){
-//		
-//		int count = communityDao.complexSearchCount(vo);
-//		//마지막 == 페이징 안쓰는 경우 
-//		boolean last = vo.getEndRow() == null || count <= vo.getEndRow();
-//		
-//		CommunityComplexResponseVO response = new CommunityComplexResponseVO();
-//		response.setCommunityList(communityDao.complexSearch(vo));
-//		response.setCount(count);
-//		response.setLast(last);
-//		return response;
-//	}
-//	
+	//검색 무한스크롤
+	@PostMapping("/search")
+	public CommunityComplexResponseVO search(
+			@RequestBody CommunityComplexRequestVO vo){
+		
+		int count = communityDao.complexSearchCount(vo);
+		//마지막 == 페이징 안쓰는 경우 
+		boolean last = vo.getEndRow() == null || count <= vo.getEndRow();
+		
+		CommunityComplexResponseVO response = new CommunityComplexResponseVO();
+		response.setCommunityList(communityDao.complexSearch(vo));
+		response.setCount(count);
+		response.setLast(last);
+		return response;
+	}
+	
 	
 	
 	

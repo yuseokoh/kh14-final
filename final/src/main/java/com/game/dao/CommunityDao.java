@@ -15,15 +15,15 @@ public class CommunityDao {
 	@Autowired
 	private SqlSession sqlSession;
 	
-//	//복합 검색 메소드
-//	public List<CommunityDto> complexSearch(CommunityComplexRequestVO vo){
-//		return sqlSession.selectList("community.complexSearch", vo);
-//	}
-//	
-//	//복합 검색 카운트 메소드
-//	public int complexSearchCount(CommunityComplexRequestVO vo) {
-//		return sqlSession.selectOne("community.complexSearchCount", vo);
-//	}
+	//복합 검색 메소드
+	public List<CommunityDto> complexSearch(CommunityComplexRequestVO vo){
+		return sqlSession.selectList("community.complexSearch", vo);
+	}
+	
+	//복합 검색 카운트 메소드
+	public int complexSearchCount(CommunityComplexRequestVO vo) {
+		return sqlSession.selectOne("community.complexSearchCount", vo);
+	}
 	
 	
 	
