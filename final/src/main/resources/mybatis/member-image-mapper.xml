@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="memberImage">
+  
+  	<insert id="add">
+  		insert into member_image(attachment,member_id)
+  		values(#{attachment},#{memberId})
+  	</insert>
+  
+<select id="image" resultType="MemberImageDto">
+    SELECT * 
+    FROM (
+        SELECT * 
+        FROM member_image 
+        WHERE member_id = #{memberId}
+        ORDER BY attachment DESC
+    ) 
+    WHERE ROWNUM = 1
+</select>
+  
+  <delete id="del">
+  	delete member_image
+  	where attachment = #{attachment} and member_id=#{memberId}
+  </delete>
+  
+  </mapper>

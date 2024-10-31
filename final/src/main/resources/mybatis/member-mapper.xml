@@ -207,7 +207,9 @@
 	</update>
 
 	<!-- 회원 정보 수정 -->
-	<update id="edit"> UPDATE member <set>
+	<update id="edit">
+	 UPDATE member 
+	 <set>
 			<if test="memberNickname != null">member_nickname =
 		#{memberNickname},</if>
 			<if test="memberEmail != null">member_email = #{memberEmail},</if>
