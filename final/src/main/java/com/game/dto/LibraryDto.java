@@ -12,4 +12,5 @@ public class LibraryDto {
     private int attachmentNo;        // attachmentNo로 이미지 파일 번호를 받음
     private String gameTitle;        // 게임 이름
     private String paymentDetailStatus; // 결제 상태 ("승인", "취소" 등)
+    private int paymentDetailNo;
 }
