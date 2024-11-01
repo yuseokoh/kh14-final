@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.game.dao.CommunityDao;
-import com.game.dao.MemberDao;
+import com.game.dao.ReplyDao;
 import com.game.dto.CommunityDto;
+import com.game.dto.ReplyDto;
 import com.game.service.TokenService;
 import com.game.vo.CommunityComplexRequestVO;
 import com.game.vo.CommunityComplexResponseVO;
@@ -28,6 +29,8 @@ public class CommunityRestController {
 	private CommunityDao communityDao;
 	@Autowired
 	private TokenService tokenService;
+	@Autowired
+	private ReplyDao replyDao;
 	
 	
 	
@@ -110,6 +113,20 @@ public class CommunityRestController {
 //			return response;
 //		}
 	    
+	    //댓글수 나오게 하는거 
+	    @PostMapping("/insert/{communityNo}")
+	    public void add(@PathVariable int communityNo, @RequestBody ReplyDto replyDto) {
+	        int seq = replyDao.sequence();
+	        replyDto.setReplyNo(seq);
+	        replyDto.setReplyOrigin(communityNo);
+	        replyDao.insert(replyDto);
+	        communityDao.updateReplyCount(communityNo);  // 댓글 수 업데이트
+	    }
+
+	    @DeleteMapping("/reply/{replyNo}")
+	    public void deleteReply(@PathVariable int replyNo) {
+	        replyDao.delete(replyNo);
+	    }
 
 	    
 	    

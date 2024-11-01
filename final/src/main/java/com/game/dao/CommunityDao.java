@@ -31,8 +31,11 @@ public class CommunityDao {
 	
 	
 	
-	
-	
+	//댓글수
+	public void updateReplyCount(int communityNo) {
+	    sqlSession.update("community.updateReplyCount", communityNo);
+	}
+
 	
 	
 	
