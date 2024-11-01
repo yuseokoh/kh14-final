@@ -72,14 +72,14 @@ public class MemberReviewDao {
      * @param end 종료 행 번호
      * @return 리뷰 목록
      */
-    public List<MemberReviewDto> listByGame(int gameNo, int start, int size) {
+    public List<MemberReviewDto> listByGame(int gameNo, int page, int size) {
         Map<String, Object> params = new HashMap<>();
         params.put("gameNo", gameNo);
-        params.put("start", start);
-        params.put("end", size);
+        params.put("startRow", (page - 1) * size);
+        params.put("endRow", page * size);
         return sqlSession.selectList("review.listByGame", params);
     }
-
+    
     /**
      * 회원별 리뷰 목록 조회
      * @param memberId 회원 ID
@@ -123,5 +123,10 @@ public class MemberReviewDao {
         params.put("gameNo", gameNo);
         params.put("days", days);
         return sqlSession.selectList("review.listPopularReviews", params);
+    }
+    
+    // 리뷰 삭제
+    public void physicalDelete(int reviewNo) {
+        sqlSession.delete("review.physicalDelete", reviewNo);
     }
 }

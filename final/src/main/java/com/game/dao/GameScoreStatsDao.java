@@ -46,4 +46,10 @@ public class GameScoreStatsDao {
         params.put("limit", limit);
         return sqlSession.selectList("score.listTopRatedGames", params);
     }
+    
+    //평균점 계산 메소드
+    public double calculateAverageScore(int gameNo) {
+    	Double avgScore = sqlSession.selectOne("game.calculateAverageScore", gameNo);
+    	return avgScore != null ? avgScore : 0.0;
+    }
 }

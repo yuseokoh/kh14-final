@@ -52,5 +52,23 @@ public class GameDao {
     public Integer findGameNoByMemberId(String memberId) {
         return sqlSession.selectOne("cart.findGameNoByTitle", memberId);
     }
+    
+    // 게임 평점 업데이트
+    public void updateScore(int gameNo) {
+    sqlSession.update("game.updateScore", gameNo);
+    }
 
+    // 게임 리뷰 카운트 업데이트
+    public void updateReviewCount(int gameNo) {
+    sqlSession.update("game.updateReviewCount", gameNo);
+    }
+    
+    // 게임 
+    public void updateGameScore(int gameNo) {
+        sqlSession.update("game.updateScore", gameNo);
+    }
+
+    public void updateGameReviewCount(int gameNo) {
+        sqlSession.update("game.updateReviewCount", gameNo);
+    }
 }
