@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="communityReaction">
+    <!-- 특정 게시물에 대해 회원의 반응 여부 확인 -->
+    <select id="hasReaction" resultType="int">
+        SELECT COUNT(*)
+        FROM community_reaction
+        WHERE member_id = #{memberId} AND community_no = #{communityNo}
+    </select>
+
+    <!-- 좋아요 또는 싫어요 추가 -->
+    <insert id="insertReaction">
+        INSERT INTO community_reaction (member_id, community_no, reaction_type)
+        VALUES (#{memberId}, #{communityNo}, #{reactionType})
+    </insert>
+
+    <!-- 기존 반응 삭제 -->
+    <delete id="deleteReaction">
+        DELETE FROM community_reaction
+        WHERE member_id = #{memberId} AND community_no = #{communityNo}
+    </delete>
+
+    <!-- 특정 게시물의 좋아요 개수 조회 -->
+    <select id="countLikes" resultType="int">
+        SELECT COUNT(*)
+        FROM community_reaction
+        WHERE community_no = #{communityNo} AND reaction_type = 'L'
+    </select>
+
+    <!-- 특정 게시물의 싫어요 개수 조회 -->
+    <select id="countDislikes" resultType="int">
+        SELECT COUNT(*)
+        FROM community_reaction
+        WHERE community_no = #{communityNo} AND reaction_type = 'U'
+    </select>
+    
+    
+    <select id="getReactionType" resultType="string">
+    SELECT reaction_type
+    FROM community_reaction
+    WHERE member_id = #{memberId} AND community_no = #{communityNo}
+</select>
+</mapper>
