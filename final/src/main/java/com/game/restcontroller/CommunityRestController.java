@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.CommunityDao;
-import com.game.dao.CommunityImageDao;
+//import com.game.dao.CommunityImageDao;
 import com.game.dao.ReplyDao;
 import com.game.dto.CommunityDto;
-import com.game.dto.CommunityImageDto;
+//import com.game.dto.CommunityImageDto;
 import com.game.dto.GameDto;
 import com.game.dto.GameImageDto;
 import com.game.dto.ReplyDto;
@@ -41,8 +41,8 @@ public class CommunityRestController {
 	private CommunityDao communityDao;
 	@Autowired
 	private TokenService tokenService;
-	@Autowired
-	private CommunityImageDao communityImageDao;
+//	@Autowired
+//	private CommunityImageDao communityImageDao;
 	@Autowired
 	private ReplyDao replyDao;
 	@Autowired
