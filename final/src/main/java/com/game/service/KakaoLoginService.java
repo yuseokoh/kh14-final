@@ -21,7 +21,9 @@ import com.game.dto.KakaoUserDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class KakaoLoginService {
 
@@ -46,12 +48,13 @@ public class KakaoLoginService {
         // 카카오 API를 통해 사용자 정보 가져오기
         KakaoUserDto kakaoUser = getUserInfo(accessToken);
         
+        log.info("카카오 사용자 정보: {}", kakaoUser);
+
         // 가져온 사용자 정보를 DB에 저장하거나 기존 유저 조회
         KakaoUserDto savedUser = kakaoUserService.saveOrUpdateKakaoUser(kakaoUser);
         
         // 멤버 테이블에도 유저를 삽입
-        kakaoUserService.insertKakaoUserAndMember(savedUser);  // 새로 추가된 로직
-
+        kakaoUserService.insertKakaoUserAndMember(savedUser);
         return savedUser;
     }
 
@@ -86,11 +89,14 @@ public class KakaoLoginService {
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(null, headers);
 
+        log.info("카카오 사용자 정보 요청 시작 - 액세스 토큰: {}", accessToken);
+        
         Map<String, Object> response = restTemplate.postForObject(uri, entity, Map.class);
         if (response == null) {
             throw new IllegalStateException("카카오 API 응답이 null입니다.");
         }
-
+        log.info("카카오 API 응답: {}", response);
+        
         String kakaoId = String.valueOf(response.get("id"));
         Map<String, String> kakaoAccount = (Map<String, String>) response.get("kakao_account");
         String email = (kakaoAccount != null) ? kakaoAccount.get("email") : null;
@@ -100,6 +106,8 @@ public class KakaoLoginService {
         kakaoUser.setMemberEmail(email != null ? email : "no-email@example.com");  // 이메일이 없으면 임시 이메일 설정
         kakaoUser.setMemberJoin(new java.sql.Date(System.currentTimeMillis()));
 
+        log.info("추출된 카카오 사용자 정보 - ID: {}, 이메일: {}", kakaoId, email);
+        
         // 이메일이 없으면 이메일 입력이 필요한 상태로 표시
         if (email == null) {
             kakaoUser.setEmailRequired(true);
@@ -125,6 +133,8 @@ public class KakaoLoginService {
 
         ResponseEntity<Map> response = restTemplate.postForEntity(uri, entity, Map.class);
 
+        log.info("카카오 액세스 토큰 요청 응답: {}", response.getBody());
+        
         Map<String, String> responseBody = response.getBody();
         return responseBody.get("access_token");
     }
