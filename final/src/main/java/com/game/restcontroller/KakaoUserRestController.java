@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.game.dao.KakaoUserDao;
 import com.game.dao.MemberDao;
 import com.game.dto.KakaoUserDto;
+import com.game.dto.MemberDto;
 import com.game.service.KakaoLoginService;
 import com.game.service.KakaoUserService;
 import com.game.service.TokenService;
@@ -73,7 +74,7 @@ public class KakaoUserRestController {
             // Access Token 및 Refresh Token 생성
             KakaoUserClaimVO claimVO = new KakaoUserClaimVO();
             claimVO.setKakaoId(kakaoUser.getKakaoId());
-            claimVO.setMemberLevel("BASIC");  // 카카오 유저 기본 권한 레벨 설정
+            claimVO.setMemberLevel("카카오 회원");  // 카카오 유저 기본 권한 레벨 설정
 
             // Access Token 생성
             String accessJwtToken = tokenService.createKakaoAccessToken(claimVO);
@@ -155,27 +156,57 @@ public class KakaoUserRestController {
 
 
 
- // 이메일 저장을 위한 엔드포인트
+// // 이메일 저장을 위한 엔드포인트
+//    @PostMapping("/saveEmail")
+//    public ResponseEntity<?> saveEmail(@RequestBody KakaoUserDto kakaoUserDto) {
+//        try {
+//            // 로그 추가: kakaoId와 email을 출력
+//            log.info("Received kakaoId: {}, memberEmail: {}", kakaoUserDto.getKakaoId(), kakaoUserDto.getMemberEmail());
+//            
+//            // 이메일 저장 전에 카카오 유저가 있는지 확인하고 없으면 새로 추가
+//            KakaoUserDto existingUser = kakaoUserService.saveOrUpdateKakaoUser(kakaoUserDto);
+//            
+//            // 이메일 업데이트 로직
+//            existingUser.setMemberEmail(kakaoUserDto.getMemberEmail());
+//            kakaoUserService.updateKakaoUserEmail(existingUser.getKakaoId(), existingUser.getMemberEmail());
+//            
+//            return ResponseEntity.ok(existingUser);
+//        } catch (Exception e) {
+//            log.error("이메일 저장 중 오류 발생", e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이메일 저장에 실패했습니다.");
+//        }
+//        
+//    }
+    
+    
     @PostMapping("/saveEmail")
     public ResponseEntity<?> saveEmail(@RequestBody KakaoUserDto kakaoUserDto) {
         try {
-            // 로그 추가: kakaoId와 email을 출력
             log.info("Received kakaoId: {}, memberEmail: {}", kakaoUserDto.getKakaoId(), kakaoUserDto.getMemberEmail());
-            
-            // 이메일 저장 전에 카카오 유저가 있는지 확인하고 없으면 새로 추가
-            KakaoUserDto existingUser = kakaoUserService.saveOrUpdateKakaoUser(kakaoUserDto);
-            
-            // 이메일 업데이트 로직
-            existingUser.setMemberEmail(kakaoUserDto.getMemberEmail());
-            kakaoUserService.updateKakaoUserEmail(existingUser.getKakaoId(), existingUser.getMemberEmail());
-            
-            return ResponseEntity.ok(existingUser);
+
+            if (kakaoUserDto.getMemberEmail() == null || kakaoUserDto.getMemberEmail().isEmpty()) {
+                return ResponseEntity.badRequest().body("유효하지 않은 이메일입니다.");
+            }
+
+            MemberDto existingMember = memberDao.findByEmail(kakaoUserDto.getMemberEmail());
+            if (existingMember != null) {
+                log.info("이메일이 존재하므로 계정 연동을 시도합니다.");
+                kakaoUserService.linkKakaoAndMemberAccounts(existingMember, kakaoUserDto);
+                return ResponseEntity.ok(Map.of("success", true, "message", "Accounts linked successfully"));
+            } else {
+                log.info("이메일이 존재하지 않으므로 새 카카오 유저를 생성합니다.");
+                kakaoUserService.createKakaoUser(kakaoUserDto);
+                return ResponseEntity.ok(Map.of("success", true, "message", "New account created successfully"));
+            }
         } catch (Exception e) {
             log.error("이메일 저장 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이메일 저장에 실패했습니다.");
         }
-        
     }
+
+
+
+
 
 
 
@@ -220,7 +251,21 @@ public class KakaoUserRestController {
         }
     }
 
-    
+//    @PostMapping("/link")
+//    public ResponseEntity<String> linkAccounts(@RequestBody Map<String, String> request) {
+//        String email = request.get("email");
+//        log.info("linkAccounts 메서드 호출됨, 전달된 이메일: {}", email); // 이메일 값 로깅
+//        try {
+//            kakaoUserService.linkKakaoAndMemberAccounts(email);
+//            log.info("계정 연동 성공");
+//            return ResponseEntity.ok("Accounts linked successfully");
+//        } catch (Exception e) {
+//            log.error("계정 연동 중 오류 발생", e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to link accounts");
+//        }
+//    }
+
+
     
     
     

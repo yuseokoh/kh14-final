@@ -54,6 +54,16 @@
 		WHERE kakao_id = #{kakaoId}
 	</update>
 
+	<select id="findByEmail" parameterType="String"
+		resultType="KakaoUserDto">
+		SELECT * FROM kakao_user WHERE member_email = #{email}
+	</select>
+
+	<select id="findByLinkedMemberId" parameterType="String"
+		resultType="KakaoUserDto">
+		SELECT * FROM kakao_user WHERE linked_member_id = #{memberId}
+	</select>
+
 
 </mapper>
 

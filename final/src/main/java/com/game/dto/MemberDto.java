@@ -21,7 +21,7 @@ public class MemberDto {
 	private Date memberLogout; //로그아웃시간 
     private String memberNickname;    // 닉네임
     private String memberEmail;       // 이메일
-    private String memberLevel = "BASIC";   // 등급
+    private String memberLevel = "일반회원";   // 등급
     private Date memberBirth;         // 생년월일
     private String memberContact;     // 연락처
     private String memberPost;        // 우편번호

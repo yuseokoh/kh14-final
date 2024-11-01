@@ -33,6 +33,7 @@ public class MemberDao {
 	@Autowired
 	private MemberTokenDao memberTokenDao;
 
+
 	public List<MemberDto> complexSearch(MemberComplexRequestVO vo) {
 		return sqlSession.selectList("member.complexSearch", vo);
 	}
@@ -70,7 +71,7 @@ public class MemberDao {
 		String rawPw = memberDto.getMemberPw(); // 비밀번호 암호화 안된 것
 		String encPw = encoder.encode(rawPw); // 암호화된 비밀번호
 		memberDto.setMemberPw(encPw);
-		memberDto.setMemberLevel("BASIC");
+		memberDto.setMemberLevel("일반회원");
 		sqlSession.insert("member.add", memberDto);
 	}
 
@@ -161,7 +162,7 @@ public class MemberDao {
 //	    memberDto.setMemberId("kakao_" + kakaoUser.getKakaoId());
 //	    memberDto.setMemberEmail(kakaoUser.getMemberEmail());
 //	    memberDto.setMemberNickname(kakaoUser.getMemberNickname());
-//	    memberDto.setMemberLevel("BASIC");
+//	    memberDto.setMemberLevel("일반회원");
 //	    
 //	    try {
 //	        sqlSession.insert("member.addWithKakao", memberDto);
@@ -205,23 +206,35 @@ public class MemberDao {
 		return sqlSession.update("member.updateKakaoUserId", params) > 0;
 	}
 
-	public void updateMemberEmail(String kakaoId, String email) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("kakaoId", kakaoId);
-	    params.put("email", email);
+	public void updateMemberEmail(MemberDto memberDto) {
+	    // null 체크 및 기본값 설정
+	    if (memberDto == null || memberDto.getMemberId() == null || memberDto.getMemberEmail() == null) {
+	        System.out.println("MemberDto 또는 필수 필드가 null입니다.");
+	        return;
+	    }
+
+	    // 필요에 따라 kakaoUserId가 null일 때 기본값 설정 (예: -1 또는 특정 값)
+	    if (memberDto.getKakaoUserId() == null) {
+	        System.out.println("kakaoUserId가 null입니다. 기본값을 설정합니다.");
+	        memberDto.setKakaoUserId(-1); // 기본값 설정 예제
+	    }
 
 	    try {
-	        int updatedRows = sqlSession.update("member.updateMemberEmailByKakaoId", params);
-	        if (updatedRows > 0) {
-	            System.out.println("Member 테이블에서 이메일 업데이트 성공: kakaoId = " + kakaoId);
-	        } else {
-	            System.out.println("Member 테이블에서 이메일 업데이트 실패: kakaoId = " + kakaoId);
-	        }
+	        // 이메일 업데이트 구문 실행
+	        sqlSession.update("MemberMapper.updateMemberEmail", memberDto);
+	        System.out.println("Member 테이블 이메일 업데이트 성공: " + memberDto);
 	    } catch (Exception e) {
-	        System.out.println("Member 테이블에서 이메일 업데이트 중 오류 발생: kakaoId = " + kakaoId);
-	        e.printStackTrace();
+	        // 오류 발생 시 로그 출력
+	        System.out.println("회원 이메일 업데이트 중 오류 발생: " + e.getMessage());
 	    }
 	}
+
+
+
+
+
+
+
 
 
 
@@ -250,14 +263,61 @@ public class MemberDao {
 	    return sqlSession.selectOne("member.selectByMemberId", memberId);
 	}
 
-	public MemberDto findById(String memberId) {
-	    return selectByMemberId(memberId);  // memberId로 멤버를 조회하여 반환
-	}
-
+//	public MemberDto findById(String memberId) {
+//	    return selectByMemberId(memberId);  // memberId로 멤버를 조회하여 반환
+//	}
 	
 	public void saveToken(MemberTokenDto tokenDto) {
 	    memberTokenDao.insert(tokenDto); // MemberTokenDao의 insert 메서드 사용하여 토큰 저장
 	}
+
+    public MemberDto findByEmail(String email) {
+        return sqlSession.selectOne("member.findByEmail", email);
+    }
+
+    public MemberDto findById(String memberId) {
+        return sqlSession.selectOne("member.selectByMemberId", memberId);
+    }
+
+    public void updateMemberEmail(String memberId, String email) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberId);
+        params.put("email", email);
+
+        try {
+            int updatedRows = sqlSession.update("member.updateEmailById", params);
+            if (updatedRows > 0) {
+                log.info("Member 테이블 이메일 업데이트 성공: memberId = {}", memberId);
+            } else {
+                log.warn("Member 테이블 이메일 업데이트 실패: 해당 memberId를 찾을 수 없음 = {}", memberId);
+            }
+        } catch (Exception e) {
+            log.error("Member 테이블 이메일 업데이트 중 오류 발생: memberId = {}", memberId, e);
+        }
+    }
+
+
+
+    public MemberDto findByKakaoUserId(String kakaoId) {
+        if (kakaoId == null || kakaoId.isEmpty()) {
+            throw new IllegalArgumentException("Kakao ID가 null이거나 비어 있습니다.");
+        }
+
+        try {
+            // MyBatis 매퍼를 호출하여 kakao_user_id로 멤버 검색
+            MemberDto memberDto = sqlSession.selectOne("member.findByKakaoUserId", kakaoId);
+            if (memberDto != null) {
+                log.info("Member 테이블에서 멤버를 찾았습니다: memberId = {}", memberDto.getMemberId());
+            } else {
+                log.warn("Member 테이블에서 해당 kakao_user_id를 찾을 수 없습니다: kakaoId = {}", kakaoId);
+            }
+            return memberDto;
+        } catch (Exception e) {
+            log.error("Member 테이블에서 멤버 검색 중 오류 발생: kakaoId = {}", kakaoId, e);
+            throw new RuntimeException("멤버 검색 실패", e);
+        }
+    }
+
 
 
 }

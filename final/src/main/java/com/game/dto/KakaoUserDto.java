@@ -12,4 +12,5 @@ public class KakaoUserDto {
 	private String memberEmail;
 	private Date memberJoin;
 	private boolean emailRequired;
+	private String linkedMemberId; 
 }

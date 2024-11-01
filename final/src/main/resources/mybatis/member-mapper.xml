@@ -251,7 +251,6 @@
 	<select id="selectOneByEmail" parameterType="String" resultType="MemberDto">
 		SELECT * FROM member WHERE member_email = #{memberEmail}
 	</select>
-	
 
 
 	<insert id="addKakaoUserWithDetails" parameterType="MemberDto">
@@ -273,7 +272,7 @@
 		INSERT INTO member (member_id, kakao_user_id, member_email,
 		member_nickname, member_level)
 		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
-		'BASIC')
+		'카카오 회원')
 	</insert>
 
 
@@ -295,20 +294,39 @@
 		kakao_id = #{kakaoId})
 	</update>
 
+
 	<update id="updateWithKakao">
 		UPDATE member
 		SET member_nickname = #{memberNickname}, member_email = #{memberEmail}
 		WHERE kakao_user_id = #{kakaoUserId}
 	</update>
 
+	<update id="updateMemberEmail" parameterType="MemberDto">
+		UPDATE member
+		SET member_email = #{memberEmail}
+		WHERE kakao_user_id = #{kakaoUserId}
+	</update>
+
+	<select id="findByKakaoUserId" parameterType="string"
+		resultType="MemberDto">
+		SELECT * FROM member WHERE kakao_user_id = #{kakaoId}
+	</select>
+
+
 	<select id="selectOneById" parameterType="string" resultType="MemberDto">
 		SELECT * FROM member WHERE member_id = #{memberId}
 	</select>
 
-
-	<select id="selectByMemberId" parameterType="string" resultType="MemberDto">
+	<select id="selectByMemberId" parameterType="String"
+		resultType="MemberDto">
 		SELECT * FROM member WHERE member_id = #{memberId}
 	</select>
+
+	<update id="updateEmailByKakaoUserId">
+		UPDATE member
+		SET member_email = #{memberEmail}
+		WHERE kakao_user_id = #{kakaoUserId}
+	</update>
 
 
 	<!-- 자주 사용하는 SQL 조각들 (Top N Query) -->
