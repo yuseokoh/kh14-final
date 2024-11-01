@@ -87,10 +87,7 @@ public class CommunityDao {
         return sqlSession.selectOne("community.detail", communityNo);
     }
 
-	public int getCount(String memberId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
     
     
 //    //이미지쉐리떄문에
