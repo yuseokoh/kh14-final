@@ -32,4 +32,5 @@ public class MemberDto {
     private int memberPoint;          // 보유 포인트
 //    @JsonProperty("id")
     private Integer  kakaoUserId;           // 카카오 회원번호
+	private int attachment;
 }

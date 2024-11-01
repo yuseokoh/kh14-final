@@ -121,15 +121,8 @@
     </select> -->
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    <!-- 게시글 작성수 -->
+    <select id="count" resultType="CommunityDto">
+    	select count(community_no) from community where writter_id=#{memberId}
+    </select>
 </mapper>

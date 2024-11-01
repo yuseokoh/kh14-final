@@ -1,6 +1,8 @@
 package com.game.dto;
 
 import lombok.Data;
+
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -8,7 +10,7 @@ import java.time.LocalDateTime;
 public class CartDto {
 
     private int cartId;           
-    private LocalDateTime addedDate;   
+    private Date addedDate;   
     private String memberId;     
     private int gameNo;
     private String gameTitle; 
