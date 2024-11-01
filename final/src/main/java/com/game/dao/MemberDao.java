@@ -317,7 +317,13 @@ public class MemberDao {
             throw new RuntimeException("멤버 검색 실패", e);
         }
     }
-
-
+    
+    public List<MemberDto> selectDeveloperRequests() {
+        return sqlSession.selectList("member.selectDeveloperRequests");
+    }
+    
+    public boolean updateDeveloperRequest(Map<String, Object> params) {
+        return sqlSession.update("member.updateDeveloperRequest", params) > 0;
+    }
 
 }

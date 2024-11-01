@@ -33,4 +33,7 @@ public class MemberDto {
 //    @JsonProperty("id")
     private Integer  kakaoUserId;           // 카카오 회원번호
 	private int attachment;
+	//관리자권한요청
+	private int developerRequest;
+	private Date developerRequestDate;
 }
