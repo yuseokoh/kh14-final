@@ -36,5 +36,9 @@ public class PlayDao {
 	public List<PlayDto> idSearch(String keyword){
 		return sqlSession.selectList("play.idSearch", keyword);
 	}
+	//회원의 포인트 합계
+	public int getPoint(String memberId){
+		return sqlSession.selectOne("play.getPoint",memberId);
+	}
 	
 }

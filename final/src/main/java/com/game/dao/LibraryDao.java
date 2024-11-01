@@ -22,6 +22,8 @@ public class LibraryDao {
 	
 	public void insert(String memberId, int gameNo) {
 		Map<String, Object> params = new HashMap<>();
+		params.put("memberId", memberId);
+		params.put("gameNo", gameNo);
 		sqlSession.insert("library.insert",params);
 	}
 	
@@ -31,6 +33,6 @@ public class LibraryDao {
 
 
 	public List<LibraryDto> selectListByMemberId(String memberId){
-		return sqlSession.selectList("library.listbymemberid",memberId);
+		return sqlSession.selectList("library.listByMemberId",memberId);
 	}
 }

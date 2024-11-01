@@ -39,8 +39,33 @@ public class LibraryRestController {
 	@GetMapping("/")
 	public List<LibraryDto> list(@RequestHeader("Authorization") String token){
 		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+		System.out.println();
 		return libraryDao.selectListByMemberId(claimVO.getMemberId());
 	}
+	
+//	@GetMapping("/")
+//	public List<LibraryDto> list(@RequestHeader("Authorization") String token) {
+//	    // Token에서 사용자 정보 확인
+//	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+//	    
+//	    // 회원 ID 출력
+//	    System.out.println("Member ID: " + claimVO.getMemberId());
+//	    
+//	    // 라이브러리 데이터 조회
+//	    List<LibraryDto> libraryList = libraryDao.selectListByMemberId(claimVO.getMemberId());
+//	    
+//	    // LibraryDto 리스트 출력
+//	    for (LibraryDto library : libraryList) {
+//	        System.out.println("Library Entry:");
+//	        System.out.println("Library ID: " + library.getLibraryId());
+//	        System.out.println("Game Title: " + library.getGameTitle());
+//	        System.out.println("Game No: " + library.getGameNo());
+//	        System.out.println("Attachment No: " + library.getAttachmentNo());
+//	        System.out.println("----------------------------");
+//	    }
+//	    
+//	    return libraryList;
+//	}
 	
 	@PostMapping("/add")
 	public LibraryDto addToLibrary(@RequestHeader("Authorization") String token,

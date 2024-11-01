@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.CertDao;
+import com.game.dao.CommunityDao;
 import com.game.dao.MemberDao;
 import com.game.dao.MemberTokenDao;
+import com.game.dao.PlayDao;
 import com.game.dao.MemberImageDao;
 import com.game.dto.GameImageDto;
 import com.game.dto.MemberDto;
@@ -70,6 +72,11 @@ public class MemberRestController {
     private MemberImageDao memberImageDao;
     @Autowired
     private AttachmentService attachmentService;
+    @Autowired
+    private PlayDao playDao;
+    @Autowired
+    private CommunityDao communityDao;
+    
     @PostMapping("/search")
     public MemberComplexResponseVO search(@RequestBody MemberComplexRequestVO vo) {
         int count = memberDao.complexSearchCount(vo);
@@ -82,6 +89,8 @@ public class MemberRestController {
         return response;
     }
 
+    //게시글 작성 및 게임 플레이시 포인트 증가시키기
+    
 //    @PostMapping("/login")
 //    public MemberLoginResponseVO login(@RequestBody MemberLoginRequestVO vo) {
 //
@@ -259,10 +268,15 @@ public class MemberRestController {
         return response;
     }
 
-    //상세조회
     @GetMapping("/{memberId}")
     public MemberDto find(@PathVariable String memberId) {
         MemberDto memberDto = memberDao.selectOne(memberId);
+
+        // 이미지 정보 가져오기
+        MemberImageDto memberImage = memberImageDao.selectone(memberId);
+        if (memberImage != null) {
+            memberDto.setAttachment(memberImage.getAttachment());
+        }
 
         return memberDto;
     }
@@ -326,7 +340,6 @@ public class MemberRestController {
         if(!result) {
         	throw new TargetNotFoundException("존재하지 않는 회원정보");
         }
-        
         // 예시: 파일 업로드가 필요한 경우
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
@@ -339,10 +352,17 @@ public class MemberRestController {
                 memberImageDao.insert(memberImageDto);
             }
         }
-        
         return memberDao.updateMemberInfo(memberDto);
     }
 
+    //게임플레이 점수에 따른 포인트증가
+    @PatchMapping("/point")
+    public boolean getPoint(@RequestBody MemberDto memberDto) {
+    	boolean result = memberDao.updateMemberInfo(memberDto);
+    	int point = playDao.getPoint(memberDto.getMemberId())+(communityDao.getCount(memberDto.getMemberId())*10);
+    	memberDto.setMemberPoint(point);
+    	return result;
+    }
     
     // 회원 정보 삭제
     @DeleteMapping("/delete/{memberId}")
@@ -379,5 +399,6 @@ public class MemberRestController {
     	return attachment;
     }
     
+  
 
 }

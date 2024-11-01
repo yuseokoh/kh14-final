@@ -121,6 +121,12 @@
 		select * from community
     </select> -->
     
+  
+    <!-- 게시글 작성수 -->
+    <select id="count" resultType="CommunityDto">
+    	select count(community_no) from community where writter_id=#{memberId}
+    </select>
+  
     <!-- 댓글수 나오는거 -->
     <update id="updateReplyCount">
     UPDATE community
@@ -138,4 +144,5 @@
     
     
     
+
 </mapper>

@@ -6,5 +6,4 @@ import lombok.Data;
 public class MemberImageDto {
 	private int attachment;
 	private String memberId;
-	
 }

@@ -7,28 +7,32 @@
   <mapper namespace="library">
   
   <insert id="insert">
-  	INSERT INTO library (library_id, member_id, game_no, purchase_date, playtime_hours, installed)
-	VALUES (library_seq.NEXTVAL, #{memberId}, #{gameNo}, SYSTIMESTAMP, 0, 1)
+  	INSERT INTO library (library_id, member_id, game_no,payment_detail_no)
+	VALUES (library_seq.NEXTVAL, #{memberId}, #{gameNo},#{paymentDetailNo})
   </insert>
   
   <delete id="del">
   	delete from library where game_no=#{gameNo}
   </delete>
   
- <select id="listbymemberid" resultType="libraryDto">
+ <select id="listByMemberId" resultType="libraryDto">
   select
     l.*, 
     g.game_title AS gameTitle,
-    g.game_no,  -- 추가: 게임 번호 등 필요한 다른 필드 추가
-    gI.attachment_no AS attachmentNo  -- 추가: 이미지 경로 등 필요하면 추가
+    g.game_no,  -- 게임 번호
+    gI.attachment_no AS attachmentNo  -- 이미지 번호
   from
     library l
   join
     game g on l.game_no = g.game_no
   left join
     game_image gI on g.game_no = gI.game_no
+  join
+    payment_detail pD on l.payment_detail_no = pD.payment_detail_no
   where
     l.member_id = #{memberId}
+    AND pD.payment_detail_status = '승인'  -- 결제 상태가 "승인"인 항목만 조회
 </select>
+
   
   </mapper>

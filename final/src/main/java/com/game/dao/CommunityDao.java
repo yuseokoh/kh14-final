@@ -85,7 +85,10 @@ public class CommunityDao {
         return sqlSession.selectOne("community.detail", communityNo);
     }
     
-
+    //작성한 게시글 수 
+    public  int getCount(String memberId) {
+    	return sqlSession.selectOne("community.count",memberId);
+    }
     
     
     //명호형이만든거
