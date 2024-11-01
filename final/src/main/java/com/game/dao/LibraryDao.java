@@ -20,11 +20,12 @@ public class LibraryDao {
 	@Autowired
 	private SqlSession sqlSession;
 	
-	public void insert(String memberId, int gameNo) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("memberId", memberId);
-		params.put("gameNo", gameNo);
-		sqlSession.insert("library.insert",params);
+	public void insert(String memberId, int gameNo, int paymentDetailNo) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("memberId", memberId);
+	    params.put("gameNo", gameNo);
+	    params.put("paymentDetailNo", paymentDetailNo);
+	    sqlSession.insert("library.insert", params);
 	}
 	
 	public boolean delete(int gameNo) {

@@ -90,9 +90,9 @@ public class CartRestController {
     
     
     // 장바구니 삭제
-    @DeleteMapping("/{cartId}")
-    public void delete(@PathVariable int cartId) {
-        boolean result = cartDao.delete(cartId);
+    @DeleteMapping("/{gameNo}")
+    public void delete(@PathVariable int gameNo) {
+        boolean result = cartDao.delete(gameNo);
         if(result == false) {
         	throw new TargetNotFoundException("존재하지 않는 게임정보");
         }

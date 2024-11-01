@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.game.dao.LibraryDao;
 import com.game.dto.LibraryDto;
+import com.game.dto.PaymentDetailDto;
+import com.game.dto.PaymentDto;
 import com.game.error.TargetNotFoundException;
 import com.game.service.TokenService;
 import com.game.vo.MemberClaimVO;
@@ -67,18 +69,49 @@ public class LibraryRestController {
 //	    return libraryList;
 //	}
 	
+//	@PostMapping("/add")
+//	public LibraryDto addToLibrary(@RequestHeader("Authorization") String token,
+//	                               @RequestBody LibraryDto libraryDto) {
+//	    // 토큰 검증 및 memberId 가져오기
+//	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));  
+//	    // LibraryDto에서 필요한 정보 추출
+//	    PaymentDetailDto paymentDetailDto = new PaymentDetailDto();
+//	    String memberId = claimVO.getMemberId();
+//	    int gameNo = paymentDetailDto.getPaymentDetailItem();
+//	    int paymentDetailNo = paymentDetailDto.getPaymentDetailNo(); // paymentDetailNo를 전달받는다고 가정
+//
+//	    // memberId 설정
+//	    libraryDto.setMemberId(memberId);
+//	    libraryDto.setGameNo(gameNo);
+//	    libraryDto.setPaymentDetailNo(paymentDetailNo);
+//	    // Library 테이블에 데이터 삽입
+//	    libraryDao.insert(memberId, gameNo, paymentDetailNo);
+//
+//	    return libraryDto;
+//	}
+	
 	@PostMapping("/add")
 	public LibraryDto addToLibrary(@RequestHeader("Authorization") String token,
-														@RequestBody LibraryDto libraryDto) {
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-        String memberId = claimVO.getMemberId();
-        int gameNo = libraryDto.getGameNo();
-        
-        libraryDto.setMemberId(memberId);
-        libraryDto.setGameNo(gameNo);
-        
-        return libraryDto;
+	                               @RequestBody LibraryDto libraryDto) {
+	    // 토큰 검증 및 memberId 가져오기
+	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));  
+	    String memberId = claimVO.getMemberId();
+
+	    // libraryDto에 memberId 설정
+	    libraryDto.setMemberId(memberId);
+
+	    // 로그로 데이터 확인 (logger 사용 권장)
+	    System.out.println("Member ID: " + memberId);
+	    System.out.println("Game No: " + libraryDto.getGameNo());
+	    System.out.println("Payment Detail No: " + libraryDto.getPaymentDetailNo());
+
+	    // Library 테이블에 데이터 삽입
+	    libraryDao.insert(memberId, libraryDto.getGameNo(), libraryDto.getPaymentDetailNo());
+
+	    return libraryDto;
 	}
+
+
 	
 	@DeleteMapping("/{libraryId}")
 	public void delete(@PathVariable int libraryId) {
