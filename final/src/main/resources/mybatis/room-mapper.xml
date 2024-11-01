@@ -25,4 +25,15 @@
 	<delete id="delete">
 		delete room where room_no = #{roomNo}
 	</delete>
+	
+	<select id="listByMember" resultType="RoomVO">
+		select 
+			R.*, nvl2(RM.member_id, 'Y', 'N') "join"
+		from 
+			room R left outer join (
+				select * from room_member where member_id = #{memberId}
+			) RM
+				on R.room_no = RM.room_no
+		order by R.room_no asc
+	</select>
 </mapper>
