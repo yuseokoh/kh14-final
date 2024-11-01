@@ -344,5 +344,20 @@
 			WHERE rn BETWEEN #{beginRow} AND #{endRow}
 		</if>
 	</sql>
+	
+	<select id="selectDeveloperRequests" resultType="MemberDto">
+	    SELECT * 
+	    FROM member 
+	    WHERE member_level = '일반회원' 
+	    AND developer_request = 1
+	    ORDER BY developer_request_date DESC
+	</select>
+	
+	<update id="updateDeveloperRequest" parameterType="map">
+	    UPDATE member 
+	    SET developer_request = #{developerRequest},
+	        developer_request_date = #{developerRequestDate}
+	    WHERE member_id = #{memberId}
+	</update>
 
 </mapper>
