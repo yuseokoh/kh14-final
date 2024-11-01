@@ -4,7 +4,7 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="community">
+<!-- <mapper namespace="community"> -->
 
 
 
@@ -14,7 +14,7 @@
 
 	<!-- 커뮤니티 게시글 목록 및 무한스크롤 -->
 	
-	<!-- <select id="list" resultType="CommunityDto">
+	<!--  <select id="list" resultType="CommunityDto">
 	<include refid="top-n-header"></include>
 	
 		select * from community
@@ -39,16 +39,58 @@
 		<if test="column != null and keyword != null">
 			${column} asc,
 		</if>
-		community_no DESC 내림차순 정렬코드
+		community_no DESC 
 	</select> -->
 	
+	<!-- gpt 무한스크롤 페이징 -->
+	
+	<mapper namespace="community">
+    <!-- 페이징 처리를 위한 SQL 조각 -->
+    <select id="list" resultType="CommunityDto">
+  <include refid="top-n-header"></include> 
+  	select * from community
+  	order by
+  	community_no desc
+  <include refid="top-n-footer"></include>
+  </select>
+
+    <!-- 커뮤니티 목록 조회 쿼리 -->
+    <select id="search" resultType="CommunityDto">
+        <include refid="top-n-header"/>
+        SELECT * FROM community
+        where
+        <if test="column != null and keyword != null">
+        	 instr(${column},#{keyword}) > 0
+        </if>
+        order by 
+		<if test="column != null and keyword != null">
+			${column} asc, 
+		</if>
+        community_no desc
+        <include refid="top-n-footer"/>
+    </select>
+
+	<select id="count" resultType="int">
+		   SELECT count(*) FROM community
+        where
+        <if test="column != null and keyword != null">
+        	 instr(${column},#{keyword}) > 0
+        </if>
+        order by 
+		<if test="column != null and keyword != null">
+			${column} asc, 
+		</if>
+        community_no desc
+	</select>
+
+	
 	<!-- 커뮤니티 게시글 목록 -->
-	<select id="list" resultType="CommunityDto">
+	<!-- <select id="list" resultType="CommunityDto">
 		select
 			*
 		from community
-		order by community_no DESC <!-- 내림차순 정렬코드 -->
-	</select>
+		order by community_no DESC 내림차순 정렬코드
+	</select> -->
 	
 
 	<!-- 커뮤니티 게시글 등록 -->
@@ -121,28 +163,38 @@
 		select * from community
     </select> -->
     
-  
-    <!-- 게시글 작성수 -->
-    <select id="count" resultType="CommunityDto">
-    	select count(community_no) from community where writter_id=#{memberId}
-    </select>
-  
     <!-- 댓글수 나오는거 -->
     <update id="updateReplyCount">
     UPDATE community
     SET community_replies = (SELECT COUNT(*) FROM reply WHERE reply_origin = #{communityNo})
     WHERE community_no = #{communityNo}
 </update>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
+
+
+    
+    
+    	<sql id="top-n-header">
+		<if test="beginRow != null and endRow != null">
+		select * from (
+  			select rownum rn, TMP.* from(
+  		</if>
+	</sql>
+	<sql id="top-n-footer">
+		<if test="beginRow != null and endRow != null">
+		 	)TMP
+		)
+		where rn between #{beginRow} and #{endRow}
+		</if>
+	</sql>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 </mapper>
