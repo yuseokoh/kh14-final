@@ -20,18 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.CommunityDao;
-//import com.game.dao.CommunityImageDao;
+import com.game.dao.CommunityImageDao;
 import com.game.dao.ReplyDao;
 import com.game.dto.CommunityDto;
-//import com.game.dto.CommunityImageDto;
-import com.game.dto.GameDto;
-import com.game.dto.GameImageDto;
+import com.game.dto.CommunityImageDto;
 import com.game.dto.ReplyDto;
 import com.game.error.TargetNotFoundException;
 import com.game.service.AttachmentService;
 import com.game.service.TokenService;
 import com.game.vo.CommunityComplexRequestVO;
 import com.game.vo.CommunityComplexResponseVO;
+
+import io.swagger.v3.oas.annotations.Parameter;
 @CrossOrigin(origins = "http://localhost:3000") 
 @RestController
 @RequestMapping("/community")
@@ -41,18 +41,19 @@ public class CommunityRestController {
 	private CommunityDao communityDao;
 	@Autowired
 	private TokenService tokenService;
-//	@Autowired
-//	private CommunityImageDao communityImageDao;
+	@Autowired
+	private CommunityImageDao communityImageDao;
 	@Autowired
 	private ReplyDao replyDao;
 	@Autowired
 	private AttachmentService attachmentService;
 	
 	
+	
 	//파일첨부 들어가면서 전체 주석-----------------------------------------------------
 	
 	//검색 무한스크롤
-	@PostMapping("/list")
+	@PostMapping("/list") 
 	public CommunityComplexResponseVO search(
 			@RequestBody CommunityComplexRequestVO vo){
 		
@@ -68,29 +69,29 @@ public class CommunityRestController {
 	}
 	
 	// 게시글 목록 조회
-	 @GetMapping("/list")
-	    public List<CommunityDto> getCommunityList() {
-	        return communityDao.CommunityList();
-	    }
+//	 @GetMapping("/list")
+//	    public List<CommunityDto> getCommunityList() {
+//	        return communityDao.CommunityList();
+//	    }
 
 	    // 게시글 등록 (POST 요청)
-	    @PostMapping("/")
-	    public void createCommunity(@RequestBody CommunityDto communityDto) {
-	        communityDao.CommunityInsert(communityDto);
-	    }
+//	    @PostMapping("/")
+//	    public void createCommunity(@RequestBody CommunityDto communityDto) {
+//	        communityDao.CommunityInsert(communityDto);
+//	    }
 
 	    // 게시글 수정 (PUT 요청)
-	    @PutMapping("/{communityNo}")
-	    public void updateCommunity(@PathVariable int communityNo, @RequestBody CommunityDto communityDto) {
-	    	communityDto.setCommunityNo(communityNo);
-	        communityDao.CommunityUpdate(communityDto);
-	    }
+//	    @PutMapping("/{communityNo}")
+//	    public void updateCommunity(@PathVariable int communityNo, @RequestBody CommunityDto communityDto) {
+//	    	communityDto.setCommunityNo(communityNo);
+//	        communityDao.CommunityUpdate(communityDto);
+//	    }
 
 	    // 게시글 삭제 (DELETE 요청)
-	    @DeleteMapping("/{communityNo}")
-	    public void deleteCommunity(@PathVariable int communityNo) {
-	        communityDao.CommunityDelete(communityNo);
-	    }
+//	    @DeleteMapping("/{communityNo}")
+//	    public void deleteCommunity(@PathVariable int communityNo) {
+//	        communityDao.CommunityDelete(communityNo);
+//	    }
 	    
 	    //검색기능
 	    @GetMapping("/search/title/{keyword}")
@@ -101,10 +102,10 @@ public class CommunityRestController {
 	    
 	    
 	 // 게시글 상세 조회 (GET 요청)
-	    @GetMapping("/{communityNo}")
-	    public CommunityDto getCommunityDetail(@PathVariable int communityNo) {
-	        return communityDao.CommunityDetail(communityNo);
-	    }
+//	    @GetMapping("/{communityNo}")
+//	    public CommunityDto getCommunityDetail(@PathVariable int communityNo) {
+//	        return communityDao.CommunityDetail(communityNo);
+//	    }
 	    
 	    
 //	    //명호형이만든거
@@ -135,271 +136,240 @@ public class CommunityRestController {
 	        replyDao.delete(replyNo);
 	    }
 //	    
-	//파일첨부 생긴거때문에 --------------------------------------------------
-//	//등록
-//		@Transactional
-//		@PostMapping(value = "/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//		public void insert(@ModelAttribute CommunityDto noticeDto,
-//				@RequestHeader("Authorization") String token,
-//				@ModelAttribute CommunityInsertImageRequestVO requestVO) 
-//						throws IllegalStateException, IOException {
-//		// 토큰 변환
-//		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-//		// 유효 검증
-//		MemberDto memberDto = memberDao.selectOne(claimVO.getMemberId());
-//		if(memberDto == null) throw new TargetNotFoundException("존재하지 않는 회원");
-//		
-//			int noticeNo = communityDao.sequence();
-//		
-//			noticeDto.setNoticeWriter(claimVO.getMemberId());
-//			noticeDto.setCommunityNo(noticeNo);
-////			System.out.println(noticeDto);
-////			System.out.println(noticeNo);
-//			communityDao.insert(noticeDto);
-//			
-//			//파일 등록
-//			if(requestVO.getAttachList() != null) {
-//				for(MultipartFile attach : requestVO.getAttachList()) {
-//				if(attach.isEmpty()) continue; // 파일이 없다면 스킵
-//						
-//				int attachmentNo = attachmentService.save(attach);
-//				communityDao.connect(communityNo, attachmentNo);
-//				}			
-//			}
-//		
-//		}
-//		@GetMapping("/detail/{noticeNo}")//상세
-//		public CommunityDetailResponseVO detail(
-//				@Parameter(required = true, description = "글 번호(PK)")
-//				@PathVariable int communityNo) {
-//			
-//			CommunityDto communityDto = communityDao.selectOne(communityNo);
-//			if(communityDto == null) throw new TargetNotFoundException();
-//			
-//			// 해당 게시글의 이미지 번호들을 조회하여 전달
-//			List<Integer> images = communityDao.findImages(communityNo);
-//			
-//			CommunityDetailResponseVO responseVO = new CommunityDetailResponseVO();
-//			responseVO.setCommunityDto(communityDto);
-//			responseVO.setImages(images);
-//			return responseVO;
-////			return noticeDto;
-//		}
-//		
-////		@PostMapping("/list")//목록 + 페이징 + 검색
-////		public NoticeListResponseVO list(@RequestBody NoticeListRequestVO vo){
-////			int count = noticeDao.countWithPaging(vo);
-////			boolean last = vo.getEndRow() == null  || count <= vo.getEndRow();
-////			NoticeListResponseVO response = new NoticeListResponseVO();
-////			response.setNoticeList(noticeDao.selectListByPaging(vo));
-////			response.setCount(count);
-////			response.setLast(last);
-////			return response;
-////		}	
-//		
-//		@GetMapping("/list")
-//		public List<CommunityDto> list(){
-//			return communityDao.selectList();
-//		}
-//		
-//		@GetMapping("/list/column/{column}/keyword/{keyword}")
-//		public List<CommunityDto> list(@PathVariable String column, @PathVariable String keyword) {
-//			return communityDao.selectList(column, keyword);
-//		}
-//		
-//		//수정
-//		@Transactional
-//		@PostMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//		public void update(
-//				@RequestHeader("Authorization") String token,
-//				@ModelAttribute CommunityEditRequestVO requestVO) throws IllegalStateException, IOException {
-//			// 토큰 변환
-//		    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-//			//공지사항 업데이트
-////			boolean result = noticeDao.update(noticeDto);
-////			if(result == false) {
-////				throw new TargetNotFoundException();
-////			}
-//			CommunityDto originDto = communityDao.selectOne(requestVO.getCommunityNo());
-//			if(originDto == null) throw new TargetNotFoundException("존재하지 않는 게시글");
-//			
-//			//작성자 확인
-//					boolean isOwner = originDto.getCommunityWriter().equals(claimVO.getMemberId());
-//					if(!isOwner) {
-//						throw new IllegalStateException("본인의 글만 수정할 수 있습니다.");
-//					}
-//			
-//			// 이미지 처리 수정 전
-//			Set<Integer> before = new HashSet<>();
-//			List<Integer> beforeList = communityDao.findImages(originDto.getCommunityNo());
-//			for(int i=0; i<beforeList.size();i++){
-//				before.add(beforeList.get(i));
-//			}
-//			
-//			//이미지 처리 수정 후
-////			List<Integer> beforeImages = noticeDao.findImages(originDto.getNoticeNo()); // 기존 이미지 목록
-//			Set<Integer> after = new HashSet<>(); // 기존 이미지 세트
-//			communityDao.deleteImage(requestVO.getCommunityNo());
-//			int afterSize = requestVO.getOriginList().size();
-//			for(int i=0; i<afterSize;i++) {
-//				int attachmentNo = requestVO.getOriginList().get(i);
-//				communityDao.connect(requestVO.getCommunityNo(), attachmentNo);
-//				after.add(attachmentNo);
-//			}
-//
-//			//수정전 - 수정후 계산
-//			before.removeAll(after);
-//			
-//			//before에 남아있는 번호에 해당하는 파일 모두 삭제
-//			for(int attachmentNo : before) {
-//				attachmentService.delete(attachmentNo);
-//			}
-//			//attachList 신규첨부
-//			if(requestVO.getAttachList() != null) {
-//				int attachListSize = requestVO.getAttachList().size();
-//				for(int i=0; i<attachListSize; i++) {
-//					int attachmentNo = attachmentService.save(requestVO.getAttachList().get(i));
-//					communityDao.connect(requestVO.getCommunityNo(), attachmentNo);
-//					after.add(attachmentNo);
-//				}
-//			}
-//			//게시글 정보 수정
-//			CommunityDto communityDto = new CommunityDto();
-//			communityDto.setCommunityTitle(requestVO.getCommunityTitle());
-//			communityDto.setCommunityContent(requestVO.getCommunityContent());
-//			communityDto.setCommunityCategory(requestVO.getCommunityType());
-//			communityDto.setCommunityNo(requestVO.getCommunityNo());
-//			
-//			communityDao.update(communityDto);	
-//		}
-//		
-//		@DeleteMapping("/delete/{communityNo}")//삭제
-//		public void delete(
-//				@RequestHeader("Authorization") String token,
-//				@PathVariable int communityNo) throws IllegalStateException, IOException {
-//			
-//			// 토큰 변환
-//		    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-//		    
-//		    if (!claimVO.getMemberId().equals(claimVO.getMemberId())) {
-//	            throw new IllegalStateException("본인의 글만 삭제할 수 있습니다.");
-//	        }
-//		    
-//			CommunityDto communityDto = communityDao.selectOne(communityNo);
-//			if(communityDto == null)
-//				throw new TargetNotFoundException("존재하지 않는 게시글");
-//			
-//			List<Integer> list = communityDao.findImages(communityNo);
-//			for(int i=0;i<list.size();i++) {
-//				attachmentService.delete(list.get(i));
-//			}
-//			boolean isOwner =  communityDto.getCommunityWriter().equals(claimVO.getMemberId());
-//		    if(isOwner) {
-//		    	communityDao.delete(communityNo);
-//		    	
-//			communityDao.delete(communityNo);// 게시글 삭제
-//			communityDao.deleteImage(communityNo);    
-//		}
-//	}
+	
 	    
-//	 // 이미지 첨부 기능이 포함된 게시글 등록 (POST 요청)
-//	    @PostMapping("/with-images")
-//	    public void insert(
+//이미지 때문에 등록,수정,삭제,상세조회 바꾼 코드------------------------
+	    
+//	 // 게시글 등록 (파일 첨부 포함)
+//	    @PostMapping("/")
+//	    public void createCommunity(
 //	            @RequestPart("community") CommunityDto communityDto,
-//	            @RequestPart(value = "files", required = false) List<MultipartFile> files) 
-//	            throws IllegalStateException, IOException {
-//
-//	        // 1. 게시글 정보 등록
-//	        communityDao.insert(communityDto);
+//	            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IllegalStateException, IOException {
+//	        communityDao.CommunityInsert(communityDto);
 //	        
-//	        // 2. 이미지가 있다면 자동으로 연결
 //	        if (files != null && !files.isEmpty()) {
 //	            for (MultipartFile file : files) {
-//	                // 첨부파일 저장
-//	                int attachmentNo = attachmentService.save(file);
-//	                
-//	                // 게시글-이미지 연결정보 저장
+//	                int attachmentNo = AttachmentService.save(file);
 //	                CommunityImageDto communityImageDto = new CommunityImageDto();
-//	                communityImageDto.setAttachmentNo(attachmentNo);
 //	                communityImageDto.setCommunityNo(communityDto.getCommunityNo());
-//	                communityImageDao.insert(communityImageDto);
+//	                communityImageDto.setAttachmentNo(attachmentNo);
+//	                communityImageDao.insertCommunityImage(communityImageDto);
 //	            }
 //	        }
 //	    }
-//	    
-//	    @PutMapping("/") // 수정
-//	    public void update(
-//	    		@RequestPart("community") CommunityDto communityDto,
-//	    		@RequestPart(value = "files", required = false)
-//	    		List<MultipartFile> files) 
-//	    		throws IllegalStateException, IOException{
-//	    	//1.게임 정보 수정
-//	        boolean result = communityDao.update(communityDto);
-//	        if (!result) {
-//	            throw new TargetNotFoundException("존재하지 않는 게임정보");
-//	        }
-//	        
-//	        //2. 새로운 이미지가 있다면 자동으로 연결
-//	        if(files != null && !files.isEmpty()) {
-//	        	for(MultipartFile file : files) {
-//	        		int attachmentNo = attachmentService.save(file);
-//	        		
-//	        		CommunityImageDto communityImageDto = new CommunityImageDto();
-//	        		communityImageDto.setAttachmentNo(attachmentNo);
-//	        		communityImageDto.setCommunityNo(communityDto.getCommunityNo());
-//	        		communityImageDao.insert(communityImageDto);
-//	        	}
-//	        }
-//	    }
-	    
-	    
-	    
-	    
-	    
-	    
-//	  //게임의 이미지 목록을 조회하는 엔드포인트
-//	    @GetMapping("/image/{communityNo}")
-//	    public List<CommunityImageDto> getCommunityImages(@PathVariable int communityNo){
-//	    	return communityImageDao.selectList(communityNo);
-//	    }
-//	    
-//	    //첨부파일을 하나씩 업로드하는 엔드포인트
-//	    @PostMapping("/upload/{communityNo}")
-//	    public int uploadCommunityImage(
-//	    		@PathVariable int communityNo,
-//	    		@RequestParam("file") MultipartFile file)
-//	    		throws IllegalStateException, IOException{
-//	    	//1. 첨부파일 저장
-//	    	int attachmentNo = attachmentService.save(file);
-//	    	
-//	    	//2. 게임 이미지 정보 저장
-//	    	CommunityImageDto communityImageDto = new CommunityImageDto();
-//	    	communityImageDto.setAttachmentNo(attachmentNo);
-//	    	communityImageDto.setCommunityNo(communityNo);
-//	    	communityImageDao.insert(communityImageDto);
-//	    	
-//	    	return attachmentNo;
-//	    }
-//	    
-//	    //여러 첨부파일을 한번에 업로드하는 엔드포인트
-//	    @PostMapping("/upload/multiple/{communityNo}")
-//	    public void uploadCommunityImages(
-//	            @PathVariable int communityNo, 
-//	            @RequestParam("files") List<MultipartFile> files) throws IllegalStateException, IOException {
-//	        
-//	        for (MultipartFile file : files) {
-//	            int attachmentNo = attachmentService.save(file);
-//	            System.out.println("Saved file with attachmentNo: " + attachmentNo);
-//	            
-//	            CommunityImageDto communityImageDto = new CommunityImageDto();
-//	            communityImageDto.setAttachmentNo(attachmentNo);
-//	            communityImageDto.setCommunityNo(communityNo);
-//	            
-//	            communityImageDao.insert(communityImageDto);
-//	            System.out.println("Inserted community image with communityNo: " + communityNo + ", attachmentNo: " + attachmentNo);
+//
+//	    // 게시글 수정 (파일 첨부 업데이트 포함)
+//	    @PutMapping("/{communityNo}")
+//	    public void updateCommunity(
+//	            @PathVariable int communityNo,
+//	            @RequestPart("community") CommunityDto communityDto,
+//	            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IllegalStateException, IOException {
+//	        communityDto.setCommunityNo(communityNo);
+//	        communityDao.CommunityUpdate(communityDto);
+//
+//	        // 기존 첨부 파일 삭제
+//	        communityImageDao.deleteCommunityImages(communityNo);
+//
+//	        // 새로운 첨부 파일 추가
+//	        if (files != null && !files.isEmpty()) {
+//	            for (MultipartFile file : files) {
+//	                int attachmentNo = AttachmentService.save(file);
+//	                CommunityImageDto communityImageDto = new CommunityImageDto();
+//	                communityImageDto.setCommunityNo(communityNo);
+//	                communityImageDto.setAttachmentNo(attachmentNo);
+//	                communityImageDao.insertCommunityImage(communityImageDto);
+//	            }
 //	        }
 //	    }
+//
+//	    // 게시글 삭제 (첨부 파일 삭제 포함)
+//	    @DeleteMapping("/{communityNo}")
+//	    public void deleteCommunity(@PathVariable int communityNo) {
+//	        // 커뮤니티 게시글 삭제
+//	        communityDao.CommunityDelete(communityNo);
+//
+//	        // 첨부 파일 삭제
+//	        List<CommunityImageDto> attachments = communityImageDao.selectByCommunityNo(communityNo);
+//	        if (attachments != null && !attachments.isEmpty()) {
+//	            for (CommunityImageDto attachment : attachments) {
+//	                AttachmentService.delete(attachment.getAttachmentNo());
+//	            }
+//	        }
+//
+//	        // 첨부 파일 관계 삭제
+//	        communityImageDao.deleteCommunityImages(communityNo);
+//	    }
+//	 // 특정 커뮤니티 글의 이미지 목록 조회
+//	    @GetMapping("/images/{communityNo}")
+//	    public List<CommunityImageDto> getCommunityImages(@PathVariable int communityNo) {
+//	        return communityImageDao.selectByCommunityNo(communityNo);
+//	    }
+//	
+//	 // 특정 게시글 상세 조회와 이미지 함께 가져오기
+//	    @GetMapping("/{communityNo}")
+//	    public CommunityComplexResponseVO getCommunityDetail(@PathVariable int communityNo) {
+//	        CommunityDto community = communityDao.CommunityDetail(communityNo);
+//	        List<CommunityImageDto> images = communityImageDao.selectByCommunityNo(communityNo);
+//
+//	        CommunityComplexResponseVO response = new CommunityComplexResponseVO();
+//	        response.setCommunityDto(community);
+//	        response.setImages(images);
+//
+//	        return response;
+//	    }
+//----------------------------------------------------------------------------DB에 들어가게 한 코드
 	    
+	    
+	    
+	    
+	    
+	    
+	    //game이미지보고 만든거
+	    @PostMapping("/") // 게시글 등록 및 이미지 첨부
+	    public void insert(
+	            @RequestPart("community") CommunityDto communityDto,
+	            @RequestPart(value = "files", required = false) List<MultipartFile> files) 
+	            throws IllegalStateException, IOException {
+	        
+	        // 1. 게시글 등록
+	        communityDao.CommunityInsert(communityDto);
+	        
+	        // 2. 게시글 삽입 후 communityNo 값 설정 확인
+	        if (communityDto.getCommunityNo() == 0) {
+	            int generatedCommunityNo = communityDao.getLastInsertId(); // communityDao에 getLastInsertId 메서드 추가 필요
+	            communityDto.setCommunityNo(generatedCommunityNo);
+	        }
+	        
+	        // 3. 첨부 파일 저장 및 community_image 테이블에 추가
+	        if (files != null && !files.isEmpty()) {
+	            for (MultipartFile file : files) {
+	                int attachmentNo = attachmentService.save(file); // 파일을 저장하고 attachmentNo 반환
+	                
+	                // 커뮤니티 이미지 정보 생성 및 삽입
+	                CommunityImageDto communityImageDto = new CommunityImageDto();
+	                communityImageDto.setAttachmentNo(attachmentNo);
+	                communityImageDto.setCommunityNo(communityDto.getCommunityNo());
+	                communityImageDao.insert(communityImageDto);
+	            }
+	        }
+	    }
+	    
+	    @PutMapping("/") // 수정
+	    public void update(
+	    		@RequestPart("community") CommunityDto communityDto,
+	    		@RequestPart(value = "files", required = false)
+	    		List<MultipartFile> files) 
+	    		throws IllegalStateException, IOException{
+	    	//1.게임 정보 수정
+	        boolean result = communityDao.update(communityDto);
+	        if (!result) {
+	            throw new TargetNotFoundException("존재하지 않는 게임정보");
+	        }
+	        
+	        //2. 새로운 이미지가 있다면 자동으로 연결
+	        if(files != null && !files.isEmpty()) {
+	        	for(MultipartFile file : files) {
+	        		int attachmentNo = attachmentService.save(file);
+	        		
+	        		CommunityImageDto communityImageDto = new CommunityImageDto();
+	        		communityImageDto.setAttachmentNo(attachmentNo);
+	        		communityImageDto.setCommunityNo(communityDto.getCommunityNo());
+	        		communityImageDao.insert(communityImageDto);
+	        	}
+	        }
+	    }
+	    
+	    @DeleteMapping("/{communityNo}") // 삭제
+	    public void delete(@PathVariable int communityNo) {
+	        boolean result = communityDao.delete(communityNo);
+	        if (!result) {
+	            throw new TargetNotFoundException("존재하지 않는 게임정보");
+	        }
+	    }
+	    
+	    
+	    
+	    	
+	    @GetMapping("/{communityNo}")//상세
+	    public CommunityDto detail(
+	    		@Parameter(required = true, description = "도서번호(pk)")
+	    		@PathVariable int communityNo) {
+	        CommunityDto communityDto = communityDao.selectOne(communityNo);
+	        if (communityDto == null) {
+	            throw new TargetNotFoundException("존재하지 않는 게임입니다");
+	        }
+	        return communityDto;
+	    }
+	    
+	
+	  //게임의 이미지 목록을 조회하는 엔드포인트
+	    @GetMapping("/image/{communityNo}")
+	    public List<CommunityImageDto> getCommunityImages(@PathVariable int communityNo){
+	    	return communityImageDao.selectList(communityNo);
+	    }
+	    
+	    //이미지 다운로드를 처리하는 엔드포인트
+	    @GetMapping("/download/{attachmentNo}")
+	    public ResponseEntity<ByteArrayResource> downloadImage(@PathVariable int attachmentNo) throws IOException {
+	        return attachmentService.find(attachmentNo); // 파일을 읽고 ByteArrayResource로 반환
+	    }
+
+	    
+	    //첨부파일을 하나씩 업로드하는 엔드포인트
+	    @PostMapping("/upload/{communityNo}")
+	    public int uploadCommunityImage(
+	    		@PathVariable int communityNo,
+	    		@RequestParam("file") MultipartFile file)
+	    		throws IllegalStateException, IOException{
+	    	//1. 첨부파일 저장
+	    	int attachmentNo = attachmentService.save(file);
+	    	
+	    	//2. 게임 이미지 정보 저장
+	    	CommunityImageDto communityImageDto = new CommunityImageDto();
+	    	communityImageDto.setAttachmentNo(attachmentNo);
+	    	communityImageDto.setCommunityNo(communityNo);
+	    	communityImageDao.insert(communityImageDto);
+	    	
+	    	return attachmentNo;
+	    }
+	    
+	    //여러 첨부파일을 한번에 업로드하는 엔드포인트
+	    @PostMapping("/upload/multiple/{communityNo}")
+	    public void uploadCommunityImages(
+	    		@PathVariable int communityNo, 
+	    		@RequestParam("files") List<MultipartFile> files)
+	    		throws IllegalStateException, IOException{
+		    	//1. 게임 이미지 정보 저장
+		    	for(MultipartFile file : files) {
+		    		int attachmentNo = attachmentService.save(file);
+	    		
+	    		//2. 게임 이미지 정보 저장
+	        	CommunityImageDto communityImageDto = new CommunityImageDto();
+	        	communityImageDto.setAttachmentNo(attachmentNo);
+	        	communityImageDto.setCommunityNo(communityNo);
+	        	communityImageDao.insert(communityImageDto);
+	    	}
+	    }
+	    
+	    @PutMapping("/community/{communityNo}")
+	    public ResponseEntity<?> updateCommunity(
+	            @PathVariable int communityNo,
+	            @RequestParam("communityTitle") String communityTitle,
+	            @RequestParam("communityContent") String communityContent,
+	            @RequestParam("communityState") String communityState,
+	            @RequestParam("communityCategory") String communityCategory,
+	            @RequestPart(name = "file", required = false) MultipartFile file) {
+	        
+	        // Community 업데이트 로직 작성 (예: communityService.update(communityNo, communityTitle, ...))
+
+	        return ResponseEntity.ok().build();
+	    }
+	    
+	    
+	    
+	    
+	    
+	
 	    
 	    
 }

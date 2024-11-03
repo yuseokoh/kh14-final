@@ -40,26 +40,44 @@ public class CommunityDao {
 		sqlSession.insert("community.insert", communityDto);
 	}
 	
-	//게시글 삭제
-	public void CommunityDelete(int communityNo) {
-		sqlSession.delete("community.delete", communityNo);
-	}
-	
-	//게시글 수정
-	public void CommunityUpdate(CommunityDto communityDto) {
-		sqlSession.update("community.update", communityDto);
-	}
-	
-//	//이미지 때문에 생긴 수정
-//	public boolean update(CommunityDto communityDto) {
-//		return sqlSession.update("community.update", communityDto) > 0;
-//		
+	//gpt 이미지성공삽입
+//	public void CommunityInsert(CommunityDto communityDto) {
+//	    // 게시글을 먼저 삽입합니다.
+//	    sqlSession.insert("community.insert", communityDto);
+//
+//	    // 삽입 후 시퀀스를 조회하여 커뮤니티 번호를 설정합니다.
+//	    int communityNo = sqlSession.selectOne("community.selectCurrentSequence");
+//	    communityDto.setCommunityNo(communityNo);
 //	}
-//	//이미지 때문에 생긴 수정
-//	 public void insert(CommunityDto communityDto) {
-//	        sqlSession.insert("community.insert", communityDto);
-//	    }
+	
+	//-------------------------------game 이미지보고다시만든거
+	 public boolean update(CommunityDto communityDto) {
+	        int result = sqlSession.update("community.update", communityDto);
+	        return result > 0;
+	    }
+	 public boolean delete(int communityNo) {
+	        return sqlSession.delete("community.delete", communityNo) > 0;
+	    }
+	 
+	 public CommunityDto selectOne(int communityNo) {
+	        return sqlSession.selectOne("community.detail", communityNo);
+	    }
+	 public int getLastInsertId() {
+		    return sqlSession.selectOne("community.selectCurrentSequence");
+		}
+	
 
+
+	
+	//게시글 삭제 ----------이미지 첨부실패시 다시 원상복귀 기존에 쓰는거
+//	public void CommunityDelete(int communityNo) {
+//		sqlSession.delete("community.delete", communityNo);
+//	}
+	
+	//게시글 수정 ----------이미지 첨부실패시 다시 원상복귀 기존에 쓰는거
+//	public void CommunityUpdate(CommunityDto communityDto) {
+//		sqlSession.update("community.update", communityDto);
+//	}
 	
 	//제목 검색
 	public List<CommunityDto> SearchByTitle(String keyword) {
@@ -87,20 +105,6 @@ public class CommunityDao {
         return sqlSession.selectOne("community.detail", communityNo);
     }
 
-	
-    
-    
-//    //이미지쉐리떄문에
-//	public void insert(CommunityDto communityDto) {
-//        sqlSession.insert("community.insert", communityDto);
-//    }
-//
-//    public boolean update(CommunityDto communityDto) {
-//        int result = sqlSession.update("community.fix", communityDto);
-//        return result > 0;
-//    }
-    
-    
 
     
     
