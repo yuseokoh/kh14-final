@@ -7,7 +7,7 @@
 <mapper namespace="communityReaction">
     <!-- 특정 게시물에 대해 회원의 반응 여부 확인 -->
     <select id="hasReaction" resultType="int">
-        SELECT COUNT()
+        SELECT COUNT(*)
         FROM community_reaction
         WHERE member_id = #{memberId} AND community_no = #{communityNo}
     </select>
@@ -26,7 +26,7 @@
 
     <!-- 특정 게시물의 좋아요 개수 조회 -->
     <select id="countLikes" resultType="int">
-        SELECT COUNT()
+        SELECT COUNT(*)
         FROM community_reaction
         WHERE community_no = #{communityNo} AND reaction_type = 'L'
     </select>

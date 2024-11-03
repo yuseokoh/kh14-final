@@ -58,8 +58,8 @@
     <select id="search" resultType="CommunityDto">
         <include refid="top-n-header"/>
         SELECT * FROM community
-        where
         <if test="column != null and keyword != null">
+        where
         	 instr(${column},#{keyword}) > 0
         </if>
         order by 
@@ -72,8 +72,8 @@
 
 	<select id="count" resultType="int">
 		   SELECT count(*) FROM community
-        where
         <if test="column != null and keyword != null">
+        where
         	 instr(${column},#{keyword}) > 0
         </if>
         order by 
@@ -92,9 +92,26 @@
 		order by community_no DESC 내림차순 정렬코드
 	</select> -->
 	
+	<!-- gpt 1차DB성공코드-->
+	<!-- <select id="selectCurrentSequence" resultType="int">
+        SELECT community_seq.CURRVAL FROM DUAL
+    </select> -->
+    
+    <!-- gpt 1차 DB성공코드 -->
+    <!-- <select id="selectByCommunityNo" resultType="com.game.dto.CommunityImageDto">
+    SELECT community_no, attachment_no
+    FROM community_image
+    WHERE community_no = #{communityNo}
+</select> -->
+    
+    <!-- 게임이미지하면서 한거 -->
+    <select id="selectCurrentSequence" resultType="int">
+    SELECT community_seq.CURRVAL FROM DUAL
+</select>
+	
 
-	<!-- 커뮤니티 게시글 등록 -->
-	<insert id="insert" >
+	<!-- 커뮤니티 게시글 등록 --><!-- parameterType="com.game.dto.CommunityDto" 이것도DB1 -->
+	<insert id="insert">
     INSERT INTO community (
     	
         community_no,
@@ -120,6 +137,7 @@
         #{communityReplies}
     )
 	</insert>
+	
 
 	<!-- 커뮤니티 게시글 삭제 -->
 	<delete id="delete" >
