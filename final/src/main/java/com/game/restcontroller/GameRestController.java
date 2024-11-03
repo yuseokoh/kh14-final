@@ -562,6 +562,8 @@ public class GameRestController {
         @RequestParam(defaultValue = "5") int minReviews,
         @RequestParam(defaultValue = "10") int limit
     ) {
+        System.out.println("Top-rated games 요청 수신 - minReviews: " + minReviews + ", limit: " + limit);
         return gameScoreStatsDao.listTopRatedGames(minReviews, limit);
     }
+
  }

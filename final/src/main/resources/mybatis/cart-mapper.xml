@@ -12,7 +12,7 @@
 	</insert>
     
     <delete id="delete">
-        DELETE FROM cart WHERE cart_id = #{cartId}
+        DELETE FROM cart WHERE game_no = #{gameNo}
     </delete>
     
      <select id="listbygameTilte" resultType="CartDto">

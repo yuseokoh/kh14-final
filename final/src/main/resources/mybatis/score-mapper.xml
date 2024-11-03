@@ -45,11 +45,14 @@
         and review_count >= #{minReviews}
     </select>
 
-    <!-- 평점 높은 순으로 게임 조회 -->
     <select id="listTopRatedGames" resultType="GameScoreStatsDto">
+    <![CDATA[
+    select * from (
         select * from game_score_stats
         where review_count >= #{minReviews}
         order by average_score desc, review_count desc
-        fetch first #{limit} rows only
-    </select>
+    ) where ROWNUM <= #{limit}
+    ]]>
+</select>
+
 </mapper>
