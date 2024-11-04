@@ -30,12 +30,14 @@ import com.game.dao.GameImageDao;
 import com.game.dao.GameScoreStatsDao;
 import com.game.dao.MemberReviewDao;
 import com.game.dao.PaymentDao;
+import com.game.dao.SystemRequirementDao;
 import com.game.dto.GameDto;
 import com.game.dto.GameImageDto;
 import com.game.dto.GameScoreStatsDto;
 import com.game.dto.MemberReviewDto;
 import com.game.dto.PaymentDetailDto;
 import com.game.dto.PaymentDto;
+import com.game.dto.SystemRequirementDto;
 import com.game.error.TargetNotFoundException;
 import com.game.service.AttachmentService;
 import com.game.service.KakaoPayService;
@@ -89,6 +91,9 @@ public class GameRestController {
     
     @Autowired
     private GameScoreStatsDao gameScoreStatsDao;
+    
+    @Autowired
+    private SystemRequirementDao systemRequirementDao;
     
     // 조회매핑 API 문서 설명 추가
     @Operation(
@@ -155,28 +160,38 @@ public class GameRestController {
         }
     }
     
-    @PutMapping("/") // 수정
+    @PutMapping("/{gameNo}") // URL 매핑 수정
     public void update(
-    		@RequestPart("game") GameDto gameDto,
-    		@RequestPart(value = "files", required = false)
-    		List<MultipartFile> files) 
-    		throws IllegalStateException, IOException{
-    	//1.게임 정보 수정
+        @PathVariable int gameNo,
+        @RequestPart("game") GameDto gameDto,
+        @RequestPart(value = "files", required = false) List<MultipartFile> files,
+        @RequestParam(value = "deletedImageNos", required = false) List<Integer> deletedImageNos
+    ) throws IllegalStateException, IOException {
+        // gameNo를 DTO에 설정
+        gameDto.setGameNo(gameNo);
+        
+        // 1. 게임 정보 수정
         boolean result = gameDao.update(gameDto);
         if (!result) {
             throw new TargetNotFoundException("존재하지 않는 게임정보");
         }
         
-        //2. 새로운 이미지가 있다면 자동으로 연결
-        if(files != null && !files.isEmpty()) {
-        	for(MultipartFile file : files) {
-        		int attachmentNo = attachmentService.save(file);
-        		
-        		GameImageDto gameImageDto = new GameImageDto();
-        		gameImageDto.setAttachmentNo(attachmentNo);
-        		gameImageDto.setGameNo(gameDto.getGameNo());
-        		gameImageDao.insert(gameImageDto);
-        	}
+        // 2. 삭제할 이미지 처리
+        if (deletedImageNos != null && !deletedImageNos.isEmpty()) {
+            for (Integer attachmentNo : deletedImageNos) {
+                gameImageDao.delete(gameNo, attachmentNo);
+            }
+        }
+        
+        // 3. 새로운 이미지 추가
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                int attachmentNo = attachmentService.save(file);
+                GameImageDto gameImageDto = new GameImageDto();
+                gameImageDto.setAttachmentNo(attachmentNo);
+                gameImageDto.setGameNo(gameNo);
+                gameImageDao.insert(gameImageDto);
+            }
         }
     }
     
@@ -562,8 +577,35 @@ public class GameRestController {
         @RequestParam(defaultValue = "5") int minReviews,
         @RequestParam(defaultValue = "10") int limit
     ) {
-        System.out.println("Top-rated games 요청 수신 - minReviews: " + minReviews + ", limit: " + limit);
         return gameScoreStatsDao.listTopRatedGames(minReviews, limit);
     }
-
+    
+    @GetMapping("/{gameNo}/review/check")
+    public Map<String, Boolean> checkReviewStatus(
+        @PathVariable int gameNo,
+        @RequestHeader(required = true) String Authorization
+    ) {
+        // 토큰 검증
+        if(!tokenService.isBearerToken(Authorization)) {
+            throw new TargetNotFoundException("로그인이 필요합니다.");
+        }
+        
+        // 토큰에서 회원 정보 추출
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(Authorization));
+        String memberId = claimVO.getMemberId();
+        
+        // 리뷰 존재 여부 확인
+        boolean hasReview = memberReviewDao.existsByMemberAndGame(memberId, gameNo);
+        
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("hasReview", hasReview);
+        
+        return response;
+    }
+    @GetMapping("/requirements/{gameNo}")
+    public List<SystemRequirementDto> getSystemRequirements(@PathVariable int gameNo) {
+        return systemRequirementDao.findByGameNo(gameNo);
+    }    
  }
+
+
