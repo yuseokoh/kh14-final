@@ -36,4 +36,8 @@
 		delete community_image
 		where attachment_no = #{attachmentNo} and community_no = #{communityNo}
 	</delete>
+	
+	<select id="exists" resultType="int">
+    SELECT COUNT(*) FROM community_image WHERE attachment_no = #{attachmentNo}
+</select>
 </mapper>

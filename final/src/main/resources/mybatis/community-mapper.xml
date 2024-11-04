@@ -113,8 +113,8 @@
 	<!-- 커뮤니티 게시글 등록 --><!-- parameterType="com.game.dto.CommunityDto" 이것도DB1 -->
 	<insert id="insert">
     INSERT INTO community (
-    	
         community_no,
+    	community_writer,
         community_category,
         community_title,
         community_content,
@@ -126,6 +126,7 @@
         community_replies
     ) VALUES (
         community_seq.NEXTVAL,  <!-- 시퀀스 사용 -->
+        #{communityWriter},
         #{communityCategory},
         #{communityTitle},
         #{communityContent},
@@ -142,7 +143,7 @@
 	<!-- 커뮤니티 게시글 삭제 -->
 	<delete id="delete" >
 		delete from community
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter }--><!-- 글 번호 -->
+		where community_no = #{communityNo}  <!-- and community_writer = #{communityWriter } --><!-- 글 번호 -->
 	</delete>
 
 	<!-- 커뮤니티 게시글 수정 -->
@@ -152,8 +153,9 @@
 		community_title = #{communityTitle}, <!-- 글 제목 -->
 		community_content = #{communityContent, jdbcType=VARCHAR}, <!-- 글 내용 -->
 		community_state = #{communityState, jdbcType=VARCHAR},
-		community_category = #{communityCategory, jdbcType=VARCHAR} <!-- 공개, 비공개 변경 null값 할 수 있게-->
-		where community_no = #{communityNo} <!-- and community_writer = #{communityWriter }--> <!-- 글 번호 -->
+		community_category = #{communityCategory, jdbcType=VARCHAR}, <!-- 공개, 비공개 변경 null값 할 수 있게-->
+		 community_utime = SYSDATE <!-- 수정 시간 업데이트 -->
+		where community_no = #{communityNo}  <!-- and community_writer = #{communityWriter } --> <!-- 글 번호 -->
 	</update>
 
 	<!-- 특정 게시글 상세 조회 -->
