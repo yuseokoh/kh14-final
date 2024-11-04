@@ -3,8 +3,12 @@
 
 <mapper namespace="roomMember">
 	<insert id="enter">
-		insert into room_member(room_no, member_id)
-		values(#{roomNo}, #{memberId})
+		merge into room_member RM
+			using dual
+				on (RM.room_no = #{roomNo} and RM.member_id = #{memberId})
+				when not matched then
+    		insert (room_no, member_id)
+    	values (#{roomNo}, #{memberId})
 	</insert>
 	
 	<delete id="leave">
