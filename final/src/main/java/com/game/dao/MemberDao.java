@@ -325,5 +325,15 @@ public class MemberDao {
     public boolean updateDeveloperRequest(Map<String, Object> params) {
         return sqlSession.update("member.updateDeveloperRequest", params) > 0;
     }
+    
+    public boolean updateMemberLevel(Map<String, Object> params) {
+        try {
+            int result = sqlSession.update("member.updateMemberLevel", params);
+            return result > 0;
+        } catch (Exception e) {
+            log.error("회원 레벨 업데이트 중 오류 발생", e);
+            return false;
+        }
+    }
 
 }

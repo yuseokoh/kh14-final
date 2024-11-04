@@ -398,98 +398,187 @@ public class MemberRestController {
     	
     	return attachment;
     }
-    
     // memberLevel = '관리자'인 회원 전용기능
     // memberLevel = '일반회원'의 정보수정
-	 @PostMapping("/developer-request")
-	 public ResponseEntity<?> requestDeveloperRole(@RequestBody Map<String, String> request) {
-	     String memberId = request.get("memberId");
-	     
+    @PostMapping("/developer-request")
+    public ResponseEntity<?> requestDeveloperRole(@RequestBody Map<String, String> request) {
+        String memberId = request.get("memberId");
+        System.out.println("개발자 권한 요청 received - memberId: " + memberId); // 로그 추가
+        
+        try {
+            MemberDto member = memberDao.selectOne(memberId);
+            
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                   .body("회원을 찾을 수 없습니다.");
+            }
+            
+            if (!"일반회원".equals(member.getMemberLevel())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                   .body("일반회원만 개발자 권한을 요청할 수 있습니다.");
+            }
+
+            // 이미 요청이 있는지 확인
+            if (member.getDeveloperRequest() == 1) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                                   .body("이미 개발자 권한 요청이 진행 중입니다.");
+            }
+
+            // 요청 정보 업데이트
+            Map<String, Object> params = new HashMap<>();
+            params.put("memberId", memberId);
+            params.put("developerRequest", 1);
+            // new Date() 대신 현재 시간을 얻는 다른 방법 사용
+            params.put("developerRequestDate", new Date(System.currentTimeMillis()));
+            
+            boolean result = memberDao.updateDeveloperRequest(params);
+            System.out.println("개발자 권한 요청 업데이트 결과: " + result); // 로그 추가
+            
+            if (result) {
+                return ResponseEntity.ok("개발자 권한 요청이 완료되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                   .body("요청 처리 중 오류가 발생했습니다.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                               .body("서버 오류가 발생했습니다.");
+        }
+    }
+		 
+	 // 새로운 관리자용 회원정보 수정 엔드포인트
+	 @PutMapping("/admin/edit/{memberId}")
+	 public ResponseEntity<?> adminEditMember(
+	         @PathVariable String memberId,
+	         @RequestBody MemberDto memberDto,
+	         @RequestHeader("Authorization") String token) {
 	     try {
-	         MemberDto member = memberDao.selectOne(memberId);
+	         // 토큰에서 현재 로그인한 사용자 정보 추출
+	         String accessToken = token.replace("Bearer ", "");
+	         MemberClaimVO claimVO = tokenService.check(accessToken);
 	         
-	         if (member == null) {
-	             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                                .body("회원을 찾을 수 없습니다.");
+	         // 관리자 권한 체크
+	         MemberDto admin = memberDao.selectOne(claimVO.getMemberId());
+	         if (!"관리자".equals(admin.getMemberLevel())) {
+	             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                     .body("관리자만 접근 가능합니다.");
 	         }
-	         
-	         if (!"일반회원".equals(member.getMemberLevel())) {
+	
+	         // URL의 memberId와 요청 바디의 memberId가 일치하는지 확인
+	         if (!memberId.equals(memberDto.getMemberId())) {
 	             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                                .body("일반회원만 개발자 권한을 요청할 수 있습니다.");
+	                     .body("잘못된 회원 정보입니다.");
+	         }
+	
+	         // 수정하려는 회원이 존재하는지 확인
+	         MemberDto targetMember = memberDao.selectOne(memberId);
+	         if (targetMember == null) {
+	             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                     .body("존재하지 않는 회원입니다.");
 	         }
 	         
-	         // developer_request 및 request_date 업데이트
-	         Map<String, Object> params = new HashMap<>();
-	         params.put("memberId", memberId);
-	         params.put("developerRequest", 1);
-	         params.put("developerRequestDate", new java.util.Date());
-	         
-	         boolean result = memberDao.updateDeveloperRequest(params);
-	         
-	         if (result) {
-	             return ResponseEntity.ok("개발자 권한 요청이 완료되었습니다.");
-	         } else {
+	         // 레벨 변경 유효성 검사
+	         if (!memberDto.getMemberLevel().equals("일반회원") && 
+	             !memberDto.getMemberLevel().equals("개발자")) {
+	             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                     .body("유효하지 않은 회원 레벨입니다.");
+	         }
+	
+	         // 회원 정보 업데이트
+	         boolean result = memberDao.updateMemberInfo(memberDto);
+	         if (!result) {
 	             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                                .body("요청 처리 중 오류가 발생했습니다.");
+	                     .body("회원 정보 수정에 실패했습니다.");
 	         }
-	         
+	
+	         return ResponseEntity.ok()
+	                 .body("회원 정보가 성공적으로 수정되었습니다.");
+	
 	     } catch (Exception e) {
+	         log.error("회원 정보 수정 중 오류 발생", e);
 	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                            .body("서버 오류가 발생했습니다.");
+	                 .body("회원 정보 수정 중 오류가 발생했습니다.");
 	     }
 	 }
- // 새로운 관리자용 회원정보 수정 엔드포인트
- @PutMapping("/admin/edit/{memberId}")
- public ResponseEntity<?> adminEditMember(
-         @PathVariable String memberId,
-         @RequestBody MemberDto memberDto,
-         @RequestHeader("Authorization") String token) {
-     try {
-         // 토큰에서 현재 로그인한 사용자 정보 추출
-         String accessToken = token.replace("Bearer ", "");
-         MemberClaimVO claimVO = tokenService.check(accessToken);
-         
-         // 관리자 권한 체크
-         MemberDto admin = memberDao.selectOne(claimVO.getMemberId());
-         if (!"관리자".equals(admin.getMemberLevel())) {
-             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                     .body("관리자만 접근 가능합니다.");
-         }
+ 
+	 @GetMapping("/notifications")
+	 public ResponseEntity<List<MemberDto>> getDeveloperRequests(
+	     @RequestHeader("Authorization") String token) {
+	     try {
+	         // 토큰에서 현재 로그인한 사용자 정보 추출
+	         String accessToken = token.replace("Bearer ", "");
+	         MemberClaimVO claimVO = tokenService.check(accessToken);
+	         
+	         // 관리자 권한 체크
+	         MemberDto admin = memberDao.selectOne(claimVO.getMemberId());
+	         if (!"관리자".equals(admin.getMemberLevel())) {
+	             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                     .body(null);
+	         }
 
-         // URL의 memberId와 요청 바디의 memberId가 일치하는지 확인
-         if (!memberId.equals(memberDto.getMemberId())) {
-             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body("잘못된 회원 정보입니다.");
-         }
+	         // 개발자 권한 요청 목록 조회
+	         List<MemberDto> developerRequests = memberDao.selectDeveloperRequests();
+	         return ResponseEntity.ok(developerRequests);
 
-         // 수정하려는 회원이 존재하는지 확인
-         MemberDto targetMember = memberDao.selectOne(memberId);
-         if (targetMember == null) {
-             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                     .body("존재하지 않는 회원입니다.");
-         }
+	     } catch (Exception e) {
+	         log.error("알림 조회 중 오류 발생", e);
+	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                 .body(null);
+	     }
+	 }
+	 
+	 @PutMapping("/admin/approve-developer/{memberId}")
+	 public ResponseEntity<?> approveDeveloperRequest(
+	         @PathVariable String memberId,
+	         @RequestHeader("Authorization") String token) {
+	     try {
+	         // 토큰에서 현재 로그인한 사용자 정보 추출
+	         String accessToken = token.replace("Bearer ", "");
+	         MemberClaimVO claimVO = tokenService.check(accessToken);
+	         
+	         // 관리자 권한 체크
+	         MemberDto admin = memberDao.selectOne(claimVO.getMemberId());
+	         if (!"관리자".equals(admin.getMemberLevel())) {
+	             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                     .body("관리자만 접근 가능합니다.");
+	         }
 
-         // 레벨 변경 유효성 검사
-         if (!memberDto.getMemberLevel().equals("일반회원") && 
-             !memberDto.getMemberLevel().equals("개발자")) {
-             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                     .body("유효하지 않은 회원 레벨입니다.");
-         }
+	         // 승인할 회원 조회
+	         MemberDto targetMember = memberDao.selectOne(memberId);
+	         if (targetMember == null) {
+	             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                     .body("존재하지 않는 회원입니다.");
+	         }
 
-         // 회원 정보 업데이트
-         boolean result = memberDao.updateMemberInfo(memberDto);
-         if (!result) {
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                     .body("회원 정보 수정에 실패했습니다.");
-         }
+	         // 개발자 권한 요청 상태 확인
+	         if (targetMember.getDeveloperRequest() != 1) {
+	             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                     .body("개발자 권한 요청이 없는 회원입니다.");
+	         }
 
-         return ResponseEntity.ok()
-                 .body("회원 정보가 성공적으로 수정되었습니다.");
+	         // 회원 레벨 업데이트 및 요청 상태 초기화
+	         Map<String, Object> updateParams = new HashMap<>();
+	         updateParams.put("memberId", memberId);
+	         updateParams.put("memberLevel", "개발자");
+	         updateParams.put("developerRequest", 0);
+	         updateParams.put("developerRequestDate", null);
 
-     } catch (Exception e) {
-         log.error("회원 정보 수정 중 오류 발생", e);
-         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                 .body("회원 정보 수정 중 오류가 발생했습니다.");
-     }
- }
+	         boolean result = memberDao.updateMemberLevel(updateParams);
+	         if (!result) {
+	             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                     .body("권한 승인 처리 중 오류가 발생했습니다.");
+	         }
+
+	         return ResponseEntity.ok()
+	                 .body("개발자 권한이 승인되었습니다.");
+
+	     } catch (Exception e) {
+	         log.error("개발자 권한 승인 중 오류 발생", e);
+	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                 .body("권한 승인 중 오류가 발생했습니다.");
+	     }
+	 }
+	 
+	 
+	 
 }
