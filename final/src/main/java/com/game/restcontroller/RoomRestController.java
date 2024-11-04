@@ -57,7 +57,8 @@ public class RoomRestController {
 	@GetMapping("/member")
 	public List<RoomDto> listByMember(@RequestHeader("Authorization") String token) {
 	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
-	    return roomDao.selectList(claimVO.getMemberId());
+	    log.info("memberId={}",claimVO.getMemberId());
+	    return roomDao.selectListByMemberId(claimVO.getMemberId());
 	}
 	
 	@DeleteMapping("/{roomNo}")
@@ -104,10 +105,10 @@ public class RoomRestController {
 		
 		return canEnter;
 	}
-	@GetMapping("/more/{firstMessageNo}")
+	@GetMapping("/more/{firstMessageNo}/{roomNo}")
     public WebsocketMessageMoreVO more(
             @RequestHeader(required = false, value = "Authorization") String token,
-            @PathVariable int firstMessageNo) {
+            @PathVariable int firstMessageNo, @PathVariable int roomNo) {
         
         String memberId = null; // 처음에는 비회원이라고 가정
         if (token != null) { // 토큰이 있으면 사용자 정보 가져오기
@@ -117,20 +118,21 @@ public class RoomRestController {
         
         // 사용자에게 보내줄 메시지 목록 조회
         List<WebsocketMessageVO> messageList = roomMessageDao.selectListMemberComplete(
-                memberId, 1, 100, firstMessageNo);
+                memberId, 1, 100, roomNo);
         
-        if (messageList.isEmpty()) {
-            throw new TargetNotFoundException("보여줄 메시지 없음");
-        }
+//        if (messageList.isEmpty()) {
+//            throw new TargetNotFoundException("보여줄 메시지 없음");
+//        }
         
         // 남은 메시지가 있는지 확인
         List<WebsocketMessageVO> prevMessageList = roomMessageDao.selectListMemberComplete(
-                memberId, 1, 100, messageList.get(0).getNo());
+                memberId, 1, 100, messageList.get(0).getNo(), roomNo);
         
+        System.out.println("firstMessageNo = "+messageList.get(0).getNo());
         // 반환값 생성
         WebsocketMessageMoreVO moreVO = new WebsocketMessageMoreVO();
-        moreVO.setMessageList(messageList);
-        
+        moreVO.setMessageList(prevMessageList);
+        System.out.println(prevMessageList);
         moreVO.setLast(prevMessageList.isEmpty());
         
         return moreVO;
