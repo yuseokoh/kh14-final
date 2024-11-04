@@ -23,17 +23,18 @@
 	</update>
 	
 	<delete id="delete">
-		delete room where room_no = #{roomNo}
+		delete from room where room_no = #{roomNo}
 	</delete>
 	
 	<select id="listByMember" resultType="RoomVO">
 		select 
-			R.*, nvl2(RM.member_id, 'Y', 'N') "join"
-		from 
-			room R left outer join (
-				select * from room_member where member_id = #{memberId}
-			) RM
-				on R.room_no = RM.room_no
-		order by R.room_no asc
+            R.room_no, R.room_name, 
+            case when RM.member_id is not null then 'Y' else 'N' end as \"join\"
+        from 
+            room R left outer join (
+                select * from room_member where member_id = #{memberId}
+            ) RM
+            on R.room_no = RM.room_no
+        order by R.room_no asc
 	</select>
 </mapper>

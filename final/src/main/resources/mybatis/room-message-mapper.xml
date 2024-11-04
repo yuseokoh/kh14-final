@@ -8,12 +8,12 @@
 	</select>
 	<insert id="add">
 		insert into room_message(
-			room_message_no, room_message_type,room_message_sender, 
+			room_message_no, room_message_sender, 
 			room_message_receiver,room_message_content,room_message_time,
 			room_no
 		)
 		values(
-			#{roomMessageNo}, #{roomMessageType},#{roomMessageSender}, 
+			#{roomMessageNo}, #{roomMessageSender}, 
 			<!-- null이 들어갈 수 있도록 형태를 명시 -->
 			#{roomMessageReceiver, jdbcType=VARCHAR}, #{roomMessageContent},
 			#{roomMessageTime}, #{roomNo}
@@ -26,7 +26,6 @@
 		select 
 			RM.room_message_no "no",
 			RM.room_message_sender "sender_member_id",
-			M.member_level "sender_member_level",
 			RM.room_message_receiver "receiver_member_id",
 			RM.room_message_content "content",
 			RM.room_message_time "time"
@@ -34,12 +33,8 @@
 			room_message RM 
 				left outer join member M 
 					on RM.room_message_sender = M.member_id
-		<!-- 방번호 + 일반채팅(chat) + 시스템메세지(system) + 나의DM만 조회 --> 
 		where 
-			<!-- 방 번호에 대한 조건 -->
 			room_no = #{roomNo}
-			
-			<!-- 더보기를 위한 조건 추가 - firstMessageNo가 있으면 -->
 			<if test="firstMessageNo != null">
 			<![CDATA[
 			and RM.room_message_no < #{firstMessageNo}
