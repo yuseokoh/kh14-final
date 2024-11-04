@@ -26,7 +26,7 @@ public class RoomDao {
 		return sqlSession.selectList("room.list");
 	}
 	
-	public List<RoomDto> selectList(String memberId){
+	public List<RoomDto> selectListByMemberId(String memberId){
 		return sqlSession.selectList("room.listByMember", memberId);
 	}
 	
