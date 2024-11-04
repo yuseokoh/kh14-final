@@ -26,7 +26,7 @@
   <!-- 삭제기능 -->
   <delete id="delete">
   	delete from reply
-  	where reply_no = #{replyNo} <!-- and reply_writer = #{replyWriter }-->
+  	where reply_no = #{replyNo}  <!-- and reply_writer = #{replyWriter } -->
   </delete>
   
   <!-- 수정기능 -->

@@ -88,10 +88,10 @@ public class CommunityRestController {
 //	    }
 
 	    // 게시글 삭제 (DELETE 요청)
-//	    @DeleteMapping("/{communityNo}")
-//	    public void deleteCommunity(@PathVariable int communityNo) {
-//	        communityDao.CommunityDelete(communityNo);
-//	    }
+	    @DeleteMapping("/{communityNo}")
+	    public void deleteCommunity(@PathVariable int communityNo) {
+	        communityDao.delete(communityNo);
+	    }
 	    
 	    //검색기능
 	    @GetMapping("/search/title/{keyword}")
@@ -254,37 +254,44 @@ public class CommunityRestController {
 	        }
 	    }
 	    
-	    @PutMapping("/") // 수정
+	    @PutMapping("/{communityNo}") // 수정 with images
 	    public void update(
-	    		@RequestPart("community") CommunityDto communityDto,
-	    		@RequestPart(value = "files", required = false)
-	    		List<MultipartFile> files) 
-	    		throws IllegalStateException, IOException{
-	    	//1.게임 정보 수정
+	        @PathVariable int communityNo,
+	        @RequestPart("community") CommunityDto communityDto,
+	        @RequestPart(value = "files", required = false) List<MultipartFile> files,
+	        @RequestParam(value = "deletedImageNos", required = false) List<Integer> deletedImageNos
+	    ) throws IllegalStateException, IOException {
+	        
+	        communityDto.setCommunityNo(communityNo);
 	        boolean result = communityDao.update(communityDto);
 	        if (!result) {
-	            throw new TargetNotFoundException("존재하지 않는 게임정보");
+	            throw new TargetNotFoundException("존재하지 않는 커뮤니티 게시글");
 	        }
 	        
-	        //2. 새로운 이미지가 있다면 자동으로 연결
-	        if(files != null && !files.isEmpty()) {
-	        	for(MultipartFile file : files) {
-	        		int attachmentNo = attachmentService.save(file);
-	        		
-	        		CommunityImageDto communityImageDto = new CommunityImageDto();
-	        		communityImageDto.setAttachmentNo(attachmentNo);
-	        		communityImageDto.setCommunityNo(communityDto.getCommunityNo());
-	        		communityImageDao.insert(communityImageDto);
-	        	}
+	        // 삭제할 기존 이미지 처리
+	        if (deletedImageNos != null && !deletedImageNos.isEmpty()) {
+	            for (Integer attachmentNo : deletedImageNos) {
+	                communityImageDao.delete(attachmentNo, communityNo);
+	                attachmentService.delete(attachmentNo);
+	            }
+	        }
+	        
+	        // 새로 추가할 파일 처리
+	        if (files != null && !files.isEmpty()) {
+	            for (MultipartFile file : files) {
+	                int attachmentNo = attachmentService.save(file);
+	                CommunityImageDto communityImageDto = new CommunityImageDto();
+	                communityImageDto.setAttachmentNo(attachmentNo);
+	                communityImageDto.setCommunityNo(communityNo);
+	                communityImageDao.insert(communityImageDto);
+	            }
 	        }
 	    }
+
 	    
-	    @DeleteMapping("/{communityNo}") // 삭제
-	    public void delete(@PathVariable int communityNo) {
-	        boolean result = communityDao.delete(communityNo);
-	        if (!result) {
-	            throw new TargetNotFoundException("존재하지 않는 게임정보");
-	        }
+	    @DeleteMapping("/image/{attachmentNo}")
+	    public void deleteCommunityImage(@PathVariable int attachmentNo) {
+	        attachmentService.delete(attachmentNo); // attachmentService에서 파일 및 DB 정보 삭제 처리
 	    }
 	    
 	    
@@ -351,20 +358,23 @@ public class CommunityRestController {
 	    	}
 	    }
 	    
-	    @PutMapping("/community/{communityNo}")
-	    public ResponseEntity<?> updateCommunity(
-	            @PathVariable int communityNo,
-	            @RequestParam("communityTitle") String communityTitle,
-	            @RequestParam("communityContent") String communityContent,
-	            @RequestParam("communityState") String communityState,
-	            @RequestParam("communityCategory") String communityCategory,
-	            @RequestPart(name = "file", required = false) MultipartFile file) {
-	        
-	        // Community 업데이트 로직 작성 (예: communityService.update(communityNo, communityTitle, ...))
-
-	        return ResponseEntity.ok().build();
-	    }
-	    
+//	    @PutMapping("/community/{communityNo}")
+//	    public ResponseEntity<?> updateCommunity(
+//	            @PathVariable int communityNo,
+//	            @RequestParam("communityTitle") String communityTitle,
+//	            @RequestParam("communityContent") String communityContent,
+//	            @RequestParam("communityState") String communityState,
+//	            @RequestParam("communityCategory") String communityCategory,
+//	            @RequestPart(name = "file", required = false) MultipartFile file) {
+//	        
+//	        // Community 업데이트 로직 작성 (예: communityService.update(communityNo, communityTitle, ...))
+//
+//	        return ResponseEntity.ok().build();
+//	    }
+//	    @DeleteMapping("/image/{attachmentNo}")
+//	    public void deleteCommunityImage(@PathVariable int attachmentNo) {
+//	        attachmentService.delete(attachmentNo); // attachmentService에서 파일 및 DB 정보 삭제 처리
+//	    }
 	    
 	    
 	    

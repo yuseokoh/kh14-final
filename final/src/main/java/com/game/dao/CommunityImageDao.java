@@ -53,5 +53,11 @@ public class CommunityImageDao {
 		params.put("communityNo", communityNo);
 		sqlSession.delete("communityImage.remove", params);
 	}
+	
+	public boolean exists(int attachmentNo) {
+	    Integer count = sqlSession.selectOne("communityImage.exists", attachmentNo);
+	    return count != null && count > 0;
+	}
+
 
 }

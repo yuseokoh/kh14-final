@@ -9,7 +9,7 @@
     <select id="hasReaction" resultType="int">
         SELECT COUNT(*)
         FROM community_reaction
-        WHERE member_id = #{memberId} AND community_no = #{communityNo}
+        WHERE member_id = #{memberId} AND community_no = #{communityNo} 
     </select>
 
     <!-- 좋아요 또는 싫어요 추가 -->
