@@ -116,8 +116,9 @@ public class CommunityDao {
 //		return sqlSession.selectOne("community.count", vo);
 //	}
     //작성한 게시글 수 
-    public  int getCount(String memberId) {
-    	return sqlSession.selectOne("community.count",memberId);
+    public int getCount(String communityWriter) {
+        Integer count = sqlSession.selectOne("community.countNo", communityWriter);
+        return count != null ? count : 0;  // null인 경우 0을 반환
     }
 	
 }

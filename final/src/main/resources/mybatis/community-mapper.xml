@@ -191,6 +191,10 @@
 </update>
 
 
+	<select id="countNo" resultType="int">
+		select count(*) from community where community_writer =#{communityWriter}
+	</select>
+
 
     
     

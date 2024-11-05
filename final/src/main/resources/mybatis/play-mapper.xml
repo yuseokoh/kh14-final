@@ -27,7 +27,7 @@
 		select * from play where instr(member_id, #{keyword}) > 0
 	</select>
 	<!-- 포인트 합계  -->
-	<select id="getPoint" resultType="PlayDto">
+	<select id="getPoint" resultType="int">
 		select sum(play_score) from play where member_id = #{memberId}
 	</select>
 	
