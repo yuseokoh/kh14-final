@@ -37,8 +37,9 @@ public class PlayDao {
 		return sqlSession.selectList("play.idSearch", keyword);
 	}
 	//회원의 포인트 합계
-	public int getPoint(String memberId){
-		return sqlSession.selectOne("play.getPoint",memberId);
+	public int getPoint(String memberId) {
+	    Integer result = sqlSession.selectOne("play.getPoint", memberId);
+	    return result != null ? result : 0; // null이면 0 반환
 	}
 	
 }

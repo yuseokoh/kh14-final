@@ -54,4 +54,10 @@
 	<update id="getRequest">
 		update friend set friend_accept = 'Y' where friend_fk = #{friendFk}
 	</update>
+	
+<!-- 상대 프로필 조회-->
+	<select id="profile">
+		select * from member where member_id=# 
+	  
+	</select>
 </mapper>
