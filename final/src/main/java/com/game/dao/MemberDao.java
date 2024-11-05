@@ -257,13 +257,6 @@ public class MemberDao {
 		memberTokenDao.insert(tokenDto); // MemberTokenDao의 insert 메서드 사용하여 토큰 저장
 	}
 
-	public MemberDto findByEmail(String email) {
-		return sqlSession.selectOne("member.findByEmail", email);
-	}
-
-	public MemberDto findById(String memberId) {
-		return sqlSession.selectOne("member.selectByMemberId", memberId);
-	}
 
 //	public void updateMemberEmail(String memberId, String email) {
 //		Map<String, Object> params = new HashMap<>();
@@ -282,25 +275,7 @@ public class MemberDao {
 //		}
 //	}
 
-	public MemberDto findByKakaoUserId(String kakaoId) {
-		if (kakaoId == null || kakaoId.isEmpty()) {
-			throw new IllegalArgumentException("Kakao ID가 null이거나 비어 있습니다.");
-		}
 
-		try {
-			// MyBatis 매퍼를 호출하여 kakao_user_id로 멤버 검색
-			MemberDto memberDto = sqlSession.selectOne("member.findByKakaoUserId", kakaoId);
-			if (memberDto != null) {
-				log.info("Member 테이블에서 멤버를 찾았습니다: memberId = {}", memberDto.getMemberId());
-			} else {
-				log.warn("Member 테이블에서 해당 kakao_user_id를 찾을 수 없습니다: kakaoId = {}", kakaoId);
-			}
-			return memberDto;
-		} catch (Exception e) {
-			log.error("Member 테이블에서 멤버 검색 중 오류 발생: kakaoId = {}", kakaoId, e);
-			throw new RuntimeException("멤버 검색 실패", e);
-		}
-	}
 
 	// 회원 정보 삭제 (카카오 유저 삭제 시 사용)
 	public boolean deleteMemberByKakaoId(String kakaoId) {
