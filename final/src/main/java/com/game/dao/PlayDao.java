@@ -27,9 +27,15 @@ public class PlayDao {
 	public List<PlayDto> scoreRanking(){
 		return sqlSession.selectList("play.scoreRanking");
 	}
+	public List<PlayDto> scoreRankingByPaging(int page, int pageSize){
+		return sqlSession.selectList("play.scoreRankingByPaging");
+	}
 	//레벨 랭킹
 	public List<PlayDto> levelRanking(){
 		return sqlSession.selectList("play.levelRanking");
+	}
+	public List<PlayDto> levelRankingByPaging(){
+		return sqlSession.selectList("play.levelRankingByPaging");
 	}
 	
 	//아이디 검색
