@@ -95,6 +95,15 @@ public class PaymentRestController {
         infoVO.setResponseVO(responseVO);
         return infoVO;
     }
+    
+    @GetMapping("/paymentList")
+    public List<PaymentDto> paymentList(@RequestHeader("Authorization") String token
+            ) {
+    	MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+    	return paymentDao.selectPaymentList(claimVO.getMemberId());
+    	
+    }
+    
     @Transactional
     @DeleteMapping("/cancelAll/{paymentNo}")
     public KakaoPayCancelResponseVO cancelAll(@PathVariable int paymentNo,
