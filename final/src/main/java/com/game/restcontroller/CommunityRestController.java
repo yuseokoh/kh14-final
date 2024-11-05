@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.game.dao.CommunityDao;
 import com.game.dao.CommunityImageDao;
+import com.game.dao.MemberDao;
 import com.game.dao.ReplyDao;
 import com.game.dto.CommunityDto;
 import com.game.dto.CommunityImageDto;
@@ -30,8 +32,12 @@ import com.game.service.AttachmentService;
 import com.game.service.TokenService;
 import com.game.vo.CommunityComplexRequestVO;
 import com.game.vo.CommunityComplexResponseVO;
+import com.game.vo.MemberClaimVO;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @CrossOrigin(origins = "http://localhost:3000") 
 @RestController
 @RequestMapping("/community")
@@ -47,6 +53,8 @@ public class CommunityRestController {
 	private ReplyDao replyDao;
 	@Autowired
 	private AttachmentService attachmentService;
+	@Autowired
+	private MemberDao memberDao;
 	
 	
 	
@@ -87,11 +95,29 @@ public class CommunityRestController {
 //	        communityDao.CommunityUpdate(communityDto);
 //	    }
 
-	    // 게시글 삭제 (DELETE 요청)
-	    @DeleteMapping("/{communityNo}")
-	    public void deleteCommunity(@PathVariable int communityNo) {
-	        communityDao.delete(communityNo);
+	    // 게시글 삭제 (DELETE 요청)----------------------------------------------------id적용
+//	    @DeleteMapping("/{communityNo}")
+//	    public void deleteCommunity(@PathVariable int communityNo) {
+//	        communityDao.delete(communityNo);
+//	    }
+	//
+	// 게시글 삭제 (DELETE 요청)
+	@DeleteMapping("/{communityNo}")
+	public void deleteCommunity(@PathVariable int communityNo, @RequestHeader("Authorization") String accessToken) {
+	    // 토큰에서 memberId 추출
+	    MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
+	    String memberId = claimVO.getMemberId();
+
+	    // 게시글 작성자 검증
+	    CommunityDto originalCommunity = communityDao.selectOne(communityNo); // 게시글 정보 가져오기
+	    if (!originalCommunity.getCommunityWriter().equals(memberId)) {
+	        throw new TargetNotFoundException("삭제 권한이 없습니다."); // 권한이 없으면 예외 발생
 	    }
+
+	    // 삭제 실행
+	    communityDao.delete(communityNo);
+	}
+
 	    
 	    //검색기능
 	    @GetMapping("/search/title/{keyword}")
@@ -228,8 +254,17 @@ public class CommunityRestController {
 	    @PostMapping("/") // 게시글 등록 및 이미지 첨부
 	    public void insert(
 	            @RequestPart("community") CommunityDto communityDto,
-	            @RequestPart(value = "files", required = false) List<MultipartFile> files) 
+	            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+	            @RequestHeader("Authorization") String accessToken)  //--------------------추가
 	            throws IllegalStateException, IOException {
+	    	
+	    	// Access token에서 memberId 추출--------------------------------------------------------
+	        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
+	        String memberId = claimVO.getMemberId();
+//	        System.out.println("memberId!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+ claimVO);
+//	        log.info("claimVO  = {}", claimVO);
+	        
+	        communityDto.setCommunityWriter(memberId); // 게시글 작성자 설정
 	        
 	        // 1. 게시글 등록
 	        communityDao.CommunityInsert(communityDto);
@@ -252,20 +287,30 @@ public class CommunityRestController {
 	                communityImageDao.insert(communityImageDto);
 	            }
 	        }
+
+	       
 	    }
+	    
+	    
 	    
 	    @PutMapping("/{communityNo}") // 수정 with images
 	    public void update(
 	        @PathVariable int communityNo,
 	        @RequestPart("community") CommunityDto communityDto,
 	        @RequestPart(value = "files", required = false) List<MultipartFile> files,
-	        @RequestParam(value = "deletedImageNos", required = false) List<Integer> deletedImageNos
+	        @RequestParam(value = "deletedImageNos", required = false) List<Integer> deletedImageNos,
+	        @RequestHeader("Authorization") String accessToken
 	    ) throws IllegalStateException, IOException {
+	    	
+	    	// Access token에서 memberId 추출------------------------------------------------------------
+	        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
+	        String memberId = claimVO.getMemberId();
 	        
+	     // 게시글 작성자 검증
 	        communityDto.setCommunityNo(communityNo);
 	        boolean result = communityDao.update(communityDto);
 	        if (!result) {
-	            throw new TargetNotFoundException("존재하지 않는 커뮤니티 게시글");
+	            throw new TargetNotFoundException("수정권한이 없는 게시글");
 	        }
 	        
 	        // 삭제할 기존 이미지 처리

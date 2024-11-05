@@ -158,9 +158,10 @@
 		where community_no = #{communityNo}  <!-- and community_writer = #{communityWriter } --> <!-- 글 번호 -->
 	</update>
 
-	<!-- 특정 게시글 상세 조회 -->
+	<!-- 특정 게시글 상세 조회 작성자추가-->
     <select id="detail" resultType="CommunityDto">
         select community_no,
+        		community_writer,
                community_category,
                community_title,
                community_content,
