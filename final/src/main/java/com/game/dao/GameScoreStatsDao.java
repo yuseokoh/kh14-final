@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.game.dto.GameScoreStatsDto;
 
@@ -21,8 +22,10 @@ public class GameScoreStatsDao {
     }
 
     // 평점 통계 갱신
+    @Transactional
     public void refreshGameStats(int gameNo) {
         sqlSession.update("score.refreshGameStats", gameNo);
+        sqlSession.update("score.updateGameScore", gameNo);  // game 테이블도 업데이트
     }
 
     // 평점 통계 삭제

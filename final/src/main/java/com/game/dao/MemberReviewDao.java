@@ -72,11 +72,11 @@ public class MemberReviewDao {
      * @param end 종료 행 번호
      * @return 리뷰 목록
      */
-    public List<MemberReviewDto> listByGame(int gameNo, int page, int size) {
+    public List<MemberReviewDto> listByGame(int gameNo, int start, int size) {
         Map<String, Object> params = new HashMap<>();
         params.put("gameNo", gameNo);
-        params.put("startRow", (page - 1) * size);
-        params.put("endRow", page * size);
+        params.put("startRow", start);
+        params.put("endRow", start + size);
         return sqlSession.selectList("review.listByGame", params);
     }
     

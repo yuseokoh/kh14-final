@@ -53,6 +53,22 @@
         order by average_score desc, review_count desc
     ) where ROWNUM <= #{limit}
     ]]>
-</select>
+	</select>
+	
+	<!-- 게임 테이블 평점 업데이트 -->
+	<update id="updateGameScore" parameterType="int">
+	    UPDATE game g
+	    SET g.game_user_score = (
+	        SELECT s.average_score 
+	        FROM game_score_stats s 
+	        WHERE s.game_no = g.game_no
+	    ),
+	    g.game_review_count = (
+	        SELECT s.review_count 
+	        FROM game_score_stats s 
+	        WHERE s.game_no = g.game_no
+	    )
+	    WHERE g.game_no = #{gameNo}
+	</update>
 
 </mapper>
