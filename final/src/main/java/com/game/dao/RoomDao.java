@@ -45,6 +45,9 @@ public class RoomDao {
 	public void enter(RoomMemberDto roomMemberDto) {
 		sqlSession.insert("roomMember.enter", roomMemberDto);
 	}
+	public void receiverEnter(RoomMemberDto roomMemberDto) {
+		sqlSession.insert("roomMember.receiverEnter", roomMemberDto);
+	}
 	public boolean leave(RoomMemberDto roomMemberDto) {
 		return sqlSession.delete("roomMember.leave", roomMemberDto) > 0;
 	}

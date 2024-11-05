@@ -35,7 +35,7 @@ public class PlayRestController {
 		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
 		int playNo = playDao.sequence();
 		
-		playDto.setGameNo(222);
+		playDto.setGameNo(107);
 		playDto.setPlayNo(playNo);
 //		playDto.setMemberId(playDto.getMemberId());
 
@@ -53,6 +53,10 @@ public class PlayRestController {
 	@GetMapping("/score")
 	public List<PlayDto> scoreRanking(){
 		return playDao.scoreRanking();
+	}
+	@GetMapping("/level/{page}/{pageSize}")
+	public List<PlayDto> levelRanking(@PathVariable int page, @PathVariable int pageSize){
+		return playDao.levelRankingByPaging();
 	}
 	
 	//아이디로 검색

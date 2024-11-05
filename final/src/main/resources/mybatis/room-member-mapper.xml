@@ -10,6 +10,14 @@
     		insert (room_no, member_id)
     	values (#{roomNo}, #{memberId})
 	</insert>
+	<insert id="receiverEnter">
+		merge into room_member RM
+			using dual
+				on (RM.room_no = #{roomNo} and RM.member_id = #{receiverId})
+				when not matched then
+    		insert (room_no, member_id)
+    	values (#{roomNo}, #{receiverId})
+	</insert>
 	
 	<delete id="leave">
 		delete room_member 
