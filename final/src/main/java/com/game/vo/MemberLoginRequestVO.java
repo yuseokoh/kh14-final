@@ -6,4 +6,5 @@ import lombok.Data;
 public class MemberLoginRequestVO {
 	private String memberId;
 	private String memberPw;
+	 private String code;
 }

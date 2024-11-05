@@ -46,6 +46,10 @@ public class KakaoUserService {
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(null, headers);
 
+        // API 호출 로그
+        log.info("카카오 API 호출 시작: URL = {}, AccessToken = {}", uri, accessToken);
+
+        
         Map<String, Object> response = restTemplate.postForObject(uri, entity, Map.class);
         if (response == null) {
             throw new IllegalStateException("카카오 API 응답이 null입니다.");
@@ -66,7 +70,7 @@ public class KakaoUserService {
         kakaoUser.setMemberNickname(nickname);
         kakaoUser.setMemberEmail(email);
         kakaoUser.setMemberJoin(new java.sql.Date(System.currentTimeMillis()));
-
+        log.info("생성된 KakaoUserDto 객체: {}", kakaoUser);
         return kakaoUser;
     }
 
@@ -102,20 +106,43 @@ public class KakaoUserService {
 
     @Transactional
     public KakaoUserDto saveOrUpdateKakaoUser(KakaoUserDto kakaoUser) {
+        log.info("saveOrUpdateKakaoUser 호출 - kakaoId: {}, memberEmail: {}", 
+                 kakaoUser.getKakaoId(), kakaoUser.getMemberEmail());
+
         Optional<KakaoUserDto> existingUser = kakaoUserDao.selectOneByKakaoId(kakaoUser.getKakaoId());
+        log.info("기존 사용자 존재 여부: {}", existingUser.isPresent());
+        // 여기에서 기존 사용자의 존재 여부를 로그로 기록합니다.
+        log.info("기존 사용자 존재 여부: {}", existingUser.isPresent());
 
         if (!existingUser.isPresent()) {
-            log.info("새로운 카카오 유저 저장: {}", kakaoUser);
-            kakaoUserDao.insert(kakaoUser);
+            log.info("KakaoUser 삽입 시도 - kakaoId: {}, memberNickname: {}, memberEmail: {}", 
+                     kakaoUser.getKakaoId(), 
+                     kakaoUser.getMemberNickname(), 
+                     kakaoUser.getMemberEmail());
+            
+            try {
+                kakaoUserDao.insert(kakaoUser);
+                log.info("Kakao 유저 삽입 성공 - kakaoId: {}", kakaoUser.getKakaoId());
 
-            // 삽입 후 생성된 kakao_user_id를 가져와 설정
+                // 데이터베이스에 삽입된 데이터 확인
+                Optional<KakaoUserDto> insertedUser = kakaoUserDao.selectOneByKakaoId(kakaoUser.getKakaoId());
+                if (!insertedUser.isPresent()) {
+                    log.error("Kakao 유저가 삽입 후에도 데이터베이스에서 조회되지 않습니다.");
+                    throw new RuntimeException("Kakao 유저 삽입에 문제가 발생했습니다.");
+                } else {
+                    log.info("Kakao 유저가 데이터베이스에 정상적으로 삽입되었습니다.");
+                }
+            } catch (Exception e) {
+                log.error("Kakao 유저 삽입 중 오류 발생", e);
+                throw new RuntimeException("Kakao 유저 삽입에 실패했습니다.");
+            }
+
             Integer kakaoUserId = kakaoUserDao.getKakaoUserIdByKakaoId(kakaoUser.getKakaoId());
             if (kakaoUserId != null) {
-                kakaoUser.setKakaoUserId(kakaoUserId); // 여기서 제대로 설정되는지 확인
+                kakaoUser.setKakaoUserId(kakaoUserId);
                 log.info("kakao_user_id 설정 완료: {}", kakaoUserId);
             } else {
-                log.error("Kakao User ID 생성 실패: kakaoUserId가 null입니다.");
-                // 예외 처리 없이 로깅만 수행
+                log.warn("kakao_user_id가 null입니다. 데이터 삽입에 문제 발생 가능성 있음.");
             }
         } else {
             log.info("기존 유저 업데이트: {}", kakaoUser);
@@ -126,6 +153,7 @@ public class KakaoUserService {
             existing.setMemberNickname(kakaoUser.getMemberNickname() != null ? kakaoUser.getMemberNickname() : existing.getMemberNickname());
             existing.setMemberJoin(kakaoUser.getMemberJoin() != null ? kakaoUser.getMemberJoin() : existing.getMemberJoin());
             kakaoUserDao.updateKakaoUser(existing);
+            log.info("기존 유저 업데이트 완11료: {}", existing);
             return existing;
         }
         return kakaoUser;
@@ -133,29 +161,31 @@ public class KakaoUserService {
 
 
 
-    @Transactional
-    public void insertWithKakao(KakaoUserDto kakaoUser) {
-        Integer kakaoUserId = kakaoUser.getKakaoUserId(); // KakaoUserDto에서 kakao_user_id 가져오기
 
-        if (kakaoUserId == null) {
-            throw new RuntimeException("Kakao User ID가 없습니다.");
-        }
 
-        MemberDto memberDto = new MemberDto();
-        memberDto.setKakaoUserId(kakaoUserId); // 외래키로 연동된 kakao_user_id 설정
-        memberDto.setMemberId(kakaoUser.getKakaoId());
-        memberDto.setMemberEmail(kakaoUser.getMemberEmail());
-        memberDto.setMemberNickname(kakaoUser.getMemberNickname());
-        memberDto.setMemberLevel("카카오 회원");
-
-        try {
-            sqlSession.insert("member.addWithKakao", memberDto);
-            log.info("member 테이블에 데이터 삽입 성공");
-        } catch (Exception e) {
-            log.error("member 테이블에 데이터 삽입 실패", e);
-            throw new RuntimeException("member 테이블 삽입 실패");
-        }
-    }
+//    @Transactional
+//    public void insertWithKakao(KakaoUserDto kakaoUser) {
+//        Integer kakaoUserId = kakaoUser.getKakaoUserId(); // KakaoUserDto에서 kakao_user_id 가져오기
+//
+//        if (kakaoUserId == null) {
+//            throw new RuntimeException("Kakao User ID가 없습니다.");
+//        }
+//
+//        MemberDto memberDto = new MemberDto();
+//        memberDto.setKakaoUserId(kakaoUserId); // 외래키로 연동된 kakao_user_id 설정
+//        memberDto.setMemberId(kakaoUser.getKakaoId());
+//        memberDto.setMemberEmail(kakaoUser.getMemberEmail());
+//        memberDto.setMemberNickname(kakaoUser.getMemberNickname());
+//        memberDto.setMemberLevel("카카오 회원");
+//
+//        try {
+//            sqlSession.insert("member.addWithKakao", memberDto);
+//            log.info("member 테이블에 데이터 삽입 성공");
+//        } catch (Exception e) {
+//            log.error("member 테이블에 데이터 삽입 실패", e);
+//            throw new RuntimeException("member 테이블 삽입 실패");
+//        }
+//    }
 
 
 	// 카카오 유저 이메일 업데이트 로직
@@ -235,62 +265,71 @@ public class KakaoUserService {
 //	    }
 //	}
 	
-	
-	public void updateKakaoUserEmail(String kakaoId, String memberEmail) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("kakaoId", kakaoId);
-	    params.put("memberEmail", memberEmail);
-
-	    try {
-	        int updatedRows = sqlSession.update("kakaoUser.updateKakaoUserEmail", params);
-	        if (updatedRows > 0) {
-	            log.info("KakaoUser 이메일 업데이트 성공: kakaoId = {}, memberEmail = {}", kakaoId, memberEmail);
-
-	            MemberDto memberDto = memberDao.findByKakaoUserId(kakaoId);
-	            if (memberDto != null) {
-	                memberDto.setMemberEmail(memberEmail);
-	                memberDao.updateMemberEmail(memberDto);
-	                log.info("Member 테이블의 이메일도 성공적으로 업데이트되었습니다.");
-	            } else {
-	                log.warn("Member 테이블에서 kakao_user_id에 해당하는 멤버를 찾을 수 없습니다.");
-	            }
-	        } else {
-	            log.warn("KakaoUser 이메일 업데이트 실패: 해당 kakaoId를 찾을 수 없음 = {}", kakaoId);
-	        }
-	    } catch (Exception e) {
-	        log.error("KakaoUser 이메일 업데이트 중 오류 발생: kakaoId = {}", kakaoId, e);
-	    }
-	}
-
-	public void linkKakaoAndMemberAccounts(MemberDto existingMember, KakaoUserDto kakaoUserDto) {
-        if (existingMember == null || kakaoUserDto == null) {
-            throw new IllegalArgumentException("existingMember 또는 kakaoUserDto가 null입니다.");
-        }
-        if (kakaoUserDto.getKakaoId() == null || kakaoUserDto.getKakaoId().isEmpty()) {
-            throw new IllegalArgumentException("Kakao ID가 null이거나 비어 있습니다.");
-        }
-        if (existingMember.getMemberEmail() == null || existingMember.getMemberEmail().isEmpty()) {
-            throw new IllegalArgumentException("Member 이메일이 null이거나 비어 있습니다.");
-        }
+    public void updateKakaoUserEmailAndLink(String kakaoId, String memberEmail) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("kakaoId", kakaoId);
+        params.put("memberEmail", memberEmail);
 
         try {
-            log.info("기존 멤버와 카카오 유저 연동: memberId = {}, kakaoId = {}", existingMember.getMemberId(), kakaoUserDto.getKakaoId());
+            // 1. 카카오 유저 테이블의 이메일 업데이트
+            int updatedRows = sqlSession.update("kakaoUser.updateKakaoUserEmail", params);
+            if (updatedRows > 0) {
+                log.info("KakaoUser 이메일 업데이트 성공: kakaoId = {}, memberEmail = {}", kakaoId, memberEmail);
 
-            // 카카오 유저에 기존 멤버 ID를 연동
-            kakaoUserDto.setLinkedMemberId(existingMember.getMemberId());
-            kakaoUserDao.updateKakaoUser(kakaoUserDto);
-
-            // 이메일 업데이트
-            existingMember.setMemberEmail(kakaoUserDto.getMemberEmail());
-            memberDao.updateMemberEmail(existingMember);
-            log.info("Member 테이블 이메일 업데이트 성공: {}", existingMember);
-
-            log.info("계정 연동 완료: memberId = {}, linkedMemberId = {}", existingMember.getMemberId(), kakaoUserDto.getLinkedMemberId());
+                // 2. 멤버 테이블에서 이메일로 회원 조회
+                Optional<MemberDto> existingMember = memberDao.selectOneByEmail(memberEmail);
+                if (existingMember.isPresent()) {
+                    // 3. 회원이 존재하면 카카오 유저와 연동
+                    String memberId = existingMember.get().getMemberId();
+                    kakaoUserDao.updateLinkedMemberId(kakaoId, memberId);
+                    log.info("카카오 유저와 기존 회원 연동 완료: memberId = {}", memberId);
+                } else {
+                    log.warn("Member 테이블에서 해당 이메일을 가진 회원을 찾을 수 없습니다.");
+                }
+            } else {
+                log.warn("KakaoUser 이메일 업데이트 실패: 해당 kakaoId를 찾을 수 없음 = {}", kakaoId);
+            }
         } catch (Exception e) {
-            log.error("계정 연동 중 오류 발생", e);
-            throw new RuntimeException("계정 연동에 실패했습니다.");
+            log.error("KakaoUser 이메일 업데이트 및 회원 연동 중 오류 발생: kakaoId = {}", kakaoId, e);
         }
     }
+
+    @Transactional
+    public void linkKakaoAndMemberAccounts(String kakaoId, String memberEmail) {
+        log.info("linkKakaoAndMemberAccounts - 받은 이메일 값: {}", memberEmail);
+        if (memberEmail == null || memberEmail.isEmpty()) {
+            log.warn("전달된 이메일이 null이거나 비어 있습니다: kakaoId = {}", kakaoId);
+            return;
+        }
+     // 이메일 값이 제대로 전달되었는지 확인하는 디버깅 로그
+        log.info("linkKakaoAndMemberAccounts 메서드 호출 - kakaoId: {}, memberEmail: {}", kakaoId, memberEmail);
+        // 멤버 테이블에서 이메일로 회원 찾기
+        Optional<MemberDto> existingMember = memberDao.selectOneByEmail(memberEmail);
+        log.info("이메일로 회원 조회 결과 존재 여부: {}", existingMember.isPresent());
+        if (existingMember.isPresent()) {
+            String memberId = existingMember.get().getMemberId();
+            
+            try {
+                // 올바른 파라미터를 사용하여 linked_member_id 설정
+                Map<String, Object> params = new HashMap<>();
+                params.put("kakaoId", kakaoId);
+                params.put("memberId", memberId);
+
+                // linked_member_id 업데이트
+                kakaoUserDao.updateLinkedMemberId(params);
+                log.info("카카오 유저와 기존 회원 연동 완료: memberId = {}", memberId);
+            } catch (Exception e) {
+                log.error("카카오 유저 연동 중 오류 발생: ", e);
+                throw new RuntimeException("카카오 유저 연동에 실패했습니다.");
+            }
+        } else {
+            log.warn("일치하는 회원이 없습니다. 추가 회원가입 로직을 처리해야 합니다.");
+        }
+    }
+
+
+
+
 
 	
 	
@@ -372,6 +411,53 @@ public class KakaoUserService {
 		        throw new RuntimeException("카카오 유저 생성에 실패했습니다.");
 		    }
 		}
+
+
+
+	  public KakaoUserDto findKakaoUserById(String kakaoId) {
+		    if (kakaoId == null || kakaoId.isEmpty()) {
+		        throw new IllegalArgumentException("Kakao ID가 null이거나 비어 있습니다.");
+		    }
+
+		    // `kakaoUserDao.selectOneByKakaoId` 메서드를 사용하여 카카오 유저를 조회합니다.
+		    Optional<KakaoUserDto> kakaoUserOptional = kakaoUserDao.selectOneByKakaoId(kakaoId);
+
+		    if (kakaoUserOptional.isPresent()) {
+		        log.info("카카오 유저 조회 성공 - kakaoId: {}", kakaoId);
+		        return kakaoUserOptional.get();
+		    } else {
+		        log.warn("카카오 유저를 찾을 수 없습니다 - kakaoId: {}", kakaoId);
+		        return null;
+		    }
+		}
+	  
+	  
+	  
+	  
+	  public void linkKakaoUserWithMember(String kakaoId, String kakaoEmail) {
+		    // 1. 이메일로 멤버를 조회
+		    Optional<MemberDto> memberOptional = memberDao.selectOneByEmail(kakaoEmail);
+
+		    if (memberOptional.isEmpty()) {
+		        log.warn("이메일에 해당하는 멤버를 찾을 수 없습니다: " + kakaoEmail);
+		        return;
+		    }
+
+		    // 2. 찾은 멤버의 ID를 linked_member_id에 저장
+		    String memberId = memberOptional.get().getMemberId();
+		    Map<String, Object> params = new HashMap<>();
+		    params.put("kakaoId", kakaoId);
+		    params.put("linkedMemberId", memberId);
+
+		    // 3. kakao_user 테이블의 linked_member_id 필드를 업데이트
+		    int updatedRows = sqlSession.update("kakao_user.updateLinkedMemberId", params);
+		    if (updatedRows > 0) {
+		        log.info("kakao_user 테이블의 linked_member_id 업데이트 성공: " + memberId);
+		    } else {
+		        log.warn("kakao_user 테이블의 linked_member_id 업데이트 실패: " + kakaoEmail);
+		    }
+		}
+
 
 
 
