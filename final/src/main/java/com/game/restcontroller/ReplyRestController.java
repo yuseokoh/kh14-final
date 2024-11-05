@@ -104,16 +104,16 @@ public class ReplyRestController {
 	}
 	
 	//댓글 수정---------------------------이게 맞나?
-	@PutMapping("/{replyNo}")
-	public void update(@PathVariable int replyNo, @RequestBody ReplyDto replyDto, @RequestHeader("Authorization") String accessToken) {
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
-		 String memberId = claimVO.getMemberId();
+	@PutMapping("/{replyNo}") //, @RequestHeader("Authorization") String accessToken
+	public void update(@PathVariable int replyNo, @RequestBody ReplyDto replyDto) {
+//		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken));
+//		 String memberId = claimVO.getMemberId();
 
 		    // 댓글 작성자 검증
-		    ReplyDto originalReply = replyDao.selectOne(replyNo); // 수정할 댓글 정보 가져오기
-		    if (!originalReply.getReplyWriter().equals(memberId)) {
-		        throw new TargetNotFoundException("수정 권한이 없습니다.");
-		    }
+//		    ReplyDto originalReply = replyDao.selectOne(replyNo); // 수정할 댓글 정보 가져오기
+//		    if (!originalReply.getReplyWriter().equals(memberId)) {
+//		        throw new TargetNotFoundException("수정 권한이 없습니다.");
+//		    }
 		
 			replyDto.setReplyNo(replyNo);
 			replyDao.update(replyDto);
@@ -121,14 +121,14 @@ public class ReplyRestController {
 	
 	//댓글 삭제--------------이게 맞나?
 	@DeleteMapping("/{replyNo}")
-	public void delete(@PathVariable int replyNo, @RequestHeader("Authorization") String accessToken) {
-		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken ));
-		String memberId = claimVO.getMemberId();
+	public void delete(@PathVariable int replyNo) {
+//		MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(accessToken ));
+//		String memberId = claimVO.getMemberId();
 		
-		ReplyDto originalReply = replyDao.selectOne(replyNo); // 삭제할 댓글 정보 가져오기
-	    if (!originalReply.getReplyWriter().equals(memberId)) {
-	        throw new TargetNotFoundException("삭제 권한이 없습니다.");
-	    }
+//		ReplyDto originalReply = replyDao.selectOne(replyNo); // 삭제할 댓글 정보 가져오기
+//	    if (!originalReply.getReplyWriter().equals(memberId)) {
+//	        throw new TargetNotFoundException("삭제 권한이 없습니다.");
+//	    }
 		replyDao.delete(replyNo);
 	}
 	
