@@ -207,9 +207,7 @@
 	</update>
 
 	<!-- 회원 정보 수정 -->
-	<update id="edit">
-	 UPDATE member 
-	 <set>
+	<update id="edit"> UPDATE member <set>
 			<if test="memberNickname != null">member_nickname =
 		#{memberNickname},</if>
 			<if test="memberEmail != null">member_email = #{memberEmail},</if>
@@ -237,11 +235,11 @@
 	<update id="updateLoginTime">
 		UPDATE member SET member_login = sysdate WHERE member_id = #{memberId}
 	</update>
+
 	<!-- 최종 로그아웃 시각 갱신 -->
 	<update id="updateLogoutTime">
 		UPDATE member SET member_logout = sysdate WHERE member_id = #{memberId}
 	</update>
-
 
 	<!-- 이메일로 회원 찾기 -->
 	<select id="findByEmail" parameterType="string" resultType="MemberDto">
@@ -252,80 +250,119 @@
 		SELECT * FROM member WHERE member_email = #{memberEmail}
 	</select>
 
-
 	<insert id="addKakaoUserWithDetails" parameterType="MemberDto">
-		INSERT INTO member (member_id, kakao_user_id, member_email,
-		member_nickname, member_level, member_pw)
-		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
-		#{memberLevel}, #{memberPw})
+		INSERT INTO member (member_id, member_email, member_nickname,
+		member_level, member_pw)
+		VALUES (#{memberId}, #{memberEmail}, #{memberNickname}, #{memberLevel},
+		#{memberPw})
 	</insert>
 
 	<insert id="addWithKakao" parameterType="MemberDto">
-		INSERT INTO member (member_id, kakao_user_id, member_email,
-		member_nickname, member_level)
-		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
-		#{memberLevel})
+		INSERT INTO member (member_id, member_email, member_nickname,
+		member_level)
+		VALUES (#{memberId}, #{memberEmail}, #{memberNickname}, #{memberLevel})
 	</insert>
-
 
 	<insert id="insertWithKakao" parameterType="KakaoUserDto">
-		INSERT INTO member (member_id, kakao_user_id, member_email,
-		member_nickname, member_level)
-		VALUES (#{memberId}, #{kakaoUserId}, #{memberEmail}, #{memberNickname},
-		'카카오 회원')
+		INSERT INTO member (member_id, member_email, member_nickname,
+		member_level)
+		VALUES (#{memberId}, #{memberEmail}, #{memberNickname}, '카카오 회원')
 	</insert>
-
 
 	<select id="selectOneByKakaoId" parameterType="string"
 		resultType="MemberDto">
-		SELECT * FROM member WHERE kakao_id = #{kakaoId}
+		SELECT * FROM member WHERE linked_member_id = (SELECT member_id FROM
+		kakao_user WHERE kakao_id = #{kakaoId})
 	</select>
 
-	<update id="updateKakaoUserId">
+	<update id="updateLinkedMemberId">
 		UPDATE member
-		SET kakao_user_id = #{kakaoUserId}
+		SET linked_member_id = #{linkedMemberId}
 		WHERE member_id = #{memberId}
 	</update>
 
 	<update id="updateMemberEmailByKakaoId">
 		UPDATE member
 		SET member_email = #{email}
-		WHERE kakao_user_id = (SELECT kakao_user_id FROM kakao_user WHERE
+		WHERE linked_member_id = (SELECT member_id FROM kakao_user WHERE
 		kakao_id = #{kakaoId})
 	</update>
-
 
 	<update id="updateWithKakao">
 		UPDATE member
 		SET member_nickname = #{memberNickname}, member_email = #{memberEmail}
-		WHERE kakao_user_id = #{kakaoUserId}
+		WHERE linked_member_id = #{linkedMemberId}
 	</update>
 
 	<update id="updateMemberEmail" parameterType="MemberDto">
 		UPDATE member
 		SET member_email = #{memberEmail}
-		WHERE kakao_user_id = #{kakaoUserId}
+		WHERE linked_member_id = #{linkedMemberId}
 	</update>
 
-	<select id="findByKakaoUserId" parameterType="string"
+	<select id="findByLinkedMemberId" parameterType="string"
 		resultType="MemberDto">
-		SELECT * FROM member WHERE kakao_user_id = #{kakaoId}
+		SELECT * FROM member WHERE linked_member_id = #{linkedMemberId}
 	</select>
-
 
 	<select id="selectOneById" parameterType="string" resultType="MemberDto">
 		SELECT * FROM member WHERE member_id = #{memberId}
 	</select>
 
-	<select id="selectByMemberId" parameterType="String"
+	<!-- Kakao ID로 MemberDto 조회 -->
+	<select id="selectOneByLinkedMemberId" parameterType="string"
 		resultType="MemberDto">
+		SELECT *
+		FROM member
+		WHERE linked_member_id = (SELECT member_id FROM kakao_user WHERE
+		kakao_id = #{kakaoId})
+	</select>
+
+	<select id="selectByMemberId" parameterType="String" resultType="MemberDto">
 		SELECT * FROM member WHERE member_id = #{memberId}
 	</select>
 
-	<update id="updateEmailByKakaoUserId">
+	<select id="selectMemberWithKakaoInfo" resultType="com.game.dto.MemberDto">
+		SELECT m.*, k.kakao_id
+		FROM member m
+		LEFT JOIN kakao_user k ON m.linked_member_id = k.member_id
+		WHERE k.kakao_id = #{kakaoId}
+	</select>
+
+	<select id="selectOneByKakaoUserId" parameterType="string"
+		resultType="MemberDto">
+		SELECT m.*
+		FROM member m
+		JOIN kakao_user ku ON ku.linked_member_id = m.member_id
+		WHERE ku.kakao_id = #{kakaoId}
+	</select>
+
+
+	<update id="updateEmailByLinkedMemberId">
 		UPDATE member
 		SET member_email = #{memberEmail}
-		WHERE kakao_user_id = #{kakaoUserId}
+		WHERE linked_member_id = #{linkedMemberId}
+	</update>
+
+	<delete id="deleteByKakaoId" parameterType="String">
+		DELETE FROM member WHERE linked_member_id = (SELECT member_id FROM
+		kakao_user WHERE kakao_id = #{kakaoId})
+	</delete>
+	
+	<!-- 중복된 member_id 또는 member_email 확인 -->
+	<select id="checkMemberExists" parameterType="MemberDto" resultType="int">
+		SELECT COUNT(*) FROM member WHERE member_id = #{memberId} OR
+		member_email = #{memberEmail}
+	</select>
+
+	<!-- 회원 정보 수정 (기존 사용자인 경우) -->
+	<update id="updateMember" parameterType="MemberDto">
+		UPDATE member
+		SET
+		member_pw = #{memberPw},
+		member_email = #{memberEmail},
+		member_level = #{memberLevel}
+		WHERE member_id = #{memberId}
 	</update>
 
 
@@ -368,5 +405,13 @@
 	        developer_request_date = #{developerRequestDate}
 	    WHERE member_id = #{memberId}
 	</update>
+
+	<select id="selectOneByKakaoId2" resultType="MemberDto">
+		select * from member where kakao_id = #{kakaoId}
+	</select>
+
+	<select id="selectOneByEmail2" resultType="MemberDto">
+		select * from member where member_email = #{memberEmail}
+	</select>
 
 </mapper>

@@ -31,8 +31,9 @@ public class MemberDto {
     private int emailVerified;        // 이메일 인증 여부 (0: 미인증, 1: 인증)
     private int memberPoint;          // 보유 포인트
 //    @JsonProperty("id")
-    private Integer  kakaoUserId;           // 카카오 회원번호
+//    private Integer  kakaoUserId;           // 카카오 회원번호
 	private int attachment;
+	private String kakaoId;
 	//관리자권한요청
 	private int developerRequest;
 	private Date developerRequestDate;

@@ -8,4 +8,6 @@ public class MemberLoginResponseVO {
 	private String memberLevel;
 	private String accessToken;
 	private String refreshToken;
+	private String kakaoId;
+	  private boolean emailRequired;
 }
