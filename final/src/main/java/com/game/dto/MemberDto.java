@@ -34,4 +34,7 @@ public class MemberDto {
 //    private Integer  kakaoUserId;           // 카카오 회원번호
 	private int attachment;
 	private String kakaoId;
+	//관리자권한요청
+	private int developerRequest;
+	private Date developerRequestDate;
 }

@@ -26,6 +26,10 @@ public class RoomDao {
 		return sqlSession.selectList("room.list");
 	}
 	
+	public List<RoomDto> selectListByMemberId(String memberId){
+		return sqlSession.selectList("room.listByMember", memberId);
+	}
+	
 	public RoomDto selectOne(int roomNo) {
 		return sqlSession.selectOne("room.find", roomNo);
 	}
@@ -44,6 +48,7 @@ public class RoomDao {
 	public boolean leave(RoomMemberDto roomMemberDto) {
 		return sqlSession.delete("roomMember.leave", roomMemberDto) > 0;
 	}
+	
 	public boolean check(RoomMemberDto roomMemberDto) {
 		int result = sqlSession.selectOne("roomMember.check", roomMemberDto);
 		return result > 0;

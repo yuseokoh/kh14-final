@@ -339,5 +339,69 @@ public class MemberDao {
 	public MemberDto selectOneByEmail2(String memberEmail) {
 		return sqlSession.selectOne("member.selectOneByEmail2", memberEmail);
 	}
+    public MemberDto findByEmail(String email) {
+        return sqlSession.selectOne("member.findByEmail", email);
+    }
+
+    public MemberDto findById(String memberId) {
+        return sqlSession.selectOne("member.selectByMemberId", memberId);
+    }
+
+    public void updateMemberEmail(String memberId, String email) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberId", memberId);
+        params.put("email", email);
+
+        try {
+            int updatedRows = sqlSession.update("member.updateEmailById", params);
+            if (updatedRows > 0) {
+                log.info("Member 테이블 이메일 업데이트 성공: memberId = {}", memberId);
+            } else {
+                log.warn("Member 테이블 이메일 업데이트 실패: 해당 memberId를 찾을 수 없음 = {}", memberId);
+            }
+        } catch (Exception e) {
+            log.error("Member 테이블 이메일 업데이트 중 오류 발생: memberId = {}", memberId, e);
+        }
+    }
+
+
+
+    public MemberDto findByKakaoUserId(String kakaoId) {
+        if (kakaoId == null || kakaoId.isEmpty()) {
+            throw new IllegalArgumentException("Kakao ID가 null이거나 비어 있습니다.");
+        }
+
+        try {
+            // MyBatis 매퍼를 호출하여 kakao_user_id로 멤버 검색
+            MemberDto memberDto = sqlSession.selectOne("member.findByKakaoUserId", kakaoId);
+            if (memberDto != null) {
+                log.info("Member 테이블에서 멤버를 찾았습니다: memberId = {}", memberDto.getMemberId());
+            } else {
+                log.warn("Member 테이블에서 해당 kakao_user_id를 찾을 수 없습니다: kakaoId = {}", kakaoId);
+            }
+            return memberDto;
+        } catch (Exception e) {
+            log.error("Member 테이블에서 멤버 검색 중 오류 발생: kakaoId = {}", kakaoId, e);
+            throw new RuntimeException("멤버 검색 실패", e);
+        }
+    }
+    
+    public List<MemberDto> selectDeveloperRequests() {
+        return sqlSession.selectList("member.selectDeveloperRequests");
+    }
+    
+    public boolean updateDeveloperRequest(Map<String, Object> params) {
+        return sqlSession.update("member.updateDeveloperRequest", params) > 0;
+    }
+    
+    public boolean updateMemberLevel(Map<String, Object> params) {
+        try {
+            int result = sqlSession.update("member.updateMemberLevel", params);
+            return result > 0;
+        } catch (Exception e) {
+            log.error("회원 레벨 업데이트 중 오류 발생", e);
+            return false;
+        }
+    }
 
 }

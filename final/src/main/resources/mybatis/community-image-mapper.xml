@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="communityImage">
+    <!-- <insert id="insert">
+        INSERT INTO community_image (community_no, attachment_no)
+        VALUES (#{communityNo}, #{attachmentNo})
+    </insert> -->
+
+    <!-- <delete id="deleteByCommunityNo">
+        DELETE FROM community_image WHERE community_no = #{communityNo}
+    </delete> -->
+
+    <!-- <select id="selectByCommunityNo" resultType="com.game.dto.CommunityImageDto">
+        SELECT community_no, attachment_no
+        FROM community_image
+        WHERE community_no = #{communityNo}
+    </select> -->
+    
+    <!-- 게임 이미지 등록 -->
+	<insert id="add">
+		insert into community_image(attachment_no, community_no)
+		values(#{attachmentNo}, #{communityNo})
+	</insert>
+
+	<!-- 게임별 이미지 목록 -->
+	<select id="listByCommunity" resultType="communityImageDto">
+		select * from community_image where community_no = #{communityNo}
+	</select>
+	
+	<!-- 게임 이미지 삭제 -->
+	<delete id="remove">
+		delete community_image
+		where attachment_no = #{attachmentNo} and community_no = #{communityNo}
+	</delete>
+	
+	<select id="exists" resultType="int">
+    SELECT COUNT(*) FROM community_image WHERE attachment_no = #{attachmentNo}
+</select>
+</mapper>

@@ -3,12 +3,21 @@
 
 <mapper namespace="roomMember">
 	<insert id="enter">
-		insert into room_member(room_no, member_id)
-		values(#{roomNo}, #{memberId})
+		merge into room_member RM
+			using dual
+				on (RM.room_no = #{roomNo} and RM.member_id = #{memberId})
+				when not matched then
+    		insert (room_no, member_id)
+    	values (#{roomNo}, #{memberId})
 	</insert>
 	
 	<delete id="leave">
 		delete room_member 
 		where room_no = #{roomNo} and member_id = #{memberId}
 	</delete>
+	
+	<select id="check" resultType="int">
+		select count(*) from room_member
+		where member_id = #{memberId} and room_no = #{roomNo}
+	</select>
 </mapper>

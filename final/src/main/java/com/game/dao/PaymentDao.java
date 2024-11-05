@@ -41,6 +41,16 @@ public void paymentInsert(PaymentDto paymentDto) {
 	public boolean cancelAllItem(int paymentNo) {
 		return sqlSession.update("payment.cancelAllItem", paymentNo) > 0;
 	}
+	public List<PaymentDto> selectAllPayments(Map<String, Object> params) {
+	    return sqlSession.selectList("payment.selectAllPayments", params);
+	}
+	public Double getTotalSales(Map<String, Object> params) {
+	    return sqlSession.selectOne("payment.getTotalSales", params);
+	}
+
+	
+
+
     // PaymentDetail 관련 메소드
     
     public int paymentDetailSequence() {

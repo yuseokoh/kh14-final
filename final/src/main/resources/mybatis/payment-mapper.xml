@@ -1,6 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="payment">
 
     <!-- Payment 테이블의 다음 시퀀스 값을 가져옵니다. -->
@@ -18,6 +20,24 @@
             #{paymentRemain}, #{paymentMemberId}, SYSDATE
         )
     </insert>
+    <select id="selectAllPayments" parameterType="map" resultType="PaymentDto">
+        SELECT *
+        FROM payment
+        WHERE 1=1
+     
+        <if test="memberId != null and memberId != ''">
+            AND payment_member_id = #{memberId}
+        </if>
+    </select>
+<select id="getTotalSales" resultType="double" parameterType="map">
+    SELECT SUM(p.payment_total)
+    FROM payment p
+    JOIN payment_detail pd ON p.payment_no = pd.payment_detail_origin
+    WHERE pd.payment_detail_status = '승인'
+ 
+</select>
+
+
 
     <!-- Payment 테이블에서 특정 회원의 결제 리스트를 가져옵니다. -->
     <select id="selectPaymentsByMemberId" parameterType="string" resultType="PaymentDto">

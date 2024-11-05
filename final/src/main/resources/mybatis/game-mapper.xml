@@ -121,4 +121,10 @@
     	AND review_status = 'active'
     </select>
     
+    <!-- 시스템 요구사항 출력 쿼리	 -->
+    <select id="findByGameNo" resultType="SystemRequirementDto">
+	    SELECT * FROM system_requirement
+	    WHERE game_no = #{gameNo}
+	</select>
+    
 </mapper>

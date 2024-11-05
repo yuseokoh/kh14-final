@@ -1,10 +1,8 @@
 package com.game.dto;
 
 import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -15,7 +13,9 @@ public class CommunityDto {
 	private int communityNo; //커뮤니티 글 번호
 	private String communityWriter;//작성자 =memberId id pri
 	private String communityContent; //커뮤니티 내용
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 	private Date communityWtime; //커뮤니티 글 작성일
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 	private Date communityUtime; //커뮤니티 글 수정일
 	private int communityViews; //커뮤니티 글 조회수
 	private int communityLikes; //커뮤니티 글 좋아요수

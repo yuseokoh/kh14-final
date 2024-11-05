@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="systemRequirement">
+   
+   <!-- 게임별 시스템 요구사항 목록 조회 -->
+   <select id="findByGameNo" resultType="com.game.dto.SystemRequirementDto">
+       SELECT * FROM system_requirement 
+       WHERE game_no = #{gameNo}
+       ORDER BY 
+           CASE requirement_type
+               WHEN 'minimum' THEN 1
+               WHEN 'recommended' THEN 2
+               ELSE 3
+           END
+   </select>
+   
+   <!-- 특정 게임의 특정 타입 시스템 요구사항 조회 -->
+   <select id="findByGameNoAndType" resultType="com.game.dto.SystemRequirementDto">
+       SELECT * FROM system_requirement 
+       WHERE game_no = #{gameNo} 
+       AND requirement_type = #{requirementType}
+   </select>
+   
+   <!-- 시스템 요구사항 등록 -->
+   <insert id="insert" parameterType="com.game.dto.SystemRequirementDto">
+       INSERT INTO system_requirement (
+           requirement_id, game_no, requirement_type,
+           os, processor, memory, graphics,
+           directx_version, storage, sound_card
+       ) VALUES (
+           system_requirement_seq.nextval, #{gameNo}, #{requirementType},
+           #{os}, #{processor}, #{memory}, #{graphics},
+           #{directxVersion}, #{storage}, #{soundCard}
+       )
+   </insert>
+   
+   <!-- 시스템 요구사항 수정 -->
+   <update id="update" parameterType="com.game.dto.SystemRequirementDto">
+       UPDATE system_requirement SET
+           os = #{os},
+           processor = #{processor},
+           memory = #{memory},
+           graphics = #{graphics},
+           directx_version = #{directxVersion},
+           storage = #{storage},
+           sound_card = #{soundCard}
+       WHERE requirement_id = #{requirementId}
+       AND game_no = #{gameNo}
+   </update>
+   
+   <!-- 시스템 요구사항 삭제 -->
+   <delete id="delete" parameterType="int">
+       DELETE FROM system_requirement 
+       WHERE requirement_id = #{requirementId}
+   </delete>
+   
+</mapper>

@@ -381,6 +381,30 @@
 			WHERE rn BETWEEN #{beginRow} AND #{endRow}
 		</if>
 	</sql>
+	
+	<select id="selectDeveloperRequests" resultType="MemberDto">
+	    SELECT *
+	    FROM member 
+	    WHERE member_level = '일반회원' 
+	    AND developer_request = 1
+	    ORDER BY developer_request_date DESC
+	</select>
+	
+	<update id="updateDeveloperRequest" parameterType="map">
+	    UPDATE member 
+	    SET developer_request = #{developerRequest},
+	        developer_request_date = #{developerRequestDate}
+	    WHERE member_id = #{memberId}
+	</update>
+	
+	<!-- 회원 레벨 및 개발자 요청 상태 업데이트 -->
+	<update id="updateMemberLevel" parameterType="map">
+	    UPDATE member 
+	    SET member_level = #{memberLevel},
+	        developer_request = #{developerRequest},
+	        developer_request_date = #{developerRequestDate}
+	    WHERE member_id = #{memberId}
+	</update>
 
 	<select id="selectOneByKakaoId2" resultType="MemberDto">
 		select * from member where kakao_id = #{kakaoId}
