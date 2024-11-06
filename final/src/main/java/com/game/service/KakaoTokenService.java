@@ -33,7 +33,7 @@ public class KakaoTokenService {
     private MemberTokenDao memberTokenDao;
 
     // Kakao 로그인용 Access Token 생성 메서드
-    public String createKakaoAccessToken(KakaoUserClaimVO vo) {
+	public String createKakaoAccessToken(KakaoUserClaimVO vo) {
         // 비밀키 생성
     	SecretKey key = Keys.hmacShaKeyFor(
 				tokenProperties.getSecret().getBytes(StandardCharsets.UTF_8));
@@ -49,6 +49,7 @@ public class KakaoTokenService {
 					.issuer(tokenProperties.getIssuer())
 					.issuedAt(now)
             .claim("kakaoId", vo.getKakaoId())
+            .claim("memberLevel", vo.getMemberLevel())
             .compact();
     }
 
@@ -69,6 +70,7 @@ public class KakaoTokenService {
 				.issuer(tokenProperties.getIssuer())
 				.issuedAt(now)
             .claim("kakaoId", vo.getKakaoId())
+            .claim("memberLevel", vo.getMemberLevel())
             .compact();
 
         // 생성된 토큰을 DB에 저장
@@ -99,6 +101,7 @@ public class KakaoTokenService {
             // 클레임에서 정보 추출하여 VO 생성
             KakaoUserClaimVO vo = new KakaoUserClaimVO();
             vo.setKakaoId(claims.get("kakaoId", String.class));
+            vo.setMemberLevel(claims.get("memberLevel", String.class));
             return vo;
 
         } catch (Exception e) {
