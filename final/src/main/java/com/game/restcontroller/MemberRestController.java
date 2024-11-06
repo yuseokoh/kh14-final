@@ -538,19 +538,42 @@ public class MemberRestController {
 //        return response;
 //    }
 
-    @GetMapping("/{memberId}")
-    public MemberDto find(@PathVariable String memberId) {
-        MemberDto memberDto = memberDao.selectOne(memberId);
+//    @GetMapping("/{memberId}")
+//    public MemberDto find(@PathVariable String memberId) {
+//        MemberDto memberDto = memberDao.selectOne(memberId);
+    @GetMapping("/")
+    public MemberDto find(@RequestHeader("Authorization") String token) {
+        MemberClaimVO claimVO = tokenService.check(tokenService.removeBearer(token));
+        MemberDto memberDto = memberDao.selectOne(claimVO.getMemberId());
+
+        // 포인트 계산
+        Integer playPoints = playDao.getPoint(claimVO.getMemberId());
+        Integer communityPoints = communityDao.getCount(claimVO.getMemberId()) * 10;
+        int point = (playPoints != null ? playPoints : 0) + (communityPoints != null ? communityPoints : 0);
+        
+        // 디버깅: 포인트 값 확인
+        System.out.println("Calculated point: " + point);
+        
+        memberDto.setMemberPoint(point);  // 계산된 포인트 설정
 
         // 이미지 정보 가져오기
-        MemberImageDto memberImage = memberImageDao.selectone(memberId);
+        MemberImageDto memberImage = memberImageDao.selectone(claimVO.getMemberId());
         if (memberImage != null) {
             memberDto.setAttachment(memberImage.getAttachment());
         }
 
+        // 디버깅: 전체 memberDto 확인
+        System.out.println("Final memberDto: " + memberDto);
+
         return memberDto;
     }
 
+    @GetMapping("/{memberId}")
+    public MemberDto findMemberId(@PathVariable String memberId) {
+        MemberDto memberDto = memberDao.selectOne(memberId);
+
+        return memberDto;
+    }
     // 회원 가입
 //    @PostMapping("/join")
 //    public ResponseEntity<String> join(@RequestBody MemberDto memberDto) {
@@ -627,11 +650,15 @@ public class MemberRestController {
 
     //게임플레이 점수에 따른 포인트증가
     @PatchMapping("/point")
-    public boolean getPoint(@RequestBody MemberDto memberDto) {
-    	boolean result = memberDao.updateMemberInfo(memberDto);
-    	int point = playDao.getPoint(memberDto.getMemberId())+(communityDao.getCount(memberDto.getMemberId())*10);
-    	memberDto.setMemberPoint(point);
-    	return result;
+    public boolean getPoint(MemberClaimVO claimVO) {
+        MemberDto memberDto = new MemberDto();
+        memberDto.setMemberId(claimVO.getMemberId());
+
+        int point = playDao.getPoint(claimVO.getMemberId()) + (communityDao.getCount(claimVO.getMemberId()) * 10);
+        memberDto.setMemberPoint(point); 
+
+        boolean result = memberDao.updateMemberInfo(memberDto);
+        return result;
     }
     
     // 회원 정보 삭제
