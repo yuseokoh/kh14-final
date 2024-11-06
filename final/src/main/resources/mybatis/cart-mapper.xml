@@ -24,19 +24,24 @@
     </select>
     
     <select id="detailList" resultType="CartDto">
-    SELECT 
-        c.*, 
-        g.game_title AS gameTitle, 
-        g.game_price AS gamePrice, 
-        gI.attachment_no AS attachmentNo
-    FROM 
-        cart c
-    JOIN 
-        game g ON c.game_no = g.game_no  -- gameNo로 연결
-    LEFT JOIN 
-        game_image gI ON g.game_no = gI.game_no  -- gameNo로 연결
-    WHERE 
-        c.member_id = #{memberId}
+        SELECT 
+    c.cart_id,
+    c.member_id,
+    c.game_no,
+    c.added_date,
+    g.game_title AS gameTitle, 
+    g.game_price AS gamePrice, 
+    MIN(gI.attachment_no) AS attachmentNo
+FROM 
+    cart c
+JOIN 
+    game g ON c.game_no = g.game_no
+LEFT JOIN 
+    game_image gI ON g.game_no = gI.game_no
+WHERE 
+    c.member_id = #{memberId}
+GROUP BY 
+    c.cart_id, c.member_id, c.game_no, c.added_date, g.game_title, g.game_price
 </select>
 
 
