@@ -39,7 +39,9 @@ import com.game.error.TargetNotFoundException;
 import com.game.service.AttachmentService;
 import com.game.service.EmailService;
 import com.game.service.KakaoLoginService;
+import com.game.service.KakaoTokenService;
 import com.game.service.TokenService;
+import com.game.vo.KakaoUserClaimVO;
 import com.game.vo.MemberClaimVO;
 import com.game.vo.MemberComplexRequestVO;
 import com.game.vo.MemberComplexResponseVO;
@@ -76,6 +78,8 @@ public class MemberRestController {
     private PlayDao playDao;
     @Autowired
     private CommunityDao communityDao;
+    @Autowired
+    private KakaoTokenService kakaoTokenService;
     
     @PostMapping("/search")
     public MemberComplexResponseVO search(@RequestBody MemberComplexRequestVO vo) {
@@ -230,43 +234,309 @@ public class MemberRestController {
 //    }
 
     
-    
     @PostMapping("/refresh")
-    public MemberLoginResponseVO refresh(
-            @RequestHeader("Authorization") String refreshToken) {
-        //[1] refreshToken이 없거나 Bearer로 시작하지 않으면 안됨
-        if (refreshToken == null)
-            throw new TargetNotFoundException("토큰 없음");
-        if (tokenService.isBearerToken(refreshToken) == false)
-            throw new TargetNotFoundException("Bearer 토큰 아님");
+    public MemberLoginResponseVO refresh(@RequestHeader("Authorization") String refreshToken) {
+        log.info("리프레시토큰은? - refreshToken: {}", refreshToken);
 
-        //[2] 토큰에서 정보를 추출
-        MemberClaimVO claimVO =
-                tokenService.check(tokenService.removeBearer(refreshToken));
-        if (claimVO.getMemberId() == null)
-            throw new TargetNotFoundException("아이디 없음");
-        if (claimVO.getMemberLevel() == null)
-            throw new TargetNotFoundException("등급 없음");
+        // [1] 토큰 유효성 검사
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            throw new TargetNotFoundException("유효하지 않은 토큰입니다.");
+        }
 
-        //[3] 토큰 발급 내역을 조회
-        MemberTokenDto memberTokenDto = new MemberTokenDto();
-        memberTokenDto.setTokenTarget(claimVO.getMemberId());
-        memberTokenDto.setTokenValue(tokenService.removeBearer(refreshToken));
-        MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
-        if (resultDto == null)//발급내역이 없음
-            throw new TargetNotFoundException("발급 내역이 없음");
+        // [2] 토큰에서 클레임 정보 추출
+        String tokenValue = tokenService.removeBearer(refreshToken);
+        MemberClaimVO claimVO = tokenService.check(tokenValue);
 
-        //[4] 기존의 리프레시 토큰 삭제
-        memberTokenDao.delete(memberTokenDto);
+        System.out.println("여기까지는 나오나요? " + claimVO);
 
-        //[5] 로그인 정보 재발급
-        MemberLoginResponseVO response = new MemberLoginResponseVO();
-        response.setMemberId(claimVO.getMemberId());
-        response.setMemberLevel(claimVO.getMemberLevel());
-        response.setAccessToken(tokenService.createAccessToken(claimVO));//재발급
-        response.setRefreshToken(tokenService.createRefreshToken(claimVO));//재발급
-        return response;
+        // [3] 회원 유형에 따라 처리
+        if (claimVO.getKakaoId() != null && claimVO.getMemberId() == null) {
+            // 카카오 회원인 경우
+            KakaoUserClaimVO kakaoClaimVO = kakaoTokenService.check(tokenValue);
+            if (kakaoClaimVO == null) {
+                throw new TargetNotFoundException("카카오 토큰 검증 실패");
+            }
+
+            // 기존 리프레시 토큰 발급 내역 확인
+            MemberTokenDto memberTokenDto = new MemberTokenDto();
+            memberTokenDto.setTokenTarget(kakaoClaimVO.getKakaoId());
+            memberTokenDto.setTokenValue(tokenValue);
+            System.out.println("여기서 에러가나나요? 요청DTO: " + memberTokenDto);
+
+            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+            if (resultDto == null) {
+                throw new TargetNotFoundException("카카오 리프레시 토큰 발급 내역이 없습니다.");
+            }
+
+            // 기존 리프레시 토큰 삭제
+            memberTokenDao.delete(memberTokenDto);
+
+            // 새로운 토큰 생성
+            MemberLoginResponseVO response = new MemberLoginResponseVO();
+            response.setKakaoId(kakaoClaimVO.getKakaoId());
+            response.setAccessToken(kakaoTokenService.createKakaoAccessToken(kakaoClaimVO));
+            response.setRefreshToken(kakaoTokenService.createRefreshToken(kakaoClaimVO));
+            System.out.println("전달객체는? " + response);
+            return response;
+
+        } else if (claimVO.getMemberId() != null && claimVO.getKakaoId() == null) {
+            // 일반 회원인 경우
+            MemberTokenDto memberTokenDto = new MemberTokenDto();
+            memberTokenDto.setTokenTarget(claimVO.getMemberId());
+            memberTokenDto.setTokenValue(tokenValue);
+
+            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+            if (resultDto == null) {
+                throw new TargetNotFoundException("리프레시 토큰 발급 내역이 없습니다.");
+            }
+
+            // 기존 리프레시 토큰 삭제
+            memberTokenDao.delete(memberTokenDto);
+
+            // 새로운 토큰 생성
+            MemberLoginResponseVO response = new MemberLoginResponseVO();
+            response.setMemberId(claimVO.getMemberId());
+            response.setMemberLevel(claimVO.getMemberLevel());
+            response.setAccessToken(tokenService.createAccessToken(claimVO));
+            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+            return response;
+
+        } else if (claimVO.getKakaoId() != null && claimVO.getMemberId() != null) {
+            // 카카오 회원과 일반 회원이 연동된 경우
+            MemberTokenDto memberTokenDto = new MemberTokenDto();
+            memberTokenDto.setTokenTarget(claimVO.getMemberId());
+            memberTokenDto.setTokenValue(tokenValue);
+
+            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+            if (resultDto == null) {
+                throw new TargetNotFoundException("리프레시 토큰 발급 내역이 없습니다.");
+            }
+
+            // 기존 리프레시 토큰 삭제
+            memberTokenDao.delete(memberTokenDto);
+
+            // 새로운 토큰 생성
+            MemberLoginResponseVO response = new MemberLoginResponseVO();
+            response.setMemberId(claimVO.getMemberId());
+            response.setMemberLevel(claimVO.getMemberLevel());
+            response.setAccessToken(tokenService.createAccessToken(claimVO));
+            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+            return response;
+        }
+
+        throw new TargetNotFoundException("회원 유형을 확인할 수 없습니다.");
     }
+
+    
+    
+//    @PostMapping("/refresh")
+//    public MemberLoginResponseVO refresh(@RequestHeader("Authorization") String refreshToken) {
+//    	log.info("리프레시토큰은? - refreshToken: {}",refreshToken);
+//        // [1] 토큰 유효성 검사
+//        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+//            throw new TargetNotFoundException("유효하지 않은 토큰입니다.");
+//        }
+//        
+//        // [2] 토큰에서 클레임 정보 추출
+//        String tokenValue = tokenService.removeBearer(refreshToken);
+//        MemberClaimVO claimVO = tokenService.check(tokenValue);
+//
+//        System.out.println("여기까지는 나오나요?"+claimVO);
+//        
+//        // [3] 회원 유형에 따라 처리
+//        if (claimVO.getKakaoId() != null && claimVO.getMemberId() == null) {
+//            // 카카오 회원인 경우
+//            KakaoUserClaimVO kakaoClaimVO = kakaoTokenService.check(tokenValue);
+//            if (kakaoClaimVO == null) {
+//                throw new TargetNotFoundException("카카오 토큰 검증 실패");
+//            }
+//
+//            MemberTokenDto memberTokenDto = new MemberTokenDto();
+//            memberTokenDto.setTokenTarget(kakaoClaimVO.getKakaoId());
+//            memberTokenDto.setTokenValue(tokenValue);
+//            System.out.println("여기서 에러가나나요? 요청DTO"+memberTokenDto);
+//            ////////////////////////////////////////////////////////////////////////////////////
+//            ////여기서 에러 발생 //////////////////////////////////////////////////////////////
+//
+//            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//            System.out.println("여기서 에러가나나요? 결과DTO"+resultDto);
+//            if (resultDto == null) {
+//                throw new TargetNotFoundException("카카오 리프레시 토큰 발급 내역이 없습니다.");
+//            }
+//
+//            memberTokenDao.delete(memberTokenDto); // 기존 리프레시 토큰 삭제
+//
+//            // 새로운 토큰 생성
+//            MemberLoginResponseVO response = new MemberLoginResponseVO();
+//            response.setMemberId(null); // 카카오 회원이므로 MemberId는 null
+//            response.setAccessToken(kakaoTokenService.createKakaoAccessToken(kakaoClaimVO));
+//            response.setRefreshToken(kakaoTokenService.createRefreshToken(kakaoClaimVO));
+//            System.out.println("전달객체는?"+response);
+//            return response;
+//
+//        } else if (claimVO.getMemberId() != null && claimVO.getKakaoId() == null) {
+//            // 일반 회원인 경우
+//            MemberTokenDto memberTokenDto = new MemberTokenDto();
+//            memberTokenDto.setTokenTarget(claimVO.getMemberId());
+//            memberTokenDto.setTokenValue(tokenValue);
+//
+//            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//            if (resultDto == null) {
+//                throw new TargetNotFoundException("리프레시 토큰 발급 내역이 없습니다.");
+//            }
+//
+//            memberTokenDao.delete(memberTokenDto); // 기존 리프레시 토큰 삭제
+//
+//            // 새로운 토큰 생성
+//            MemberLoginResponseVO response = new MemberLoginResponseVO();
+//            response.setMemberId(claimVO.getMemberId());
+//            response.setMemberLevel(claimVO.getMemberLevel());
+//            response.setAccessToken(tokenService.createAccessToken(claimVO));
+//            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+//            return response;
+//        } else if (claimVO.getKakaoId() != null && claimVO.getMemberId() != null) {
+//            // 카카오 회원과 일반 회원이 연동된 경우
+//            MemberTokenDto memberTokenDto = new MemberTokenDto();
+//            memberTokenDto.setTokenTarget(claimVO.getMemberId()); // 연동된 회원 ID 사용
+//            memberTokenDto.setTokenValue(tokenValue);
+//
+//            MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//            if (resultDto == null) {
+//                throw new TargetNotFoundException("리프레시 토큰 발급 내역이 없습니다.");
+//            }
+//
+//            memberTokenDao.delete(memberTokenDto); // 기존 리프레시 토큰 삭제
+//
+//            // 새로운 토큰 생성
+//            MemberLoginResponseVO response = new MemberLoginResponseVO();
+//            response.setMemberId(claimVO.getMemberId());
+//            response.setMemberLevel(claimVO.getMemberLevel());
+//            response.setAccessToken(tokenService.createAccessToken(claimVO));
+//            response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+//            return response;
+//        }
+//
+//        throw new TargetNotFoundException("회원 유형을 확인할 수 없습니다.");
+//    }
+    
+//    @PostMapping("/validateToken")
+//    public ResponseEntity<Map<String, Object>> validateToken(@RequestBody Map<String, String> request) {
+//        String token = request.get("token");
+//
+//        // 토큰 검증
+//        KakaoUserClaimVO claimVO = kakaoTokenService.check(token);
+//        if (claimVO == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid token"));
+//        }
+//
+//        // 토큰 검증 성공 시 필요한 정보를 반환
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("kakaoId", claimVO.getKakaoId());
+//        response.put("accessToken", token);  // 토큰이 유효한 경우 그대로 반환
+//
+//        return ResponseEntity.ok(response);
+//    }
+
+    
+    
+    
+//    @PostMapping("/refresh")
+//    public MemberLoginResponseVO refresh(
+//            @RequestHeader("Authorization") String refreshToken) {
+//        //[1] refreshToken이 없거나 Bearer로 시작하지 않으면 안됨
+//        if (refreshToken == null)
+//            throw new TargetNotFoundException("토큰 없음");
+//        if (tokenService.isBearerToken(refreshToken) == false)
+//            throw new TargetNotFoundException("Bearer 토큰 아님");
+//
+//        //[2] 토큰에서 정보를 추출
+//        MemberClaimVO claimVO =
+//                tokenService.check(tokenService.removeBearer(refreshToken));
+//        log.info("멤버아이디 : {}",claimVO.getMemberId());
+//     
+//     //일반회원O 카카오회원X
+//     if (claimVO.getKakaoId() == null && claimVO.getMemberId()!=null) {
+//    	 MemberTokenDto memberTokenDto = new MemberTokenDto();
+//         memberTokenDto.setTokenTarget(claimVO.getMemberId());
+//         memberTokenDto.setTokenValue(tokenService.removeBearer(refreshToken));
+//         MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//         if (resultDto == null)//발급내역이 없음
+//             throw new TargetNotFoundException("발급 내역이 없음1");
+//
+//         //[4] 기존의 리프레시 토큰 삭제
+//         memberTokenDao.delete(memberTokenDto);
+//
+//         //[5] 로그인 정보 재발급
+//         MemberLoginResponseVO response = new MemberLoginResponseVO();
+//         response.setMemberId(claimVO.getMemberId());
+//         response.setMemberLevel(claimVO.getMemberLevel());
+//         response.setAccessToken(tokenService.createAccessToken(claimVO));//재발급
+//         response.setRefreshToken(tokenService.createRefreshToken(claimVO));//재발급
+//         return response;
+//     }
+//  // 카카오 회원 O 일반 회원 X
+//     else if (claimVO.getKakaoId() != null && claimVO.getMemberId() == null) {
+//        	 MemberTokenDto memberTokenDto = new MemberTokenDto();
+//        	 memberTokenDto.setTokenTarget(claimVO.getKakaoId());
+//             memberTokenDto.setTokenValue(kakaoTokenService.removeBearer(refreshToken));
+//             MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//             if (resultDto == null)//발급내역이 없음
+//                 throw new TargetNotFoundException("발급 내역이 없음2");
+//
+//             //[4] 기존의 리프레시 토큰 삭제
+//             memberTokenDao.delete(memberTokenDto);
+//
+//             //[5] 로그인 정보 재발급
+//             MemberLoginResponseVO response = new MemberLoginResponseVO();
+//             response.setMemberId(claimVO.getMemberId());
+//             response.setMemberLevel(claimVO.getMemberLevel());
+//             response.setAccessToken(tokenService.createAccessToken(claimVO));//재발급
+//             response.setRefreshToken(tokenService.createRefreshToken(claimVO));//재발급
+//         return response;
+//     }
+//
+//     //일반회원O 카카오회원O
+//     else if(claimVO.getKakaoId()!=null && claimVO.getMemberId()!=null) {
+//    	 
+//    	 MemberTokenDto memberTokenDto = new MemberTokenDto();
+//         memberTokenDto.setTokenTarget(claimVO.getMemberId());
+//         memberTokenDto.setTokenValue(tokenService.removeBearer(refreshToken));
+//         MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//         if (resultDto == null)//발급내역이 없음
+//             throw new TargetNotFoundException("발급 내역이 없음3");
+//    	 
+//         MemberLoginResponseVO response = new MemberLoginResponseVO();
+//         response.setMemberId(claimVO.getMemberId());
+//         response.setMemberLevel(claimVO.getMemberLevel());
+//         response.setAccessToken(tokenService.createAccessToken(claimVO));
+//         response.setRefreshToken(tokenService.createRefreshToken(claimVO));
+//    	 
+//     }
+//     
+////        if (claimVO.getMemberId() == null)
+////            throw new TargetNotFoundException("아이디 없음");
+////        if (claimVO.getMemberLevel() == null)
+////            throw new TargetNotFoundException("등급 없음");
+//
+//        //[3] 토큰 발급 내역을 조회
+//        MemberTokenDto memberTokenDto = new MemberTokenDto();
+//        memberTokenDto.setTokenTarget(claimVO.getMemberId());
+//        memberTokenDto.setTokenValue(tokenService.removeBearer(refreshToken));
+//        MemberTokenDto resultDto = memberTokenDao.selectOne(memberTokenDto);
+//        if (resultDto == null)//발급내역이 없음
+//            throw new TargetNotFoundException("발급 내역이 없음");
+//
+//        //[4] 기존의 리프레시 토큰 삭제
+//        memberTokenDao.delete(memberTokenDto);
+//
+//        //[5] 로그인 정보 재발급
+//        MemberLoginResponseVO response = new MemberLoginResponseVO();
+//        response.setMemberId(claimVO.getMemberId());
+//        response.setMemberLevel(claimVO.getMemberLevel());
+//        response.setAccessToken(tokenService.createAccessToken(claimVO));//재발급
+//        response.setRefreshToken(tokenService.createRefreshToken(claimVO));//재발급
+//        return response;
+//    }
 
     @GetMapping("/{memberId}")
     public MemberDto find(@PathVariable String memberId) {

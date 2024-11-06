@@ -115,8 +115,8 @@ public class TokenService {
 
 
 		MemberTokenDto memberTokenDto = new MemberTokenDto();
-		memberTokenDto.setTokenTarget(vo.getMemberId());
-		memberTokenDto.setTokenValue(token);
+	       memberTokenDto.setTokenTarget(vo.getKakaoId() != null ? vo.getKakaoId() : vo.getMemberId());
+	        memberTokenDto.setTokenValue(token);
 		memberTokenDao.insert(memberTokenDto);
 
 		return token;
