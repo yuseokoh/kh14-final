@@ -1,29 +1,24 @@
 package com.game.service;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.game.configuration.TokenProperties;
 import com.game.dao.MemberDao;
 import com.game.dao.MemberTokenDao;
-import com.game.dto.KakaoUserDto;
 import com.game.dto.MemberDto;
 import com.game.dto.MemberTokenDto;
-import com.game.vo.KakaoUserClaimVO;
 import com.game.vo.MemberClaimVO;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
