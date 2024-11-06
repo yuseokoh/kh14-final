@@ -24,11 +24,10 @@ public class GameImageDao {
 		return sqlSession.selectList("gameImage.listByGame", gameNo);
 	}
 	
-	public void delete(int attachmentNo, int gameNo) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("attachmentNo", attachmentNo);
-		params.put("gameNo", gameNo);
-		sqlSession.delete("gameImage.remove", params);
+	public boolean delete(int attachmentNo, int gameNo) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("attachmentNo", attachmentNo);
+	    params.put("gameNo", gameNo);
+	    return sqlSession.delete("gameImage.remove", params) > 0;
 	}
-
 }

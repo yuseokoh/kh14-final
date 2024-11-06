@@ -372,6 +372,19 @@ public class GameRestController {
     	return attachmentNo;
     }
     
+  //첨부파일을 삭제하는 엔드포인트
+    @PostMapping("/image/{attachmentNo}")
+    public void deleteGameImage(
+        @PathVariable("attachmentNo") int attachmentNo,
+        @RequestParam("gameNo") int gameNo
+    ) {
+        // 파라미터 순서 수정 (attachmentNo, gameNo)
+        boolean result = gameImageDao.delete(attachmentNo, gameNo);
+        if(!result) {
+            throw new TargetNotFoundException("이미지를 찾을 수 없습니다");
+        }
+    }
+    
     //여러 첨부파일을 한번에 업로드하는 엔드포인트
     @PostMapping("/upload/multiple/{gameNo}")
     public void uploadGameImages(
