@@ -18,5 +18,17 @@ public class SystemRequirementDto {
 	    private String directxVersion;
 	    private String storage;
 	    private String soundCard;
-	// getters and setters
-}
+	// getters and setters    @Override
+	    public String toString() {
+	        return "SystemRequirementDto(requirementId=" + requirementId + 
+	               ", gameNo=" + gameNo + 
+	               ", requirementType=" + requirementType + 
+	               ", os=" + os + 
+	               ", processor=" + processor + 
+	               ", memory=" + memory + 
+	               ", graphics=" + graphics + 
+	               ", directxVersion=" + directxVersion + 
+	               ", storage=" + storage + 
+	               ", soundCard=" + soundCard + ")";
+	    }
+	}

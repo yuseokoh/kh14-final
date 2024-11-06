@@ -606,6 +606,31 @@ public class GameRestController {
     public List<SystemRequirementDto> getSystemRequirements(@PathVariable int gameNo) {
         return systemRequirementDao.findByGameNo(gameNo);
     }    
+    
+    @PutMapping("/requirements/{gameNo}")
+    public void updateSystemRequirements(
+        @PathVariable int gameNo,
+        @RequestBody List<SystemRequirementDto> requirements
+    ) {
+        try {
+            // 기존 요구사항 삭제
+            List<SystemRequirementDto> existingReqs = systemRequirementDao.findByGameNo(gameNo);
+            for (SystemRequirementDto req : existingReqs) {
+                boolean deleteResult = systemRequirementDao.delete(req.getRequirementId());
+                if (!deleteResult) {
+                    throw new TargetNotFoundException("시스템 요구사항 삭제 실패");
+                }
+            }
+
+            // 새로운 요구사항 추가
+            for (SystemRequirementDto req : requirements) {
+                req.setGameNo(gameNo);
+                systemRequirementDao.insert(req);
+            }
+        } catch (Exception e) {
+            throw new TargetNotFoundException("시스템 요구사항 업데이트 중 오류가 발생했습니다");
+        }
+    }
  }
 
 
