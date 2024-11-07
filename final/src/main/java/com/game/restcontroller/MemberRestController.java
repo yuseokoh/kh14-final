@@ -49,7 +49,7 @@ import com.game.vo.MemberLoginResponseVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin
 @RestController
 @RequestMapping("/member")
 public class MemberRestController {

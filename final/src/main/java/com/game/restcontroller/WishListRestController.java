@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/wishlist")
 public class WishListRestController {

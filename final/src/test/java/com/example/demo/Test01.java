@@ -20,7 +20,7 @@ public class Test01 {
     @Test
     public void testSendSignupInvitation() throws MessagingException {
         String recipientEmail = "dhdbtjraksa@naver.com";
-        String signupUrl = "http://localhost:3000/#/member/SignupForm";
+        String signupUrl = "http://192.168.30.58:3000/#/member/SignupForm";
         
         // [1] Create a MimeMessage object that can be sent using the sender
         MimeMessage message = sender.createMimeMessage();

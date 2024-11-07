@@ -26,7 +26,7 @@ import com.game.vo.WebsocketMessageVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins ="http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/room")
 public class RoomRestController {

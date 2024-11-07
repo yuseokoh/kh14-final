@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.game.dao.RoomMessageDao;
 import com.game.service.TokenService;
 
-@CrossOrigin(origins="http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/message")
 public class WebsocketRestController {

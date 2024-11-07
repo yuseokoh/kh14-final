@@ -29,7 +29,7 @@ import com.game.vo.MemberClaimVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = { "http://localhost:3000" })
+@CrossOrigin
 @RestController
 @RequestMapping("/kakao")
 public class KakaoUserRestController {
