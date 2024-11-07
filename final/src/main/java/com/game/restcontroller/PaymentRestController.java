@@ -33,7 +33,7 @@ import com.game.vo.pay.KakaoPayOrderResponseVO;
 import com.game.vo.pay.KakaoPayReadyRequestVO;
 import com.game.vo.pay.KakaoPayReadyResponseVO;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/kakaopay")
 public class PaymentRestController {

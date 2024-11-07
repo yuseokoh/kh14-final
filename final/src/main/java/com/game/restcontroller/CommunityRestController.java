@@ -38,7 +38,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000") 
+@CrossOrigin
 @RestController
 @RequestMapping("/community")
 public class CommunityRestController {

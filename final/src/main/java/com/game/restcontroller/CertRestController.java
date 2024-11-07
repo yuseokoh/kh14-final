@@ -14,7 +14,7 @@ import com.game.service.EmailService;
 
 import jakarta.mail.MessagingException;
 
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin
 @RestController
 @RequestMapping("/rest/cert")
 public class CertRestController {

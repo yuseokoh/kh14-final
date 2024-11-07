@@ -21,7 +21,7 @@ import com.game.vo.MemberClaimVO;
 import com.game.vo.ReplyComplexRequestVO;
 import com.game.vo.ReplyComplexResponseVO;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/reply")
 public class ReplyRestController {
