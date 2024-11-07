@@ -24,7 +24,7 @@
     </select>
     
     <select id="detailList" resultType="CartDto">
-        SELECT 
+            SELECT 
     c.cart_id,
     c.member_id,
     c.game_no,
@@ -43,6 +43,7 @@ WHERE
 GROUP BY 
     c.cart_id, c.member_id, c.game_no, c.added_date, g.game_title, g.game_price
 </select>
+
 
 
   </mapper>
